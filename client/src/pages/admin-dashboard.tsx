@@ -14,6 +14,7 @@ import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("zones");
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
+  const [editingType, setEditingType] = useState<'harvested' | 'total'>('harvested');
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -31,8 +32,12 @@ export default function AdminDashboard() {
   });
 
   const updateQuotaMutation = useMutation({
-    mutationFn: async ({ quotaId, harvested }: { quotaId: number; harvested: number }) => {
-      const response = await apiRequest("PATCH", `/api/admin/quotas/${quotaId}`, { harvested });
+    mutationFn: async ({ quotaId, harvested, totalQuota }: { quotaId: number; harvested?: number; totalQuota?: number }) => {
+      const updateData: any = {};
+      if (harvested !== undefined) updateData.harvested = harvested;
+      if (totalQuota !== undefined) updateData.totalQuota = totalQuota;
+      
+      const response = await apiRequest("PATCH", `/api/admin/quotas/${quotaId}`, updateData);
       return response.json();
     },
     onSuccess: () => {
@@ -55,15 +60,20 @@ export default function AdminDashboard() {
     },
   });
 
-  const handleQuotaEdit = (quotaId: number, currentValue: number) => {
+  const handleQuotaEdit = (quotaId: number, currentValue: number, type: 'harvested' | 'total') => {
     setEditingQuota(quotaId);
+    setEditingType(type);
     setQuotaValues({ ...quotaValues, [quotaId]: currentValue });
   };
 
   const handleQuotaSave = (quotaId: number) => {
     const newValue = quotaValues[quotaId];
     if (newValue !== undefined && newValue >= 0) {
-      updateQuotaMutation.mutate({ quotaId, harvested: newValue });
+      if (editingType === 'harvested') {
+        updateQuotaMutation.mutate({ quotaId, harvested: newValue });
+      } else {
+        updateQuotaMutation.mutate({ quotaId, totalQuota: newValue });
+      }
     }
   };
 
@@ -176,10 +186,11 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Gestione Zone e Quote</h3>
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <FileText className="mr-2" size={20} />
-                    Aggiorna Quote
-                  </Button>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-700">
+                      Clicca sui numeri per modificare: <strong>prelevati</strong> / <strong>totale</strong>
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -214,7 +225,7 @@ export default function AdminDashboard() {
                                   <Input
                                     type="number"
                                     min="0"
-                                    max={quota.totalQuota}
+                                    max={editingType === 'harvested' ? quota.totalQuota : 999}
                                     value={quotaValues[quota.id] || 0}
                                     onChange={(e) => setQuotaValues({
                                       ...quotaValues,
@@ -222,7 +233,9 @@ export default function AdminDashboard() {
                                     })}
                                     className="w-16 h-8 text-sm"
                                   />
-                                  <span className="text-sm">/{quota.totalQuota}</span>
+                                  {editingType === 'harvested' && (
+                                    <span className="text-sm">/{quota.totalQuota}</span>
+                                  )}
                                   <Button
                                     size="sm"
                                     onClick={() => handleQuotaSave(quota.id)}
@@ -242,17 +255,27 @@ export default function AdminDashboard() {
                                 </div>
                               ) : (
                                 <div className="flex items-center space-x-1">
-                                  <span className="font-semibold">
-                                    {quota.harvested}/{quota.totalQuota}
-                                  </span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleQuotaEdit(quota.id, quota.harvested)}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Edit size={12} />
-                                  </Button>
+                                  <div className="flex items-center">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleQuotaEdit(quota.id, quota.harvested, 'harvested')}
+                                      className="h-6 w-auto p-1 text-sm font-semibold"
+                                      title="Modifica capi prelevati"
+                                    >
+                                      {quota.harvested}
+                                    </Button>
+                                    <span className="text-sm">/</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleQuotaEdit(quota.id, quota.totalQuota, 'total')}
+                                      className="h-6 w-auto p-1 text-sm font-semibold"
+                                      title="Modifica quota totale"
+                                    >
+                                      {quota.totalQuota}
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
                             </div>

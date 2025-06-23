@@ -37,13 +37,17 @@ router.get("/quotas", authenticateToken, requireRole('ADMIN'), async (req: AuthR
 router.patch("/quotas/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { harvested } = req.body;
+    const { harvested, totalQuota } = req.body;
     
-    if (typeof harvested !== 'number' || harvested < 0) {
+    if (harvested !== undefined && (typeof harvested !== 'number' || harvested < 0)) {
       return res.status(400).json({ message: "Numero di capi prelevati non valido" });
     }
     
-    const quota = await storage.updateQuota(parseInt(id), harvested);
+    if (totalQuota !== undefined && (typeof totalQuota !== 'number' || totalQuota < 0)) {
+      return res.status(400).json({ message: "Quota totale non valida" });
+    }
+    
+    const quota = await storage.updateQuota(parseInt(id), harvested, totalQuota);
     
     if (!quota) {
       return res.status(404).json({ message: "Quota non trovata" });

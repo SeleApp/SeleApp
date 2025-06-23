@@ -21,7 +21,7 @@ export interface IStorage {
   // Wildlife Quotas
   getZoneQuotas(zoneId: number): Promise<WildlifeQuota[]>;
   getAllQuotas(): Promise<WildlifeQuota[]>;
-  updateQuota(id: number, harvested: number): Promise<WildlifeQuota | undefined>;
+  updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined>;
   
   // Reservations
   getReservations(hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]>;
@@ -80,10 +80,18 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(wildlifeQuotas);
   }
 
-  async updateQuota(id: number, harvested: number): Promise<WildlifeQuota | undefined> {
+  async updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined> {
+    const updateData: any = {};
+    if (harvested !== undefined) updateData.harvested = harvested;
+    if (totalQuota !== undefined) updateData.totalQuota = totalQuota;
+    
+    if (Object.keys(updateData).length === 0) {
+      return undefined;
+    }
+    
     const [quota] = await db
       .update(wildlifeQuotas)
-      .set({ harvested })
+      .set(updateData)
       .where(eq(wildlifeQuotas.id, id))
       .returning();
     return quota || undefined;
