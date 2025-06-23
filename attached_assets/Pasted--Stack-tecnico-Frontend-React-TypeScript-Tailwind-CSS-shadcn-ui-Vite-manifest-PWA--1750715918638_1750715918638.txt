@@ -1,0 +1,45 @@
+🧱 Stack tecnico:
+- Frontend: React + TypeScript + Tailwind CSS + shadcn/ui + Vite + manifest PWA
+- Backend: Node.js + Express + TypeScript
+- Database: PostgreSQL (Drizzle ORM)
+- Autenticazione: JWT con ruoli (HUNTER, ADMIN)
+
+🎯 Requisiti funzionali:
+- Due ruoli utente: cacciatori e amministratori
+- Le **zone di caccia sono 16**
+- Il cacciatore può **prenotare una sola zona per ciascuna fascia oraria (mattina o pomeriggio)** ogni giorno
+- La caccia è permessa solo da **lunedì a domenica**, **esclusi martedì e venerdì** (silenzio venatorio)
+- Ogni zona può essere prenotata da un solo cacciatore per fascia oraria
+- I capi selezionabili sono **solo caprioli e cervi**, con sesso e classe (maschio/femmina, adulto/giovane)
+- Il sistema deve nascondere o bloccare prenotazioni se le quote disponibili sono esaurite
+- Dopo il prelievo, il capo va rimosso dalla lista disponibile
+
+📦 Backend:
+1. Crea `server/index.ts` con Express che serve anche i file statici Vite
+2. Crea `server/db.ts` con configurazione Drizzle ORM + PostgreSQL
+3. Crea `shared/schema.ts` con tabelle: Hunters, Zones, Reservations, Reports, Wildlife
+4. Crea seed iniziale con 16 zone, e capi (caprioli/cervi) con sesso e classe
+5. Implementa `routes/reservations.ts` con controlli:
+   - Blocca prenotazioni in giorni di silenzio venatorio
+   - Impedisce doppie prenotazioni per stessa fascia oraria
+   - Impedisce prenotazioni su zone già occupate
+   - Aggiorna le quote dopo conferma di un prelievo
+6. Aggiungi middleware `auth.ts` con verifica JWT e ruoli
+
+📦 Frontend:
+1. Crea `client/` con Vite, React, Tailwind CSS
+2. Crea pagine: LoginPage, HunterDashboard, AdminDashboard
+3. Componenti: ZoneCard, ReservationModal, ReportModal
+4. Aggiungi manifest.json e service-worker.js funzionanti
+5. Rendila PWA installabile su iOS/Android
+6. Ottimizza tutto per over 50 (font grandi, pulsanti chiari, flusso semplificato)
+
+📎 Bonus:
+- Esporta PDF modulo uscita da prenotazione (`generateHuntPDF`)
+- Invia PDF via email se utente è abilitato ULSS (`sendToULSS`)
+- Mostra lo stato quota (🟢 disponibile, 🟡 bassa, 🔴 esaurita)
+- Aggiungi sistema notifiche (interno + webhook email/WhatsApp se possibile)
+
+⚠️ Scrivi i file solo se necessari. Commenta ogni parte. Ottimizza per funzionare **subito in Replit** con database persistente. Nessun setup esterno. Evita codice ridondante.
+
+Aiutami a generare tutto il necessario per partire, a partire da backend e database. Grazie.
