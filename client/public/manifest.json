@@ -1,0 +1,36 @@
+{
+  "name": "SeleApp Cison di Val Marino",
+  "short_name": "SeleApp",
+  "description": "Sistema di gestione prenotazioni caccia per Cison di Val Marino",
+  "lang": "it",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#2E7D32",
+  "background_color": "#ffffff",
+  "categories": ["hunting", "management", "booking"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232E7D32'%3E%3Cpath d='M14 6l-3.75 5 2.85 3.8-1.6 1.2L9 13l-2.5 3.8-1.6-1.2L7.75 11 4 6h10z'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232E7D32'%3E%3Cpath d='M14 6l-3.75 5 2.85 3.8-1.6 1.2L9 13l-2.5 3.8-1.6-1.2L7.75 11 4 6h10z'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 844' fill='none'%3E%3Crect width='390' height='844' fill='%23f9fafb'/%3E%3Ctext x='195' y='422' text-anchor='middle' fill='%236b7280' font-family='sans-serif' font-size='18'%3ESeleApp Dashboard%3C/text%3E%3C/svg%3E",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
