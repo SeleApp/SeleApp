@@ -99,12 +99,26 @@ export class DatabaseStorage implements IStorage {
         timeSlot: reservations.timeSlot,
         status: reservations.status,
         createdAt: reservations.createdAt,
-        zone: zones,
-        hunter: users,
+        zone: {
+          id: zones.id,
+          name: zones.name,
+          description: zones.description,
+          isActive: zones.isActive,
+        },
+        hunter: {
+          id: users.id,
+          email: users.email,
+          password: users.password,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role,
+          isActive: users.isActive,
+          createdAt: users.createdAt,
+        },
       })
       .from(reservations)
-      .leftJoin(zones, eq(reservations.zoneId, zones.id))
-      .leftJoin(users, eq(reservations.hunterId, users.id))
+      .innerJoin(zones, eq(reservations.zoneId, zones.id))
+      .innerJoin(users, eq(reservations.hunterId, users.id))
       .orderBy(desc(reservations.huntDate));
 
     if (hunterId) {
@@ -184,7 +198,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHuntReports(): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]> {
-    return await db
+    const results = await db
       .select({
         id: huntReports.id,
         reservationId: huntReports.reservationId,
@@ -194,23 +208,33 @@ export class DatabaseStorage implements IStorage {
         ageClass: huntReports.ageClass,
         notes: huntReports.notes,
         reportedAt: huntReports.reportedAt,
-        reservation: {
-          id: reservations.id,
-          hunterId: reservations.hunterId,
-          zoneId: reservations.zoneId,
-          huntDate: reservations.huntDate,
-          timeSlot: reservations.timeSlot,
-          status: reservations.status,
-          createdAt: reservations.createdAt,
-          zone: zones,
-          hunter: users,
-        },
+        reservationId: reservations.id,
+        reservationHunterId: reservations.hunterId,
+        reservationZoneId: reservations.zoneId,
+        reservationHuntDate: reservations.huntDate,
+        reservationTimeSlot: reservations.timeSlot,
+        reservationStatus: reservations.status,
+        reservationCreatedAt: reservations.createdAt,
+        zoneId: zones.id,
+        zoneName: zones.name,
+        zoneDescription: zones.description,
+        zoneIsActive: zones.isActive,
+        hunterId: users.id,
+        hunterEmail: users.email,
+        hunterPassword: users.password,
+        hunterFirstName: users.firstName,
+        hunterLastName: users.lastName,
+        hunterRole: users.role,
+        hunterIsActive: users.isActive,
+        hunterCreatedAt: users.createdAt,
       })
       .from(huntReports)
-      .leftJoin(reservations, eq(huntReports.reservationId, reservations.id))
-      .leftJoin(zones, eq(reservations.zoneId, zones.id))
-      .leftJoin(users, eq(reservations.hunterId, users.id))
+      .innerJoin(reservations, eq(huntReports.reservationId, reservations.id))
+      .innerJoin(zones, eq(reservations.zoneId, zones.id))
+      .innerJoin(users, eq(reservations.hunterId, users.id))
       .orderBy(desc(huntReports.reportedAt));
+    
+    return results as any;
   }
 
   async getAdminStats(): Promise<{
