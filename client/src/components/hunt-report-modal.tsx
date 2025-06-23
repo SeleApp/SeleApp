@@ -132,20 +132,27 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
           {showHarvestDetails && (
             <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h4 className="font-medium text-blue-900 mb-2">Dettagli Capo Abbattuto</h4>
+                <p className="text-sm text-blue-700">
+                  Seleziona attentamente il tipo di capo abbattuto. Questa informazione aggiornerà automaticamente le quote della zona.
+                </p>
+              </div>
+
               <div>
                 <Label className="block text-lg font-medium text-gray-700 mb-2">
-                  Specie
+                  Specie *
                 </Label>
                 <Select
                   value={form.watch("species") || ""}
                   onValueChange={(value) => form.setValue("species", value as "roe_deer" | "red_deer")}
                 >
                   <SelectTrigger className="input-large">
-                    <SelectValue placeholder="Seleziona specie..." />
+                    <SelectValue placeholder="Seleziona la specie..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="roe_deer">Capriolo</SelectItem>
-                    <SelectItem value="red_deer">Cervo</SelectItem>
+                    <SelectItem value="roe_deer">🦌 Capriolo (Capreolus capreolus)</SelectItem>
+                    <SelectItem value="red_deer">🦌 Cervo (Cervus elaphus)</SelectItem>
                   </SelectContent>
                 </Select>
                 {form.formState.errors.species && (
@@ -158,7 +165,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="block text-lg font-medium text-gray-700 mb-2">
-                    Sesso
+                    Sesso *
                   </Label>
                   <Select
                     value={form.watch("sex") || ""}
@@ -168,8 +175,8 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                       <SelectValue placeholder="Seleziona..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Maschio</SelectItem>
-                      <SelectItem value="female">Femmina</SelectItem>
+                      <SelectItem value="male">♂ Maschio</SelectItem>
+                      <SelectItem value="female">♀ Femmina</SelectItem>
                     </SelectContent>
                   </Select>
                   {form.formState.errors.sex && (
@@ -181,7 +188,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
                 <div>
                   <Label className="block text-lg font-medium text-gray-700 mb-2">
-                    Classe
+                    Classe d'Età *
                   </Label>
                   <Select
                     value={form.watch("ageClass") || ""}
@@ -191,8 +198,8 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                       <SelectValue placeholder="Seleziona..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="adult">Adulto</SelectItem>
-                      <SelectItem value="young">Giovane</SelectItem>
+                      <SelectItem value="adult">🦌 Adulto (&gt;1 anno)</SelectItem>
+                      <SelectItem value="young">🦌 Giovane (&lt;1 anno)</SelectItem>
                     </SelectContent>
                   </Select>
                   {form.formState.errors.ageClass && (
@@ -202,6 +209,16 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                   )}
                 </div>
               </div>
+
+              {form.watch("species") && form.watch("sex") && form.watch("ageClass") && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <p className="text-green-800 font-medium">
+                    ✓ Capo selezionato: {form.watch("species") === "roe_deer" ? "Capriolo" : "Cervo"}{" "}
+                    {form.watch("sex") === "male" ? "Maschio" : "Femmina"}{" "}
+                    {form.watch("ageClass") === "adult" ? "Adulto" : "Giovane"}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

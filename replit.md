@@ -106,7 +106,9 @@ The application uses a modern tech stack with Express.js backend, React frontend
 # Changelog
 
 Changelog:
-- June 23, 2025. Initial setup
+- June 23, 2025. Initial setup and core functionality implemented
+- June 23, 2025. Added quota management system with inline editing
+- June 23, 2025. Enhanced hunt reporting with detailed animal selection
 
 # User Preferences
 

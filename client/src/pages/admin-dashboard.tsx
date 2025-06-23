@@ -1,15 +1,22 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save } from "lucide-react";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("zones");
+  const [editingQuota, setEditingQuota] = useState<number | null>(null);
+  const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
@@ -22,6 +29,48 @@ export default function AdminDashboard() {
   const { data: quotasData = [], isLoading: quotasLoading } = useQuery({
     queryKey: ["/api/admin/quotas"],
   });
+
+  const updateQuotaMutation = useMutation({
+    mutationFn: async ({ quotaId, harvested }: { quotaId: number; harvested: number }) => {
+      const response = await apiRequest("PATCH", `/api/admin/quotas/${quotaId}`, { harvested });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/zones"] });
+      toast({
+        title: "Quota aggiornata",
+        description: "La quota è stata aggiornata con successo.",
+      });
+      setEditingQuota(null);
+      setQuotaValues({});
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Errore nell'aggiornamento",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleQuotaEdit = (quotaId: number, currentValue: number) => {
+    setEditingQuota(quotaId);
+    setQuotaValues({ ...quotaValues, [quotaId]: currentValue });
+  };
+
+  const handleQuotaSave = (quotaId: number) => {
+    const newValue = quotaValues[quotaId];
+    if (newValue !== undefined && newValue >= 0) {
+      updateQuotaMutation.mutate({ quotaId, harvested: newValue });
+    }
+  };
+
+  const handleQuotaCancel = () => {
+    setEditingQuota(null);
+    setQuotaValues({});
+  };
 
   if (statsLoading || reservationsLoading || quotasLoading) {
     return (
@@ -160,9 +209,52 @@ export default function AdminDashboard() {
                               {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} {quota.sex === 'male' ? 'M' : 'F'}/{quota.ageClass === 'adult' ? 'A' : 'G'}:
                             </span>
                             <div className="flex items-center space-x-2">
-                              <span className="font-semibold">
-                                {quota.harvested}/{quota.totalQuota}
-                              </span>
+                              {editingQuota === quota.id ? (
+                                <div className="flex items-center space-x-1">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max={quota.totalQuota}
+                                    value={quotaValues[quota.id] || 0}
+                                    onChange={(e) => setQuotaValues({
+                                      ...quotaValues,
+                                      [quota.id]: parseInt(e.target.value) || 0
+                                    })}
+                                    className="w-16 h-8 text-sm"
+                                  />
+                                  <span className="text-sm">/{quota.totalQuota}</span>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleQuotaSave(quota.id)}
+                                    disabled={updateQuotaMutation.isPending}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Save size={12} />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={handleQuotaCancel}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <X size={12} />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center space-x-1">
+                                  <span className="font-semibold">
+                                    {quota.harvested}/{quota.totalQuota}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleQuotaEdit(quota.id, quota.harvested)}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Edit size={12} />
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
