@@ -33,8 +33,18 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ message: "Zona non valida o non attiva" });
     }
 
+    // Validate and parse the hunt date
+    const huntDateStr = reservationData.huntDate;
+    if (!huntDateStr || typeof huntDateStr !== 'string') {
+      return res.status(400).json({ message: "Data non valida" });
+    }
+
+    const huntDate = new Date(huntDateStr + 'T12:00:00Z'); // Add time to avoid timezone issues
+    if (isNaN(huntDate.getTime())) {
+      return res.status(400).json({ message: "Formato data non valido" });
+    }
+
     // Check for hunting day restrictions
-    const huntDate = new Date(reservationData.huntDate);
     const dayOfWeek = huntDate.getDay();
     if (dayOfWeek === 2 || dayOfWeek === 5) { // Tuesday or Friday
       return res.status(400).json({ 
@@ -44,7 +54,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
     // Check if hunter already has a reservation for this date and time slot
     const existingReservations = await storage.getReservations(req.user.id);
-    const dateStr = huntDate.toISOString().split('T')[0];
+    const dateStr = huntDateStr; // Use original string format
     const hasConflict = existingReservations.some(r => {
       const reservationDate = new Date(r.huntDate).toISOString().split('T')[0];
       return reservationDate === dateStr && 
@@ -84,7 +94,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     const reservation = await storage.createReservation({
       hunterId: req.user.id,
       zoneId: reservationData.zoneId,
-      huntDate: new Date(reservationData.huntDate),
+      huntDate: huntDate,
       timeSlot: reservationData.timeSlot,
       status: 'active',
     });
