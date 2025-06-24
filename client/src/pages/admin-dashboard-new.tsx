@@ -17,7 +17,9 @@ import { authService } from "@/lib/auth";
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
+  const [editingField, setEditingField] = useState<'quota' | 'period' | null>(null);
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
+  const [periodValues, setPeriodValues] = useState<Record<number, string>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -35,14 +37,14 @@ export default function AdminDashboard() {
   });
 
   const updateRegionalQuotaMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: number; value: number }) => {
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/regional-quotas/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           ...authService.getAuthHeaders(),
         },
-        body: JSON.stringify({ totalQuota: value }),
+        body: JSON.stringify(data),
       });
       
       if (!response.ok) {
@@ -55,7 +57,9 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
       toast({ title: "Quota regionale aggiornata con successo" });
       setEditingQuota(null);
+      setEditingField(null);
       setQuotaValues({});
+      setPeriodValues({});
     },
     onError: (error: Error) => {
       console.error("Error updating regional quota:", error);
@@ -67,21 +71,47 @@ export default function AdminDashboard() {
     },
   });
 
-  const startEditing = (quotaId: number, currentValue: number) => {
+  const startEditingQuota = (quotaId: number, currentValue: number) => {
     setEditingQuota(quotaId);
+    setEditingField('quota');
     setQuotaValues({ ...quotaValues, [quotaId]: currentValue });
+  };
+
+  const startEditingPeriod = (quotaId: number, currentPeriod: string) => {
+    setEditingQuota(quotaId);
+    setEditingField('period');
+    setPeriodValues({ ...periodValues, [quotaId]: currentPeriod });
   };
 
   const saveQuota = (quotaId: number) => {
     const value = quotaValues[quotaId];
     if (value !== undefined && value >= 0) {
-      updateRegionalQuotaMutation.mutate({ id: quotaId, value });
+      updateRegionalQuotaMutation.mutate({ id: quotaId, data: { totalQuota: value } });
+    }
+  };
+
+  const savePeriod = (quotaId: number) => {
+    const period = periodValues[quotaId];
+    if (period !== undefined) {
+      updateRegionalQuotaMutation.mutate({ id: quotaId, data: { notes: period } });
     }
   };
 
   const cancelEditing = () => {
     setEditingQuota(null);
+    setEditingField(null);
     setQuotaValues({});
+    setPeriodValues({});
+  };
+
+  const formatPeriod = (startDate: string | null, endDate: string | null, notes: string | null) => {
+    if (notes) return notes;
+    if (startDate && endDate) {
+      const start = new Date(startDate).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+      const end = new Date(endDate).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+      return `${start} - ${end}`;
+    }
+    return "Non definito";
   };
 
   const getCategoryLabel = (quota: any) => {
@@ -92,12 +122,12 @@ export default function AdminDashboard() {
     return species === 'roe_deer' ? 'Capriolo' : 'Cervo';
   };
 
-  const getStatusBadge = (quota: any) => {
+  const getStatusIndicator = (quota: any) => {
     const available = quota.totalQuota - quota.harvested;
-    if (available <= 0) return <Badge variant="destructive">Esaurito</Badge>;
-    if (available <= 2) return <Badge variant="destructive">Critico</Badge>;
-    if (available <= 5) return <Badge variant="secondary">Pochi rimasti</Badge>;
-    return <Badge variant="default">Disponibile</Badge>;
+    if (available <= 0) {
+      return <div className="w-3 h-3 bg-red-500 rounded-full" title="Esaurito"></div>;
+    }
+    return <div className="w-3 h-3 bg-green-500 rounded-full" title="Disponibile"></div>;
   };
 
   return (
@@ -220,13 +250,14 @@ export default function AdminDashboard() {
                           <TableHead>Capi Abbattuti</TableHead>
                           <TableHead>Capi Rimanenti</TableHead>
                           <TableHead>Stato</TableHead>
-                          <TableHead>Azioni</TableHead>
+                          <TableHead>Periodo di Caccia</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {regionalQuotas.map((quota: any) => {
                           const available = quota.totalQuota - quota.harvested;
-                          const isEditing = editingQuota === quota.id;
+                          const isEditingQuota = editingQuota === quota.id && editingField === 'quota';
+                          const isEditingPeriod = editingQuota === quota.id && editingField === 'period';
                           const speciesLabel = getSpeciesLabel(quota.species);
                           const categoryLabel = getCategoryLabel(quota);
 
@@ -239,7 +270,7 @@ export default function AdminDashboard() {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                {isEditing ? (
+                                {isEditingQuota ? (
                                   <div className="flex items-center gap-2">
                                     <Input
                                       type="number"
@@ -273,7 +304,7 @@ export default function AdminDashboard() {
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => startEditing(quota.id, quota.totalQuota)}
+                                      onClick={() => startEditingQuota(quota.id, quota.totalQuota)}
                                     >
                                       <Edit className="h-4 w-4" />
                                     </Button>
@@ -284,22 +315,56 @@ export default function AdminDashboard() {
                                 <span className="font-semibold text-red-600">{quota.harvested}</span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className={`font-bold ${available <= 0 ? 'text-red-600' : available <= 2 ? 'text-orange-600' : 'text-green-600'}`}>
+                                <span className={`font-bold ${available <= 0 ? 'text-red-600' : 'text-green-600'}`}>
                                   {available}
                                 </span>
                               </TableCell>
-                              <TableCell>
-                                {getStatusBadge(quota)}
+                              <TableCell className="text-center">
+                                {getStatusIndicator(quota)}
                               </TableCell>
                               <TableCell>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => startEditing(quota.id, quota.totalQuota)}
-                                  disabled={isEditing}
-                                >
-                                  ✏️ Modifica
-                                </Button>
+                                {isEditingPeriod ? (
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="text"
+                                      placeholder="es. 1/10 - 31/12"
+                                      value={periodValues[quota.id] || ""}
+                                      onChange={(e) => setPeriodValues({
+                                        ...periodValues,
+                                        [quota.id]: e.target.value
+                                      })}
+                                      className="w-32"
+                                      autoFocus
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => savePeriod(quota.id)}
+                                      disabled={updateRegionalQuotaMutation.isPending}
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={cancelEditing}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm">
+                                      {formatPeriod(quota.huntingStartDate, quota.huntingEndDate, quota.notes)}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => startEditingPeriod(quota.id, quota.notes || formatPeriod(quota.huntingStartDate, quota.huntingEndDate, null))}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
