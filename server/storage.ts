@@ -18,10 +18,16 @@ export interface IStorage {
   getZone(id: number): Promise<Zone | undefined>;
   createZone(zone: InsertZone): Promise<Zone>;
   
-  // Wildlife Quotas
+  // Wildlife Quotas (deprecato - ora si usano le quote regionali)
   getZoneQuotas(zoneId: number): Promise<WildlifeQuota[]>;
   getAllQuotas(): Promise<WildlifeQuota[]>;
   updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined>;
+  
+  // Regional Quotas Management
+  getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
+  updateRegionalQuota(id: number, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
+  createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
+  isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string): Promise<boolean>;
   
   // Reservations
   getReservations(hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]>;
@@ -297,16 +303,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Ottiene tutte le quote regionali con stato disponibilità
+   * Ottiene tutte le quote regionali con stato disponibilità e periodo di caccia
    */
-  async getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean })[]> {
-    const quotas = await db.select().from(regionalQuotas);
+  async getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
+    const quotas = await db.select().from(regionalQuotas).orderBy(regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
+    const now = new Date();
     
     return quotas.map(quota => ({
       ...quota,
       available: quota.totalQuota - quota.harvested,
-      isExhausted: quota.harvested >= quota.totalQuota
+      isExhausted: quota.harvested >= quota.totalQuota,
+      isInSeason: quota.huntingStartDate && quota.huntingEndDate 
+        ? now >= quota.huntingStartDate && now <= quota.huntingEndDate && quota.isActive
+        : quota.isActive
     }));
+  }
+
+  /**
+   * Aggiorna una quota regionale (admin può modificare totali, periodi, note)
+   */
+  async updateRegionalQuota(id: number, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined> {
+    try {
+      const updateData = { ...data, updatedAt: new Date() };
+      const [updatedQuota] = await db
+        .update(regionalQuotas)
+        .set(updateData)
+        .where(eq(regionalQuotas.id, id))
+        .returning();
+      
+      return updatedQuota;
+    } catch (error) {
+      console.error("Error updating regional quota:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Crea o aggiorna una quota regionale (quando arrivano nuovi numeri dalla regione)
+   */
+  async createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota> {
+    try {
+      // Verifica se esiste già una quota per questa combinazione
+      const existingQuota = await db
+        .select()
+        .from(regionalQuotas)
+        .where(
+          and(
+            eq(regionalQuotas.species, quota.species),
+            quota.roeDeerCategory 
+              ? eq(regionalQuotas.roeDeerCategory, quota.roeDeerCategory)
+              : eq(regionalQuotas.redDeerCategory, quota.redDeerCategory!)
+          )
+        );
+
+      if (existingQuota.length > 0) {
+        // Aggiorna quota esistente
+        const [updated] = await db
+          .update(regionalQuotas)
+          .set({ 
+            totalQuota: quota.totalQuota,
+            season: quota.season,
+            updatedAt: new Date()
+          })
+          .where(eq(regionalQuotas.id, existingQuota[0].id))
+          .returning();
+        return updated;
+      } else {
+        // Crea nuova quota
+        const [newQuota] = await db
+          .insert(regionalQuotas)
+          .values(quota)
+          .returning();
+        return newQuota;
+      }
+    } catch (error) {
+      console.error("Error creating/updating regional quota:", error);
+      throw error;
+    }
   }
 
   async getHuntReports(): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]> {

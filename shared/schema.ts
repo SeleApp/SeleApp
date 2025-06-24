@@ -45,6 +45,11 @@ export const regionalQuotas = pgTable("regional_quotas", {
   totalQuota: integer("total_quota").notNull().default(0),
   harvested: integer("harvested").notNull().default(0),
   season: text("season").notNull().default("2024-2025"),
+  // Periodi di caccia per ogni categoria
+  huntingStartDate: timestamp("hunting_start_date"),
+  huntingEndDate: timestamp("hunting_end_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  notes: text("notes"), // Note dell'admin sulla categoria
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
