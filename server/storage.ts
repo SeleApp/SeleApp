@@ -201,8 +201,8 @@ export class DatabaseStorage implements IStorage {
   async createReservation(reservation: InsertReservation): Promise<Reservation> {
     try {
       // Verifica che non ci sia già una prenotazione per lo stesso cacciatore nella stessa data
-      const existingCount = await db
-        .select({ count: sql<number>`count(*)` })
+      const existingReservations = await db
+        .select({ id: reservations.id })
         .from(reservations)
         .where(
           and(
@@ -212,13 +212,13 @@ export class DatabaseStorage implements IStorage {
           )
         );
 
-      if (existingCount[0]?.count > 0) {
+      if (existingReservations.length > 0) {
         throw new Error('Hai già una prenotazione attiva per questa data');
       }
 
       // Verifica che non ci siano più di 4 prenotazioni per zona/data/slot
-      const slotCount = await db
-        .select({ count: sql<number>`count(*)` })
+      const slotReservations = await db
+        .select({ id: reservations.id })
         .from(reservations)
         .where(
           and(
@@ -229,7 +229,7 @@ export class DatabaseStorage implements IStorage {
           )
         );
 
-      if (slotCount[0]?.count >= 4) {
+      if (slotReservations.length >= 4) {
         throw new Error('Slot di caccia pieno per questa zona, data e orario');
       }
 
