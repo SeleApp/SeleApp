@@ -10,9 +10,10 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX, ClipboardList, Plus, MapPin, BarChart3 } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
-import HunterModal from "@/components/hunter-modal";
+import HunterManagementModal from "@/components/hunter-management-modal";
+import AdminReportModal from "@/components/admin-report-modal";
 import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
@@ -24,8 +25,9 @@ export default function AdminDashboard() {
   const [harvestedValues, setHarvestedValues] = useState<Record<number, number>>({});
   const [periodValues, setPeriodValues] = useState<Record<number, string>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
-  const [showHunterModal, setShowHunterModal] = useState(false);
-  const [selectedHunter, setSelectedHunter] = useState<any>(null);
+  const [showHunterManagement, setShowHunterManagement] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -45,6 +47,10 @@ export default function AdminDashboard() {
 
   const { data: hunters = [] } = useQuery({
     queryKey: ["/api/admin/hunters"],
+  });
+
+  const { data: reports = [] } = useQuery({
+    queryKey: ["/api/reports"],
   });
 
   const updateRegionalQuotaMutation = useMutation({
@@ -343,7 +349,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={() => setShowHunterModal(true)}
+              onClick={() => setShowHunterManagement(true)}
               variant="outline"
               className="flex items-center gap-2"
             >
@@ -422,6 +428,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="reservations" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Prenotazioni
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Report
             </TabsTrigger>
 
           </TabsList>
@@ -879,7 +889,155 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <div className="space-y-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Report di Caccia</h3>
+                    <Button
+                      onClick={() => setShowReportModal(true)}
+                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Nuovo Report
+                    </Button>
+                  </div>
 
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Cacciatore</TableHead>
+                          <TableHead>Zona</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Orario</TableHead>
+                          <TableHead>Esito</TableHead>
+                          <TableHead>Dettagli Prelievo</TableHead>
+                          <TableHead>Note</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reports.map((report: any) => (
+                          <TableRow key={report.id}>
+                            <TableCell className="font-medium">
+                              {report.reservation?.hunter?.firstName} {report.reservation?.hunter?.lastName}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-gray-500" />
+                                {report.reservation?.zone?.name || `Zona ${report.reservation?.zoneId}`}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {report.reservation?.huntDate && new Date(report.reservation.huntDate).toLocaleDateString('it-IT')}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={report.reservation?.timeSlot === 'morning' ? 'default' : 'secondary'}>
+                                {report.reservation?.timeSlot === 'morning' ? 'Mattina' : 'Pomeriggio'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={report.outcome === 'harvest' ? 'default' : 'secondary'}>
+                                {report.outcome === 'harvest' ? 'Prelievo' : 'Nessun Prelievo'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {report.outcome === 'harvest' && report.species ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">
+                                    {report.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                                  </div>
+                                  <div className="text-gray-600">
+                                    {report.sex === 'male' ? 'Maschio' : 'Femmina'}, {report.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="max-w-[200px] truncate text-sm text-gray-600">
+                                {report.notes || '-'}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Statistics Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Prelievi Totali</p>
+                        <p className="text-2xl font-bold">
+                          {reports.filter((r: any) => r.outcome === 'harvest').length}
+                        </p>
+                      </div>
+                      <BarChart3 className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Prelievi Capriolo</p>
+                        <p className="text-2xl font-bold">
+                          {reports.filter((r: any) => r.outcome === 'harvest' && r.species === 'roe_deer').length}
+                        </p>
+                      </div>
+                      <Target className="h-8 w-8 text-amber-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Prelievi Cervo</p>
+                        <p className="text-2xl font-bold">
+                          {reports.filter((r: any) => r.outcome === 'harvest' && r.species === 'red_deer').length}
+                        </p>
+                      </div>
+                      <Target className="h-8 w-8 text-red-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Zone Statistics */}
+              <Card>
+                <CardContent className="p-6">
+                  <h4 className="text-lg font-semibold mb-4">Prelievi per Zona</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    {Array.from({ length: 16 }, (_, i) => {
+                      const zoneId = i + 1;
+                      const zoneReports = reports.filter((r: any) => 
+                        r.outcome === 'harvest' && r.reservation?.zoneId === zoneId
+                      );
+                      return (
+                        <div key={zoneId} className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-medium text-gray-700">Zona {zoneId}</div>
+                          <div className="text-xl font-bold text-green-600">{zoneReports.length}</div>
+                          <div className="text-xs text-gray-500">prelievi</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -888,13 +1046,14 @@ export default function AdminDashboard() {
         onOpenChange={setShowRegionalQuotaManager}
       />
       
-      <HunterModal
-        open={showHunterModal}
-        onOpenChange={(open) => {
-          setShowHunterModal(open);
-          if (!open) setSelectedHunter(null);
-        }}
-        hunter={selectedHunter}
+      <HunterManagementModal
+        open={showHunterManagement}
+        onOpenChange={setShowHunterManagement}
+      />
+      
+      <AdminReportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
       />
     </div>
   );
