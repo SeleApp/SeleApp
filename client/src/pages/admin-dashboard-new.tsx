@@ -81,7 +81,31 @@ export default function AdminDashboard() {
   const startEditingPeriod = (quotaId: number, currentPeriod: string) => {
     setEditingQuota(quotaId);
     setEditingField('period');
-    setPeriodValues({ ...periodValues, [quotaId]: currentPeriod });
+    
+    // Try to parse existing period to pre-fill date inputs
+    let startDate = "";
+    let endDate = "";
+    
+    if (currentPeriod && currentPeriod !== "Non definito") {
+      // Try to extract dates from format like "15/09 - 31/12" 
+      const matches = currentPeriod.match(/(\d{1,2}\/\d{1,2})\s*-\s*(\d{1,2}\/\d{1,2})/);
+      if (matches) {
+        const [, start, end] = matches;
+        const currentYear = new Date().getFullYear();
+        // Convert to ISO date format for input fields
+        const [startDay, startMonth] = start.split('/');
+        const [endDay, endMonth] = end.split('/');
+        startDate = `${currentYear}-${startMonth.padStart(2, '0')}-${startDay.padStart(2, '0')}`;
+        endDate = `${currentYear}-${endMonth.padStart(2, '0')}-${endDay.padStart(2, '0')}`;
+      }
+    }
+    
+    setPeriodValues({ 
+      ...periodValues, 
+      [quotaId]: currentPeriod,
+      [`${quotaId}_start`]: startDate,
+      [`${quotaId}_end`]: endDate
+    });
   };
 
   const saveQuota = (quotaId: number) => {
@@ -102,7 +126,15 @@ export default function AdminDashboard() {
     setEditingQuota(null);
     setEditingField(null);
     setQuotaValues({});
-    setPeriodValues({});
+    
+    // Clear all period-related values including temporary date fields
+    const clearedPeriods: Record<string, string> = {};
+    Object.keys(periodValues).forEach(key => {
+      if (!key.includes('_start') && !key.includes('_end')) {
+        clearedPeriods[key] = periodValues[key];
+      }
+    });
+    setPeriodValues(clearedPeriods);
   };
 
   const formatPeriod = (startDate: string | null, endDate: string | null, notes: string | null) => {
@@ -362,42 +394,81 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell>
                                 {isEditingPeriod ? (
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="text"
-                                      placeholder="es. 1/10 - 31/12"
-                                      value={periodValues[quota.id] || ""}
-                                      onChange={(e) => setPeriodValues({
-                                        ...periodValues,
-                                        [quota.id]: e.target.value
-                                      })}
-                                      className="w-32"
-                                      autoFocus
-                                    />
-                                    <Button
-                                      size="sm"
-                                      onClick={() => savePeriod(quota.id)}
-                                      disabled={updateRegionalQuotaMutation.isPending}
-                                    >
-                                      <Check className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={cancelEditing}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                  <div className="flex flex-col gap-3 p-3 bg-gray-50 rounded-lg min-w-[280px]">
+                                    <div className="text-sm font-medium text-gray-700">Imposta periodo di caccia:</div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600 block mb-1">Data Inizio</label>
+                                        <Input
+                                          type="date"
+                                          className="text-base h-10"
+                                          onChange={(e) => {
+                                            const startDate = e.target.value;
+                                            const currentEnd = periodValues[`${quota.id}_end`] || "";
+                                            const formattedPeriod = startDate && currentEnd 
+                                              ? `${new Date(startDate).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })} - ${new Date(currentEnd).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}`
+                                              : "";
+                                            setPeriodValues({
+                                              ...periodValues,
+                                              [`${quota.id}_start`]: startDate,
+                                              [quota.id]: formattedPeriod
+                                            });
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600 block mb-1">Data Fine</label>
+                                        <Input
+                                          type="date"
+                                          className="text-base h-10"
+                                          onChange={(e) => {
+                                            const endDate = e.target.value;
+                                            const currentStart = periodValues[`${quota.id}_start`] || "";
+                                            const formattedPeriod = currentStart && endDate 
+                                              ? `${new Date(currentStart).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })} - ${new Date(endDate).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}`
+                                              : "";
+                                            setPeriodValues({
+                                              ...periodValues,
+                                              [`${quota.id}_end`]: endDate,
+                                              [quota.id]: formattedPeriod
+                                            });
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-gray-500 bg-white p-2 rounded border">
+                                      <strong>Anteprima:</strong> {periodValues[quota.id] || "Seleziona entrambe le date"}
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => savePeriod(quota.id)}
+                                        disabled={updateRegionalQuotaMutation.isPending || !periodValues[quota.id]}
+                                        className="flex-1 h-10 text-base"
+                                      >
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Salva Periodo
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={cancelEditing}
+                                        className="h-10"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm">
+                                    <span className="text-sm font-medium">
                                       {formatPeriod(quota.huntingStartDate, quota.huntingEndDate, quota.notes)}
                                     </span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => startEditingPeriod(quota.id, quota.notes || formatPeriod(quota.huntingStartDate, quota.huntingEndDate, null))}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                                     >
                                       <Edit className="h-4 w-4" />
                                     </Button>
