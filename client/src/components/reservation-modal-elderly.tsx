@@ -29,8 +29,9 @@ const ZONE_GRID = [
 ];
 
 const TIME_SLOTS = [
-  { id: 'morning', label: 'Mattina', icon: '🌅', time: '06:00 - 11:00' },
-  { id: 'afternoon', label: 'Pomeriggio', icon: '🌄', time: '14:00 - 19:00' }
+  { id: 'morning', label: 'Mattina', icon: '🌅', time: '06:00 - 12:00' },
+  { id: 'afternoon', label: 'Pomeriggio', icon: '🌄', time: '12:00 - 18:00' },
+  { id: 'full_day', label: 'Tutto il Giorno', icon: '☀️', time: '06:00 - 18:00' }
 ];
 
 export default function ReservationModalElderly({ open, onOpenChange, zones }: ReservationModalProps) {
@@ -185,7 +186,6 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                         {selectedZone === zone.id && (
                           <div className="mt-3">
                             <CheckCircle className="h-8 w-8 text-green-600 mx-auto" />
-                            <div className="text-green-800 font-bold mt-1">SELEZIONATA</div>
                           </div>
                         )}
                       </CardContent>
@@ -316,7 +316,6 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                       {selectedTimeSlot === slot.id && (
                         <div className="mt-4">
                           <CheckCircle className="h-8 w-8 text-purple-600 mx-auto" />
-                          <div className="text-purple-800 font-bold mt-1">SELEZIONATO</div>
                         </div>
                       )}
                     </CardContent>
