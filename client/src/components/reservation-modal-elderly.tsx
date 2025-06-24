@@ -97,14 +97,20 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
     const today = new Date();
     
     for (let i = 1; i <= 30; i++) {
-      const date = new Date(today);
+      const date = new Date();
       date.setDate(today.getDate() + i);
       
       // Salta martedì (2) e venerdì (5)
       if (date.getDay() === 2 || date.getDay() === 5) continue;
       
+      // Formato corretto della data per evitare problemi di timezone
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateValue = `${year}-${month}-${day}`;
+      
       dates.push({
-        value: date.toISOString().split('T')[0],
+        value: dateValue,
         label: date.toLocaleDateString('it-IT', { 
           weekday: 'long', 
           day: 'numeric', 

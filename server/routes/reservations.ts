@@ -73,45 +73,30 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     }
 
-    // Check if zone is already booked for this time slot
-    const zoneReservations = await storage.getZoneReservations(
-      reservationData.zoneId,
-      dateStr,
-      reservationData.timeSlot
-    );
-
-    if (zoneReservations.length > 0) {
-      return res.status(400).json({ 
-        message: "Zona già prenotata per questa fascia oraria" 
-      });
-    }
-
-    // Check if there are available quotas in the zone
-    const quotas = await storage.getZoneQuotas(reservationData.zoneId);
-    const hasAvailableQuotas = quotas.some(q => q.harvested < q.totalQuota);
-    
-    if (!hasAvailableQuotas) {
-      return res.status(400).json({ 
-        message: "Quote esaurite per questa zona" 
-      });
-    }
-
-    const reservation = await storage.createReservation({
+    console.log("Creating reservation with final data:", {
       hunterId: req.user.id,
       zoneId: reservationData.zoneId,
-      huntDate: huntDate,
+      huntDate,
       timeSlot: reservationData.timeSlot,
       status: 'active',
     });
 
+    const reservation = await storage.createReservation({
+      hunterId: req.user.id,
+      zoneId: reservationData.zoneId,
+      huntDate,
+      timeSlot: reservationData.timeSlot,
+      status: 'active',
+    });
+
+    console.log("Reservation created successfully:", reservation);
     res.status(201).json(reservation);
   } catch (error) {
     console.error("Error creating reservation:", error);
-    if (error instanceof Error && error.message.includes('venatorio')) {
-      res.status(400).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "Errore nella creazione della prenotazione" });
-    }
+    res.status(500).json({ 
+      message: "Errore nella creazione della prenotazione",
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
   }
 });
 
