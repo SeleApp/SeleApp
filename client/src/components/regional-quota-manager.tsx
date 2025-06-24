@@ -158,7 +158,11 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
                       </TableCell>
                       <TableCell>{quota.harvested}</TableCell>
                       <TableCell className="font-bold">{quota.totalQuota - quota.harvested}</TableCell>
-                      <TableCell>{quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`}</TableCell>
+                      <TableCell>
+                        <span className="text-sm">
+                          {quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`}
+                        </span>
+                      </TableCell>
                       <TableCell>{getStatusBadge(quota)}</TableCell>
                       <TableCell className="text-xs">
                         <div>Inizio: {formatDate(quota.huntingStartDate)}</div>
@@ -193,48 +197,40 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
                   Gestione Periodi di Caccia
                 </CardTitle>
                 <CardDescription>
-                  Imposta i periodi di caccia per ogni categoria di animale
+                  Imposta i periodi di caccia per ogni categoria di animale (utilizza formato testo personalizzato)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                   {quotas.filter((q: any) => q.species === 'roe_deer').length > 0 && (
                     <div>
-                      <h4 className="font-semibold mb-2">Capriolo</h4>
-                      <div className="grid gap-2">
+                      <h4 className="font-semibold mb-3 text-amber-600">🦌 Capriolo - Periodi di Caccia</h4>
+                      <div className="grid gap-3">
                         {quotas.filter((q: any) => q.species === 'roe_deer').map((quota: any) => (
-                          <div key={quota.id} className="flex items-center gap-4 p-3 border rounded">
-                            <Badge>{quota.roeDeerCategory}</Badge>
-                            <div className="flex gap-2">
-                              <div>
-                                <Label htmlFor={`start-${quota.id}`}>Inizio</Label>
-                                <Input
-                                  id={`start-${quota.id}`}
-                                  type="date"
-                                  defaultValue={quota.huntingStartDate?.split('T')[0]}
-                                  onBlur={(e) => {
-                                    updateQuotaMutation.mutate({
-                                      id: quota.id,
-                                      data: { huntingStartDate: new Date(e.target.value) }
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor={`end-${quota.id}`}>Fine</Label>
-                                <Input
-                                  id={`end-${quota.id}`}
-                                  type="date"
-                                  defaultValue={quota.huntingEndDate?.split('T')[0]}
-                                  onBlur={(e) => {
-                                    updateQuotaMutation.mutate({
-                                      id: quota.id,
-                                      data: { huntingEndDate: new Date(e.target.value) }
-                                    });
-                                  }}
-                                />
-                              </div>
+                          <div key={`roe-${quota.id}`} className="flex items-center justify-between p-4 border rounded-lg bg-amber-50">
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline" className="font-medium">{quota.roeDeerCategory}</Badge>
+                              <span className="text-sm font-medium">
+                                {quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`}
+                              </span>
                             </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                const currentPeriod = quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`;
+                                const newPeriod = prompt("Inserisci periodo personalizzato (es. 15/09 - 31/12):", currentPeriod);
+                                if (newPeriod && newPeriod !== currentPeriod) {
+                                  updateQuotaMutation.mutate({
+                                    id: quota.id,
+                                    data: { notes: newPeriod }
+                                  });
+                                }
+                              }}
+                              disabled={updateQuotaMutation.isPending}
+                            >
+                              ✏️ Modifica
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -243,46 +239,46 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
 
                   {quotas.filter((q: any) => q.species === 'red_deer').length > 0 && (
                     <div>
-                      <h4 className="font-semibold mb-2">Cervo</h4>
-                      <div className="grid gap-2">
+                      <h4 className="font-semibold mb-3 text-red-600">🦌 Cervo - Periodi di Caccia</h4>
+                      <div className="grid gap-3">
                         {quotas.filter((q: any) => q.species === 'red_deer').map((quota: any) => (
-                          <div key={quota.id} className="flex items-center gap-4 p-3 border rounded">
-                            <Badge>{quota.redDeerCategory}</Badge>
-                            <div className="flex gap-2">
-                              <div>
-                                <Label htmlFor={`start-${quota.id}`}>Inizio</Label>
-                                <Input
-                                  id={`start-${quota.id}`}
-                                  type="date"
-                                  defaultValue={quota.huntingStartDate?.split('T')[0]}
-                                  onBlur={(e) => {
-                                    updateQuotaMutation.mutate({
-                                      id: quota.id,
-                                      data: { huntingStartDate: new Date(e.target.value) }
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor={`end-${quota.id}`}>Fine</Label>
-                                <Input
-                                  id={`end-${quota.id}`}
-                                  type="date"
-                                  defaultValue={quota.huntingEndDate?.split('T')[0]}
-                                  onBlur={(e) => {
-                                    updateQuotaMutation.mutate({
-                                      id: quota.id,
-                                      data: { huntingEndDate: new Date(e.target.value) }
-                                    });
-                                  }}
-                                />
-                              </div>
+                          <div key={`red-${quota.id}`} className="flex items-center justify-between p-4 border rounded-lg bg-red-50">
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline" className="font-medium">{quota.redDeerCategory}</Badge>
+                              <span className="text-sm font-medium">
+                                {quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`}
+                              </span>
                             </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                const currentPeriod = quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`;
+                                const newPeriod = prompt("Inserisci periodo personalizzato (es. 15/09 - 31/12):", currentPeriod);
+                                if (newPeriod && newPeriod !== currentPeriod) {
+                                  updateQuotaMutation.mutate({
+                                    id: quota.id,
+                                    data: { notes: newPeriod }
+                                  });
+                                }
+                              }}
+                              disabled={updateQuotaMutation.isPending}
+                            >
+                              ✏️ Modifica
+                            </Button>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+                </div>
+                
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <h5 className="font-medium text-blue-800 mb-2">💡 Suggerimento</h5>
+                  <p className="text-sm text-blue-700">
+                    I periodi personalizzati sovrascrivono le date del database. 
+                    Formato consigliato: "15/09 - 31/12" o "1 ottobre - 15 gennaio"
+                  </p>
                 </div>
               </CardContent>
             </Card>
