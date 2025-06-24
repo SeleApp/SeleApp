@@ -208,7 +208,11 @@ export default function HunterDashboard() {
                           <h3 className="text-xl font-bold text-gray-900">{reservation.zone.name}</h3>
                           <p className="text-gray-600">
                             {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
-                            {reservation.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
+                            {reservation.timeSlot === "morning" 
+                              ? "Mattina" 
+                              : reservation.timeSlot === "afternoon" 
+                              ? "Pomeriggio" 
+                              : "Tutto il Giorno"}
                           </p>
                         </div>
                         <div className="flex items-center space-x-3">
