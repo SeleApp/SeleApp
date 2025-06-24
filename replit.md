@@ -109,6 +109,7 @@ Changelog:
 - June 23, 2025. Initial setup and core functionality implemented
 - June 23, 2025. Added quota management system with inline editing for both total quotas and harvested counts
 - June 23, 2025. Enhanced hunt reporting with detailed animal selection and automatic quota updates
+- June 24, 2025. Redesigned quota management with table format for better organization and real-time updates
 
 # User Preferences
 

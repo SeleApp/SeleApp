@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check } from "lucide-react";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("zones");
@@ -41,12 +42,19 @@ export default function AdminDashboard() {
       return response.json();
     },
     onSuccess: () => {
+      // Refresh all quota-related data
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/zones"] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/admin/quotas"] });
+      
       toast({
         title: "Quota aggiornata",
-        description: "La quota è stata aggiornata con successo.",
+        description: editingType === 'total' 
+          ? "Quota totale aggiornata con successo." 
+          : "Numero capi prelevati aggiornato con successo.",
       });
       setEditingQuota(null);
       setQuotaValues({});
@@ -185,106 +193,162 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Gestione Zone e Quote</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Gestione Quote Caccia</h3>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-sm text-blue-700">
-                      Clicca sui numeri per modificare: <strong>prelevati</strong> / <strong>totale</strong>
+                      <strong>Clicca sui numeri per modificare le quote</strong>
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {quotasData.map((zone: any) => (
-                    <div key={zone.id} className="border border-gray-200 rounded-xl p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-lg font-bold text-gray-900">{zone.name}</h4>
-                        <div className="flex items-center">
-                          <span className="text-xl mr-1">
-                            {zone.quotas?.some((q: any) => q.harvested >= q.totalQuota * 0.8) ? 
-                              zone.quotas?.some((q: any) => q.harvested >= q.totalQuota) ? "🔴" : "🟡" 
-                              : "🟢"}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {zone.quotas?.some((q: any) => q.harvested >= q.totalQuota) ? 
-                              "Esaurita" : 
-                              zone.quotas?.some((q: any) => q.harvested >= q.totalQuota * 0.8) ? 
-                                "Bassa" : "Buone"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        {zone.quotas?.map((quota: any) => (
-                          <div key={quota.id} className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} {quota.sex === 'male' ? 'M' : 'F'}/{quota.ageClass === 'adult' ? 'A' : 'G'}:
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              {editingQuota === quota.id ? (
-                                <div className="flex items-center space-x-1">
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    max={editingType === 'harvested' ? quota.totalQuota : 999}
-                                    value={quotaValues[quota.id] || 0}
-                                    onChange={(e) => setQuotaValues({
-                                      ...quotaValues,
-                                      [quota.id]: parseInt(e.target.value) || 0
-                                    })}
-                                    className="w-16 h-8 text-sm"
-                                  />
-                                  {editingType === 'harvested' && (
-                                    <span className="text-sm">/{quota.totalQuota}</span>
-                                  )}
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleQuotaSave(quota.id)}
-                                    disabled={updateQuotaMutation.isPending}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Save size={12} />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={handleQuotaCancel}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <X size={12} />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center space-x-1">
+                {quotasLoading ? (
+                  <div className="text-center py-8">Caricamento...</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-bold">Zona</TableHead>
+                          <TableHead className="font-bold">Specie</TableHead>
+                          <TableHead className="font-bold">Sesso</TableHead>
+                          <TableHead className="font-bold">Età</TableHead>
+                          <TableHead className="font-bold text-center">Prelevati</TableHead>
+                          <TableHead className="font-bold text-center">Quota Totale</TableHead>
+                          <TableHead className="font-bold text-center">Disponibili</TableHead>
+                          <TableHead className="font-bold text-center">Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {quotasData.flatMap((zone: any) =>
+                          zone.quotas?.map((quota: any) => {
+                            const available = quota.totalQuota - quota.harvested;
+                            const percentage = quota.totalQuota > 0 ? (quota.harvested / quota.totalQuota) * 100 : 0;
+                            
+                            return (
+                              <TableRow key={quota.id} className="hover:bg-gray-50">
+                                <TableCell className="font-medium">{zone.name}</TableCell>
+                                <TableCell>
                                   <div className="flex items-center">
+                                    <span className="mr-2">🦌</span>
+                                    {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
+                                    {quota.sex === 'male' ? '♂ Maschio' : '♀ Femmina'}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100">
+                                    {quota.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {editingQuota === quota.id && editingType === 'harvested' ? (
+                                    <div className="flex items-center justify-center space-x-1">
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max={quota.totalQuota}
+                                        value={quotaValues[quota.id] ?? quota.harvested}
+                                        onChange={(e) => setQuotaValues({
+                                          ...quotaValues,
+                                          [quota.id]: parseInt(e.target.value) || 0
+                                        })}
+                                        className="w-16 h-8 text-sm text-center"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleQuotaSave(quota.id)}
+                                        disabled={updateQuotaMutation.isPending}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Check size={12} />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={handleQuotaCancel}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <X size={12} />
+                                      </Button>
+                                    </div>
+                                  ) : (
                                     <Button
-                                      size="sm"
                                       variant="ghost"
                                       onClick={() => handleQuotaEdit(quota.id, quota.harvested, 'harvested')}
-                                      className="h-6 w-auto p-1 text-sm font-semibold"
-                                      title="Modifica capi prelevati"
+                                      className="font-semibold text-lg hover:bg-blue-100"
                                     >
                                       {quota.harvested}
                                     </Button>
-                                    <span className="text-sm">/</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {editingQuota === quota.id && editingType === 'total' ? (
+                                    <div className="flex items-center justify-center space-x-1">
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max="999"
+                                        value={quotaValues[quota.id] ?? quota.totalQuota}
+                                        onChange={(e) => setQuotaValues({
+                                          ...quotaValues,
+                                          [quota.id]: parseInt(e.target.value) || 0
+                                        })}
+                                        className="w-16 h-8 text-sm text-center"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleQuotaSave(quota.id)}
+                                        disabled={updateQuotaMutation.isPending}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Check size={12} />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={handleQuotaCancel}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <X size={12} />
+                                      </Button>
+                                    </div>
+                                  ) : (
                                     <Button
-                                      size="sm"
                                       variant="ghost"
                                       onClick={() => handleQuotaEdit(quota.id, quota.totalQuota, 'total')}
-                                      className="h-6 w-auto p-1 text-sm font-semibold"
-                                      title="Modifica quota totale"
+                                      className="font-semibold text-lg hover:bg-green-100"
                                     >
                                       {quota.totalQuota}
                                     </Button>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <span className={`font-semibold ${available <= 0 ? 'text-red-600' : available <= 2 ? 'text-orange-600' : 'text-green-600'}`}>
+                                    {available}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <div className="flex items-center justify-center">
+                                    {percentage >= 100 ? (
+                                      <Badge variant="destructive">Esaurita</Badge>
+                                    ) : percentage >= 80 ? (
+                                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">Attenzione</Badge>
+                                    ) : (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-800">Disponibile</Badge>
+                                    )}
                                   </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }) || []
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
