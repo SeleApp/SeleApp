@@ -15,6 +15,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reports", reportsRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/regional-quotas", regionalQuotasRoutes);
+  
+  // Admin hunters routes
+  const adminHuntersRoutes = await import("./routes/admin-hunters");
+  app.use("/api/admin/hunters", adminHuntersRoutes.default);
 
   const httpServer = createServer(app);
   return httpServer;
