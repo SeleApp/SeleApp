@@ -526,6 +526,52 @@ export class DatabaseStorage implements IStorage {
       lowQuotas: lowQuotasResult.count,
     };
   }
+
+  // Hunter Management Methods
+  async getAllHunters(): Promise<User[]> {
+    const results = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        password: users.password,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.role, 'HUNTER'))
+      .orderBy(users.lastName, users.firstName);
+    return results;
+  }
+
+  async updateHunterStatus(id: number, isActive: boolean): Promise<User | undefined> {
+    const [updated] = await db
+      .update(users)
+      .set({ isActive })
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
+
+  async updateHunter(id: number, data: Partial<User>): Promise<User | undefined> {
+    const [updated] = await db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
+
+  async createHunter(data: InsertUser): Promise<User> {
+    const [hunter] = await db.insert(users).values(data).returning();
+    return hunter;
+  }
+
+  async deleteHunter(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
