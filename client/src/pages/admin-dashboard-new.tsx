@@ -10,8 +10,9 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
+import HunterModal from "@/components/hunter-modal";
 import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
@@ -23,6 +24,8 @@ export default function AdminDashboard() {
   const [harvestedValues, setHarvestedValues] = useState<Record<number, number>>({});
   const [periodValues, setPeriodValues] = useState<Record<number, string>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
+  const [showHunterModal, setShowHunterModal] = useState(false);
+  const [selectedHunter, setSelectedHunter] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,6 +41,10 @@ export default function AdminDashboard() {
 
   const { data: reservations = [], isLoading: isLoadingReservations } = useQuery({
     queryKey: ["/api/reservations"],
+  });
+
+  const { data: hunters = [] } = useQuery({
+    queryKey: ["/api/admin/hunters"],
   });
 
   const updateRegionalQuotaMutation = useMutation({
@@ -415,6 +422,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="reservations" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Prenotazioni
+            </TabsTrigger>
+            <TabsTrigger value="hunters" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Gestione Cacciatori
             </TabsTrigger>
           </TabsList>
 
