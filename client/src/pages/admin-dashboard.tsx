@@ -10,12 +10,12 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings } from "lucide-react";
+import RegionalQuotaManager from "@/components/regional-quota-manager";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("zones");
+  const [activeTab, setActiveTab] = useState("quotas");
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
-  const [editingType, setEditingType] = useState<'harvested' | 'total'>('harvested');
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
@@ -92,20 +92,20 @@ export default function AdminDashboard() {
   };
 
   // Helper function per mappare vecchio formato a nuove categorie
-  const getCategoryFromOldFormat = (quota: any, species: string) => {
-    if (species === 'roe_deer') {
-      if (quota.sex === 'male' && quota.ageClass === 'young') return 'M0';
-      if (quota.sex === 'female' && quota.ageClass === 'young') return 'F0';
-      if (quota.sex === 'female' && quota.ageClass === 'adult') return 'FA';
-      if (quota.sex === 'male' && quota.ageClass === 'adult') return 'MA';
-      return 'M1'; // default per maschi adulti senza distinzione
-    } else if (species === 'red_deer') {
-      if (quota.ageClass === 'young') return 'CL0';
-      if (quota.sex === 'female' && quota.ageClass === 'adult') return 'FF';
-      if (quota.sex === 'male' && quota.ageClass === 'adult') return 'MM';
-      return 'MCL1'; // default per maschi fusone
-    }
-    return 'Unknown';
+  const getCategoryLabel = (quota: any) => {
+    return quota.roeDeerCategory || quota.redDeerCategory || 'N/A';
+  };
+
+  const getSpeciesLabel = (species: string) => {
+    return species === 'roe_deer' ? 'Capriolo' : 'Cervo';
+  };
+
+  const getStatusBadge = (quota: any) => {
+    const available = quota.totalQuota - quota.harvested;
+    if (available <= 0) return <Badge variant="destructive">Esaurito</Badge>;
+    if (available <= 2) return <Badge variant="destructive">Critico</Badge>;
+    if (available <= 5) return <Badge variant="secondary">Pochi rimasti</Badge>;
+    return <Badge variant="default">Disponibile</Badge>;
   };
 
   // Helper per ottenere la descrizione della categoria
