@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { loginSchema, type LoginRequest } from "@shared/schema";
-import { Mountain, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
+import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -66,8 +67,12 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardContent className="p-8">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mountain className="text-white text-3xl" size={32} />
+            <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+              <img 
+                src={logoPath} 
+                alt="SeleApp Logo" 
+                className="w-20 h-20 object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">SeleApp</h1>
             <p className="text-lg text-gray-600">Cison di Val Marino</p>

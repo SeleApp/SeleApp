@@ -13,6 +13,7 @@ import type { AdminStats, ReservationWithDetails } from "@/lib/types";
 import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 
+// This is the old admin dashboard, replace with the new one
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
   const [editingQuota, setEditingQuota] = useState<number | null>(null);

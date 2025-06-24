@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { authService } from "./lib/auth";
 import LoginPage from "./pages/login";
 import HunterDashboard from "./pages/hunter-dashboard";
-import AdminDashboard from "./pages/admin-dashboard";
+import AdminDashboard from "./pages/admin-dashboard-new";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
