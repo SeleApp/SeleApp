@@ -119,12 +119,13 @@ Changelog:
 - June 24, 2025. **FINAL DUAL SYSTEM IMPLEMENTATION**: Completed hybrid zone-regional architecture
   - **Admin Dashboard**: Regional quota management only (9 categories: 5 capriolo + 4 cervo)
   - **Hunter Dashboard**: Physical zone selection (16 zones of Cison di Val Marino territory)
-  - Replaced "Quote Basse" with "Capi Prelevati Capriolo" and "Capi Prelevati Cervo" in stats
-  - Added species filter (All/Capriolo/Cervo) for cleaner admin interface
-  - Implemented manual harvested count editing for correcting elderly hunter errors
-  - Enhanced date picker interface with larger, senior-friendly controls
-  - Fixed automatic data refresh in advanced quota management section
-  - System maintains: Regional quotas as limits + Physical zones for hunter location choice
+  - **Critical Fix**: Removed zone-level quota seeding - zones are now pure location containers
+  - **Hunter Features**: Added informational regional quota tab with real-time data sync
+  - **Statistics Sync**: Hunter dashboard now shows accurate regional quota data
+  - **UI Enhancements**: 4-tab layout for hunters (Zones/Regional Quotas/Reservations/Reports)
+  - **Data Integrity**: Fixed 32-zone bug by limiting display to exactly 16 zones
+  - **Elderly-Friendly**: Simplified period management with text prompts instead of date pickers
+  - System architecture: 16 physical zones + 9 regional quotas + real-time synchronization
 
 # User Preferences
 

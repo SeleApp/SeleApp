@@ -40,73 +40,7 @@ async function seed() {
     // Get all zones
     const allZones = await db.select().from(zones);
 
-    // Skip creating zone-level quotas - we only use regional quotas now
-    // The 16 zones are just physical locations for hunting
     console.log(`Created ${allZones.length} hunting zones for Cison di Val Marino`);
-      // Roe deer quotas
-      quotaData.push(
-        {
-          zoneId: zone.id,
-          species: "roe_deer" as const,
-          sex: "male" as const,
-          ageClass: "adult" as const,
-          totalQuota: Math.floor(Math.random() * 5) + 3, // 3-7
-          harvested: 0,
-          season: "2024-2025",
-        },
-        {
-          zoneId: zone.id,
-          species: "roe_deer" as const,
-          sex: "female" as const,
-          ageClass: "adult" as const,
-          totalQuota: Math.floor(Math.random() * 4) + 2, // 2-5
-          harvested: 0,
-          season: "2024-2025",
-        },
-        {
-          zoneId: zone.id,
-          species: "roe_deer" as const,
-          sex: "male" as const,
-          ageClass: "young" as const,
-          totalQuota: Math.floor(Math.random() * 3) + 1, // 1-3
-          harvested: 0,
-          season: "2024-2025",
-        },
-        {
-          zoneId: zone.id,
-          species: "roe_deer" as const,
-          sex: "female" as const,
-          ageClass: "young" as const,
-          totalQuota: Math.floor(Math.random() * 3) + 1, // 1-3
-          harvested: 0,
-          season: "2024-2025",
-        }
-      );
-
-      // Red deer quotas (fewer)
-      quotaData.push(
-        {
-          zoneId: zone.id,
-          species: "red_deer" as const,
-          sex: "male" as const,
-          ageClass: "adult" as const,
-          totalQuota: Math.floor(Math.random() * 2) + 1, // 1-2
-          harvested: 0,
-          season: "2024-2025",
-        },
-        {
-          zoneId: zone.id,
-          species: "red_deer" as const,
-          sex: "female" as const,
-          ageClass: "adult" as const,
-          totalQuota: Math.floor(Math.random() * 2) + 1, // 1-2
-          harvested: 0,
-          season: "2024-2025",
-        }
-      );
-    }
-
-    await db.insert(wildlifeQuotas).values(quotaData).onConflictDoNothing();
 
     console.log("✅ Database seeded successfully!");
     console.log("🔑 Admin credentials: admin@seleapp.com / admin123");
