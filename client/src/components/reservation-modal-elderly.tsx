@@ -29,9 +29,9 @@ const ZONE_GRID = [
 ];
 
 const TIME_SLOTS = [
-  { id: 'morning', label: 'Mattina', icon: '🌅', time: '06:00 - 12:00' },
-  { id: 'afternoon', label: 'Pomeriggio', icon: '🌄', time: '12:00 - 18:00' },
-  { id: 'full_day', label: 'Tutto il Giorno', icon: '☀️', time: '06:00 - 18:00' }
+  { id: 'morning', label: 'Mattina', time: '06:00 - 12:00' },
+  { id: 'afternoon', label: 'Pomeriggio', time: '12:00 - 18:00' },
+  { id: 'full_day', label: 'Tutto il Giorno', time: '06:00 - 18:00' }
 ];
 
 export default function ReservationModalElderly({ open, onOpenChange, zones }: ReservationModalProps) {
@@ -299,7 +299,6 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                     onClick={() => setSelectedTimeSlot(slot.id as "morning" | "afternoon" | "full_day")}
                   >
                     <CardContent className="p-8 text-center flex flex-col justify-center h-full">
-                      <div className="text-6xl mb-4">{slot.icon}</div>
                       <div className={`text-2xl font-black mb-3 ${
                         selectedTimeSlot === slot.id ? 'text-purple-800' : 'text-yellow-700'
                       }`}>
