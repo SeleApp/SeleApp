@@ -317,17 +317,33 @@ export default function AdminDashboard() {
                               .map((q: any) => (
                                 <div key={q.id} className="flex justify-between">
                                   <span>{getCategoryLabel(q)}</span>
-                                  <span>{q.totalQuota - q.harvested} / {q.totalQuota}</span>
+                                  <span>
+                                    <span className="text-red-600 font-medium">{q.harvested}</span>
+                                    <span className="text-gray-500"> / </span>
+                                    <span className="text-green-600 font-medium">{q.totalQuota}</span>
+                                    <span className="text-gray-400 ml-2">({q.totalQuota - q.harvested} rim.)</span>
+                                  </span>
                                 </div>
                               ))}
-                            <div className="border-t pt-1 font-semibold flex justify-between">
-                              <span>Totale</span>
+                            <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                              <span>Totale Capriolo</span>
                               <span>
-                                {regionalQuotas
-                                  .filter((q: any) => q.species === 'roe_deer')
-                                  .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} / {regionalQuotas
-                                  .filter((q: any) => q.species === 'roe_deer')
-                                  .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                <span className="text-red-600 font-bold">
+                                  {regionalQuotas
+                                    .filter((q: any) => q.species === 'roe_deer')
+                                    .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                                </span>
+                                <span className="text-gray-500"> / </span>
+                                <span className="text-green-600 font-bold">
+                                  {regionalQuotas
+                                    .filter((q: any) => q.species === 'roe_deer')
+                                    .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                </span>
+                                <span className="text-gray-400 ml-2">
+                                  ({regionalQuotas
+                                    .filter((q: any) => q.species === 'roe_deer')
+                                    .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
+                                </span>
                               </span>
                             </div>
                           </div>
@@ -343,17 +359,33 @@ export default function AdminDashboard() {
                               .map((q: any) => (
                                 <div key={q.id} className="flex justify-between">
                                   <span>{getCategoryLabel(q)}</span>
-                                  <span>{q.totalQuota - q.harvested} / {q.totalQuota}</span>
+                                  <span>
+                                    <span className="text-red-600 font-medium">{q.harvested}</span>
+                                    <span className="text-gray-500"> / </span>
+                                    <span className="text-green-600 font-medium">{q.totalQuota}</span>
+                                    <span className="text-gray-400 ml-2">({q.totalQuota - q.harvested} rim.)</span>
+                                  </span>
                                 </div>
                               ))}
-                            <div className="border-t pt-1 font-semibold flex justify-between">
-                              <span>Totale</span>
+                            <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                              <span>Totale Cervo</span>
                               <span>
-                                {regionalQuotas
-                                  .filter((q: any) => q.species === 'red_deer')
-                                  .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} / {regionalQuotas
-                                  .filter((q: any) => q.species === 'red_deer')
-                                  .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                <span className="text-red-600 font-bold">
+                                  {regionalQuotas
+                                    .filter((q: any) => q.species === 'red_deer')
+                                    .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                                </span>
+                                <span className="text-gray-500"> / </span>
+                                <span className="text-green-600 font-bold">
+                                  {regionalQuotas
+                                    .filter((q: any) => q.species === 'red_deer')
+                                    .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                </span>
+                                <span className="text-gray-400 ml-2">
+                                  ({regionalQuotas
+                                    .filter((q: any) => q.species === 'red_deer')
+                                    .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
+                                </span>
                               </span>
                             </div>
                           </div>
