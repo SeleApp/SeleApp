@@ -142,7 +142,7 @@ Changelog:
   - **Added**: New intuitive reservation form with step-by-step process for elderly users
   - **Fixed**: Database query issues causing reservation errors
   - **UI**: Large buttons, clear visual steps, and simplified elderly-friendly interface
-  - **Admin Tab**: "Gestione Cacciatori" replaces "Gestione Avanzata" as requested
+  - **Admin Interface**: "Gestione Cacciatori" button moved to header area, tab removed as requested
 
 # User Preferences
 
