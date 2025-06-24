@@ -116,13 +116,15 @@ Changelog:
   - Updated hunt reporting logic to scale regional quotas instead of zone quotas
   - When any category reaches 0 quota, it becomes unavailable across all zones
   - Improved category mapping logic for accurate quota decrements
-- June 24, 2025. **FINAL IMPLEMENTATION**: Completed regional quota management system
-  - Replaced admin dashboard with regional-only quota table
-  - Added custom deer logo to login page
-  - Fixed all authentication and API errors
-  - System now shows: Species, Class/Sex, Assigned Quota, Harvested, Remaining
-  - Removed all zone references from quota display
-  - Added inline editing with pencil button for quota modifications
+- June 24, 2025. **FINAL DUAL SYSTEM IMPLEMENTATION**: Completed hybrid zone-regional architecture
+  - **Admin Dashboard**: Regional quota management only (9 categories: 5 capriolo + 4 cervo)
+  - **Hunter Dashboard**: Physical zone selection (16 zones of Cison di Val Marino territory)
+  - Replaced "Quote Basse" with "Capi Prelevati Capriolo" and "Capi Prelevati Cervo" in stats
+  - Added species filter (All/Capriolo/Cervo) for cleaner admin interface
+  - Implemented manual harvested count editing for correcting elderly hunter errors
+  - Enhanced date picker interface with larger, senior-friendly controls
+  - Fixed automatic data refresh in advanced quota management section
+  - System maintains: Regional quotas as limits + Physical zones for hunter location choice
 
 # User Preferences
 

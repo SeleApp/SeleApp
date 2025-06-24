@@ -31,23 +31,18 @@ export default function ZoneCard({ zone, onReserve }: ZoneCardProps) {
         </div>
 
         <div className="space-y-3 mb-6">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Caprioli M/A:</span>
-            <span className="font-semibold">
-              {getQuotaDisplay('roe_deer', 'male', 'adult')}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Caprioli F/A:</span>
-            <span className="font-semibold">
-              {getQuotaDisplay('roe_deer', 'female', 'adult')}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Cervi M/A:</span>
-            <span className="font-semibold">
-              {getQuotaDisplay('red_deer', 'male', 'adult')}
-            </span>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">Quote Regionali Disponibili:</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="text-center">
+                <span className="font-bold text-amber-600">🦌 Capriolo</span>
+                <div className="text-gray-600">Tutte le categorie</div>
+              </div>
+              <div className="text-center">
+                <span className="font-bold text-red-600">🦌 Cervo</span>
+                <div className="text-gray-600">Tutte le categorie</div>
+              </div>
+            </div>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Cervi F/A:</span>

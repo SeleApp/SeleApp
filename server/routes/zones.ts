@@ -7,44 +7,46 @@ const router = Router();
 router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
     const zones = await storage.getAllZones();
-    const zonesWithQuotas = await Promise.all(
-      zones.map(async (zone) => {
-        const quotas = await storage.getZoneQuotas(zone.id);
-        
-        // Calculate quota status
-        let quotaStatus = "🟢";
-        let quotaText = "Disponibile";
-        
-        const totalQuotas = quotas.reduce((sum, q) => sum + q.totalQuota, 0);
-        const totalHarvested = quotas.reduce((sum, q) => sum + q.harvested, 0);
-        
-        if (totalQuotas > 0) {
-          const percentage = totalHarvested / totalQuotas;
-          if (percentage >= 1) {
-            quotaStatus = "🔴";
-            quotaText = "Esaurita";
-          } else if (percentage >= 0.8) {
-            quotaStatus = "🟡";
-            quotaText = "Bassa";
-          }
+    const regionalQuotas = await storage.getRegionalQuotas();
+    
+    const zonesWithQuotas = zones.map((zone) => {
+      // Calculate overall quota status based on regional quotas
+      let quotaStatus = "🟢";
+      let quotaText = "Disponibile";
+      
+      const exhaustedQuotas = regionalQuotas.filter(q => q.isExhausted).length;
+      const totalQuotas = regionalQuotas.length;
+      
+      if (exhaustedQuotas > 0) {
+        if (exhaustedQuotas >= totalQuotas * 0.8) {
+          quotaStatus = "🔴";
+          quotaText = "Quote Limitate";
+        } else if (exhaustedQuotas >= totalQuotas * 0.5) {
+          quotaStatus = "🟡";
+          quotaText = "Quote Basse";
         }
-        
-        return {
-          ...zone,
-          quotas: quotas.reduce((acc, quota) => {
-            const key = `${quota.species}_${quota.sex}_${quota.ageClass}`;
-            acc[key] = {
-              harvested: quota.harvested,
-              total: quota.totalQuota,
-              available: quota.totalQuota - quota.harvested,
-            };
-            return acc;
-          }, {} as Record<string, any>),
-          quotaStatus,
-          quotaText,
+      }
+      
+      // Create quota structure for compatibility
+      const quotas: Record<string, any> = {};
+      regionalQuotas.forEach(quota => {
+        const key = quota.species === 'roe_deer' 
+          ? `roe_deer_${quota.roeDeerCategory}` 
+          : `red_deer_${quota.redDeerCategory}`;
+        quotas[key] = {
+          harvested: quota.harvested,
+          total: quota.totalQuota,
+          available: quota.available,
         };
-      })
-    );
+      });
+      
+      return {
+        ...zone,
+        quotas,
+        quotaStatus,
+        quotaText,
+      };
+    });
     
     res.json(zonesWithQuotas);
   } catch (error) {
