@@ -176,7 +176,11 @@ export default function AdminDashboard() {
   };
 
   const getCategoryLabel = (quota: any) => {
-    return quota.roeDeerCategory || quota.redDeerCategory || 'N/A';
+    if (quota.species === 'roe_deer') {
+      return quota.roeDeerCategory || 'N/A';
+    } else {
+      return quota.redDeerCategory || 'N/A';
+    }
   };
 
   const getSpeciesLabel = (species: string) => {

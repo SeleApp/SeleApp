@@ -113,22 +113,9 @@ export default function HunterDashboard() {
                       const available = quota.totalQuota - quota.harvested;
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
-                          const labels: Record<string, string> = {
-                            'M0': 'Maschio 0 anni',
-                            'F0': 'Femmina 0 anni', 
-                            'FA': 'Femmina Adulta',
-                            'M1': 'Maschio 1 anno',
-                            'MA': 'Maschio Adulto'
-                          };
-                          return labels[q.roeDeerCategory] || q.roeDeerCategory;
+                          return q.roeDeerCategory || 'N/A';
                         } else {
-                          const labels: Record<string, string> = {
-                            'CL0': 'Cerbiatto 0 anni',
-                            'FF': 'Femmina Fertile',
-                            'MM': 'Maschio Maturo',
-                            'MCL1': 'Maschio 1 anno'
-                          };
-                          return labels[q.redDeerCategory] || q.redDeerCategory;
+                          return q.redDeerCategory || 'N/A';
                         }
                       };
 

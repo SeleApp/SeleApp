@@ -132,6 +132,11 @@ Changelog:
   - **Added**: Hunt report correction system for fixing elderly hunter mistakes
   - **Enhanced**: Admin can modify incorrect reports and manage user accounts
   - **Elderly-Friendly Forms**: Redesigned reservation modal with large buttons, visual time slots, and compact zone grid
+- June 24, 2025. **CATEGORY LABELS CORRECTION**: Fixed category display to show exact user-specified codes
+  - **Capriolo Categories**: M0, F0, FA, M1, MA (no translations, exact codes as provided)
+  - **Cervo Categories**: CL0, FF, MM, MCL1 (no translations, exact codes as provided)
+  - **Removed**: Incorrect translations like "Cerbiatto", "Femmina Fertile" etc.
+  - **Display**: Now shows exact category codes as specified by user requirements
 
 # User Preferences
 
