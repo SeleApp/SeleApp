@@ -18,8 +18,9 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
-  const [editingField, setEditingField] = useState<'quota' | 'period' | null>(null);
+  const [editingField, setEditingField] = useState<'quota' | 'harvested' | 'period' | null>(null);
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
+  const [harvestedValues, setHarvestedValues] = useState<Record<number, number>>({});
   const [periodValues, setPeriodValues] = useState<Record<number, string>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
@@ -63,6 +64,7 @@ export default function AdminDashboard() {
       setEditingQuota(null);
       setEditingField(null);
       setQuotaValues({});
+      setHarvestedValues({});
       setPeriodValues({});
     },
     onError: (error: Error) => {
@@ -79,6 +81,12 @@ export default function AdminDashboard() {
     setEditingQuota(quotaId);
     setEditingField('quota');
     setQuotaValues({ ...quotaValues, [quotaId]: currentValue });
+  };
+
+  const startEditingHarvested = (quotaId: number, currentValue: number) => {
+    setEditingQuota(quotaId);
+    setEditingField('harvested');
+    setHarvestedValues({ ...harvestedValues, [quotaId]: currentValue });
   };
 
   const startEditingPeriod = (quotaId: number, currentPeriod: string) => {
@@ -118,6 +126,13 @@ export default function AdminDashboard() {
     }
   };
 
+  const saveHarvested = (quotaId: number) => {
+    const value = harvestedValues[quotaId];
+    if (value !== undefined && value >= 0) {
+      updateRegionalQuotaMutation.mutate({ id: quotaId, data: { harvested: value } });
+    }
+  };
+
   const savePeriod = (quotaId: number) => {
     const period = periodValues[quotaId];
     if (period !== undefined) {
@@ -129,6 +144,7 @@ export default function AdminDashboard() {
     setEditingQuota(null);
     setEditingField(null);
     setQuotaValues({});
+    setHarvestedValues({});
     
     // Clear all period-related values including temporary date fields
     const clearedPeriods: Record<string, string> = {};
@@ -338,6 +354,7 @@ export default function AdminDashboard() {
                         {getFilteredQuotas().map((quota: any) => {
                           const available = quota.totalQuota - quota.harvested;
                           const isEditingQuota = editingQuota === quota.id && editingField === 'quota';
+                          const isEditingHarvested = editingQuota === quota.id && editingField === 'harvested';
                           const isEditingPeriod = editingQuota === quota.id && editingField === 'period';
                           const speciesLabel = getSpeciesLabel(quota.species);
                           const categoryLabel = getCategoryLabel(quota);
@@ -393,7 +410,48 @@ export default function AdminDashboard() {
                                 )}
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="font-semibold text-red-600">{quota.harvested}</span>
+                                {isEditingHarvested ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={harvestedValues[quota.id] || ""}
+                                      onChange={(e) => setHarvestedValues({
+                                        ...harvestedValues,
+                                        [quota.id]: parseInt(e.target.value) || 0
+                                      })}
+                                      className="w-20 text-center"
+                                      autoFocus
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => saveHarvested(quota.id)}
+                                      disabled={updateRegionalQuotaMutation.isPending}
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={cancelEditing}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <span className="font-semibold text-red-600">{quota.harvested}</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => startEditingHarvested(quota.id, quota.harvested)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                                      title="Modifica capi abbattuti (per correggere errori)"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
                               </TableCell>
                               <TableCell className="text-center">
                                 <span className={`font-bold ${available <= 0 ? 'text-red-600' : 'text-green-600'}`}>

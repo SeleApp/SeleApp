@@ -56,6 +56,7 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+      refetch(); // Force immediate refresh
       toast({ title: `Aggiornate ${data.quotas.length} quote regionali` });
       setBulkData("");
     },
