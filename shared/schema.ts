@@ -179,9 +179,6 @@ export type InsertWildlifeQuota = z.infer<typeof insertWildlifeQuotaSchema>;
 export type RegionalQuota = typeof regionalQuotas.$inferSelect;
 export type InsertRegionalQuota = z.infer<typeof insertRegionalQuotaSchema>;
 
-export type RegionalQuota = typeof regionalQuotas.$inferSelect;
-export type InsertRegionalQuota = z.infer<typeof insertRegionalQuotaSchema>;
-
 export type Reservation = typeof reservations.$inferSelect;
 export type InsertReservation = z.infer<typeof insertReservationSchema>;
 

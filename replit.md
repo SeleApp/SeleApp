@@ -111,6 +111,11 @@ Changelog:
 - June 23, 2025. Enhanced hunt reporting with detailed animal selection and automatic quota updates
 - June 24, 2025. Redesigned quota management with table format for better organization and real-time updates
 - June 24, 2025. Implemented species-specific categories: Capriolo (M0,F0,FA,M1,MA) and Cervo (CL0,FF,MM,MCL1)
+- June 24, 2025. **CRITICAL ARCHITECTURE CHANGE**: Migrated from zone-level to regional-level quota management
+  - Added new `regional_quotas` table for proper quota tracking
+  - Updated hunt reporting logic to scale regional quotas instead of zone quotas
+  - When any category reaches 0 quota, it becomes unavailable across all zones
+  - Improved category mapping logic for accurate quota decrements
 
 # User Preferences
 
