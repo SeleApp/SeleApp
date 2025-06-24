@@ -144,11 +144,13 @@ Changelog:
   - **UI**: Large buttons, clear visual steps, and simplified elderly-friendly interface
   - **Admin Interface**: "Gestione Cacciatori" button moved to header area, tab removed as requested
 - June 24, 2025. **FLEXIBLE RESERVATION SYSTEM**: Enhanced reservation logic for same-day multiple bookings
-  - **Added**: "Tutto il Giorno" (Full Day) time slot option for 6:00-18:00 hunting
+  - **Added**: "Tutto il Giorno" (Full Day) time slot option for Alba-Tramonto hunting
   - **Enhanced**: Same hunter can book multiple time slots on same date (morning + afternoon)
   - **Smart Conflicts**: Prevents conflicting bookings (full day vs specific slots)
   - **User-Friendly**: Clear error messages for booking conflicts
   - **Database**: Updated time_slot enum to include 'full_day' option
+  - **Natural Times**: Updated to use Alba-12:00, 12:00-Tramonto, Alba-Tramonto format
+  - **UI Cleanup**: Removed emoji and "SELEZIONATA" text for cleaner interface
 
 # User Preferences
 
