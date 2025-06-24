@@ -137,17 +137,18 @@ export default function HunterDashboard() {
 
             <Card>
               <CardContent className="p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Specie</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Quota</TableHead>
-                      <TableHead>Prelevati</TableHead>
-                      <TableHead>Disponibili</TableHead>
-                      <TableHead>Periodo</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                <div className="overflow-x-auto">
+                  <Table className="min-w-full text-sm">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs">Specie</TableHead>
+                        <TableHead className="text-xs">Categoria</TableHead>
+                        <TableHead className="text-xs">Quota</TableHead>
+                        <TableHead className="text-xs">Prelevati</TableHead>
+                        <TableHead className="text-xs">Disponibili</TableHead>
+                        <TableHead className="text-xs">Periodo</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {getFilteredQuotas().map((quota: any) => {
                       const available = quota.totalQuota - quota.harvested;
@@ -190,8 +191,9 @@ export default function HunterDashboard() {
                         </TableRow>
                       );
                     })}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

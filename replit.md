@@ -151,6 +151,11 @@ Changelog:
   - **Database**: Updated time_slot enum to include 'full_day' option
   - **Natural Times**: Updated to use Alba-12:00, 12:00-Tramonto, Alba-Tramonto format
   - **UI Cleanup**: Removed emoji and "SELEZIONATA" text for cleaner interface
+- June 24, 2025. **MOBILE LAYOUT OPTIMIZATION**: Enhanced mobile responsiveness for hunter dashboard
+  - **Responsive Tabs**: Added horizontal scrolling and proper spacing for small screens
+  - **Mobile-First Design**: Reorganized layout with title above tabs, wrapped filter buttons
+  - **Table Optimization**: Added horizontal scroll and smaller text sizes for mobile tables
+  - **Touch-Friendly**: Improved button sizes and spacing for better mobile interaction
 
 # User Preferences
 
