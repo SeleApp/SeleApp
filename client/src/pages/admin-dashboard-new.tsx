@@ -16,6 +16,7 @@ import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
+  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
   const [editingField, setEditingField] = useState<'quota' | 'period' | null>(null);
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
@@ -112,6 +113,15 @@ export default function AdminDashboard() {
       return `${start} - ${end}`;
     }
     return "Non definito";
+  };
+
+  const getFilteredQuotas = () => {
+    if (selectedSpecies === 'all') return regionalQuotas;
+    return regionalQuotas.filter((q: any) => q.species === selectedSpecies);
+  };
+
+  const getSpeciesButtonVariant = (species: 'all' | 'roe_deer' | 'red_deer') => {
+    return selectedSpecies === species ? 'default' : 'outline';
   };
 
   const getCategoryLabel = (quota: any) => {
@@ -219,20 +229,48 @@ export default function AdminDashboard() {
           <TabsContent value="quotas">
             <Card>
               <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">Quote Regionali di Caccia</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Disponibile</span>
+                <div className="flex flex-col gap-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-gray-900">Quote Regionali di Caccia</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Disponibile</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Esaurito</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Pochi rimasti</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Esaurito</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('all')}
+                        onClick={() => setSelectedSpecies('all')}
+                        className="h-8"
+                      >
+                        Tutte
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('roe_deer')}
+                        onClick={() => setSelectedSpecies('roe_deer')}
+                        className="h-8"
+                      >
+                        🦌 Capriolo
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('red_deer')}
+                        onClick={() => setSelectedSpecies('red_deer')}
+                        className="h-8"
+                      >
+                        🦌 Cervo
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -254,7 +292,7 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {regionalQuotas.map((quota: any) => {
+                        {getFilteredQuotas().map((quota: any) => {
                           const available = quota.totalQuota - quota.harvested;
                           const isEditingQuota = editingQuota === quota.id && editingField === 'quota';
                           const isEditingPeriod = editingQuota === quota.id && editingField === 'period';
@@ -372,56 +410,103 @@ export default function AdminDashboard() {
                       </TableBody>
                     </Table>
 
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold mb-2">Riassunto Capriolo</h4>
-                          <div className="space-y-1 text-sm">
-                            {regionalQuotas
-                              .filter((q: any) => q.species === 'roe_deer')
-                              .map((q: any) => (
-                                <div key={q.id} className="flex justify-between">
-                                  <span>{getCategoryLabel(q)}</span>
-                                  <span>
-                                    <span className="text-red-600 font-medium">{q.harvested}</span>
-                                    <span className="text-gray-500"> / </span>
-                                    <span className="text-green-600 font-medium">{q.totalQuota}</span>
-                                    <span className="text-gray-400 ml-2">({q.totalQuota - q.harvested} rim.)</span>
+                    {selectedSpecies === 'all' && (
+                      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card>
+                          <CardContent className="p-4">
+                            <h4 className="font-semibold mb-2">Riassunto Capriolo</h4>
+                            <div className="space-y-1 text-sm">
+                              {regionalQuotas
+                                .filter((q: any) => q.species === 'roe_deer')
+                                .map((q: any) => (
+                                  <div key={q.id} className="flex justify-between">
+                                    <span>{getCategoryLabel(q)}</span>
+                                    <span>
+                                      <span className="text-red-600 font-medium">{q.harvested}</span>
+                                      <span className="text-gray-500"> / </span>
+                                      <span className="text-green-600 font-medium">{q.totalQuota}</span>
+                                      <span className="text-gray-400 ml-2">({q.totalQuota - q.harvested} rim.)</span>
+                                    </span>
+                                  </div>
+                                ))}
+                              <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                                <span>Totale Capriolo</span>
+                                <span>
+                                  <span className="text-red-600 font-bold">
+                                    {regionalQuotas
+                                      .filter((q: any) => q.species === 'roe_deer')
+                                      .reduce((sum: number, q: any) => sum + q.harvested, 0)}
                                   </span>
-                                </div>
-                              ))}
-                            <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
-                              <span>Totale Capriolo</span>
-                              <span>
-                                <span className="text-red-600 font-bold">
-                                  {regionalQuotas
-                                    .filter((q: any) => q.species === 'roe_deer')
-                                    .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                                  <span className="text-gray-500"> / </span>
+                                  <span className="text-green-600 font-bold">
+                                    {regionalQuotas
+                                      .filter((q: any) => q.species === 'roe_deer')
+                                      .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                  </span>
+                                  <span className="text-gray-400 ml-2">
+                                    ({regionalQuotas
+                                      .filter((q: any) => q.species === 'roe_deer')
+                                      .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
+                                  </span>
                                 </span>
-                                <span className="text-gray-500"> / </span>
-                                <span className="text-green-600 font-bold">
-                                  {regionalQuotas
-                                    .filter((q: any) => q.species === 'roe_deer')
-                                    .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
-                                </span>
-                                <span className="text-gray-400 ml-2">
-                                  ({regionalQuotas
-                                    .filter((q: any) => q.species === 'roe_deer')
-                                    .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
-                                </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
 
-                      <Card>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold mb-2">Riassunto Cervo</h4>
-                          <div className="space-y-1 text-sm">
-                            {regionalQuotas
-                              .filter((q: any) => q.species === 'red_deer')
-                              .map((q: any) => (
+                        <Card>
+                          <CardContent className="p-4">
+                            <h4 className="font-semibold mb-2">Riassunto Cervo</h4>
+                            <div className="space-y-1 text-sm">
+                              {regionalQuotas
+                                .filter((q: any) => q.species === 'red_deer')
+                                .map((q: any) => (
+                                  <div key={q.id} className="flex justify-between">
+                                    <span>{getCategoryLabel(q)}</span>
+                                    <span>
+                                      <span className="text-red-600 font-medium">{q.harvested}</span>
+                                      <span className="text-gray-500"> / </span>
+                                      <span className="text-green-600 font-medium">{q.totalQuota}</span>
+                                      <span className="text-gray-400 ml-2">({q.totalQuota - q.harvested} rim.)</span>
+                                    </span>
+                                  </div>
+                                ))}
+                              <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                                <span>Totale Cervo</span>
+                                <span>
+                                  <span className="text-red-600 font-bold">
+                                    {regionalQuotas
+                                      .filter((q: any) => q.species === 'red_deer')
+                                      .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                                  </span>
+                                  <span className="text-gray-500"> / </span>
+                                  <span className="text-green-600 font-bold">
+                                    {regionalQuotas
+                                      .filter((q: any) => q.species === 'red_deer')
+                                      .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                  </span>
+                                  <span className="text-gray-400 ml-2">
+                                    ({regionalQuotas
+                                      .filter((q: any) => q.species === 'red_deer')
+                                      .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {selectedSpecies !== 'all' && (
+                      <div className="mt-6">
+                        <Card>
+                          <CardContent className="p-4">
+                            <h4 className="font-semibold mb-2">
+                              Riassunto {selectedSpecies === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                            </h4>
+                            <div className="space-y-1 text-sm">
+                              {getFilteredQuotas().map((q: any) => (
                                 <div key={q.id} className="flex justify-between">
                                   <span>{getCategoryLabel(q)}</span>
                                   <span>
@@ -432,31 +517,26 @@ export default function AdminDashboard() {
                                   </span>
                                 </div>
                               ))}
-                            <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
-                              <span>Totale Cervo</span>
-                              <span>
-                                <span className="text-red-600 font-bold">
-                                  {regionalQuotas
-                                    .filter((q: any) => q.species === 'red_deer')
-                                    .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                              <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                                <span>Totale {selectedSpecies === 'roe_deer' ? 'Capriolo' : 'Cervo'}</span>
+                                <span>
+                                  <span className="text-red-600 font-bold">
+                                    {getFilteredQuotas().reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                                  </span>
+                                  <span className="text-gray-500"> / </span>
+                                  <span className="text-green-600 font-bold">
+                                    {getFilteredQuotas().reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
+                                  </span>
+                                  <span className="text-gray-400 ml-2">
+                                    ({getFilteredQuotas().reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
+                                  </span>
                                 </span>
-                                <span className="text-gray-500"> / </span>
-                                <span className="text-green-600 font-bold">
-                                  {regionalQuotas
-                                    .filter((q: any) => q.species === 'red_deer')
-                                    .reduce((sum: number, q: any) => sum + q.totalQuota, 0)}
-                                </span>
-                                <span className="text-gray-400 ml-2">
-                                  ({regionalQuotas
-                                    .filter((q: any) => q.species === 'red_deer')
-                                    .reduce((sum: number, q: any) => sum + (q.totalQuota - q.harvested), 0)} rim.)
-                                </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
