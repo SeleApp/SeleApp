@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { loginSchema, type LoginRequest } from "@shared/schema";
+import React from "react";
 import { LogIn } from "lucide-react";
 import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
@@ -24,6 +25,17 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  // Check authentication on mount
+  React.useEffect(() => {
+    if (authService.isAuthenticated()) {
+      if (authService.isAdmin()) {
+        navigate("/admin");
+      } else {
+        navigate("/hunter");
+      }
+    }
+  }, [navigate]);
 
   const onSubmit = async (data: LoginRequest) => {
     setIsLoading(true);

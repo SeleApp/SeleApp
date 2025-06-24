@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
 import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
+import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
@@ -35,10 +36,20 @@ export default function AdminDashboard() {
 
   const updateRegionalQuotaMutation = useMutation({
     mutationFn: async ({ id, value }: { id: number; value: number }) => {
-      return await apiRequest(`/api/regional-quotas/${id}`, {
+      const response = await fetch(`/api/regional-quotas/${id}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeaders(),
+        },
         body: JSON.stringify({ totalQuota: value }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });

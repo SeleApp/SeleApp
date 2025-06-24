@@ -324,12 +324,22 @@ export class DatabaseStorage implements IStorage {
    */
   async updateRegionalQuota(id: number, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined> {
     try {
-      const updateData = { ...data, updatedAt: new Date() };
+      const updateData = { 
+        ...data, 
+        updatedAt: new Date() 
+      };
+      
+      console.log('Updating regional quota:', id, updateData);
+      
       const [updatedQuota] = await db
         .update(regionalQuotas)
         .set(updateData)
         .where(eq(regionalQuotas.id, id))
         .returning();
+      
+      if (!updatedQuota) {
+        throw new Error(`Regional quota with id ${id} not found`);
+      }
       
       return updatedQuota;
     } catch (error) {
