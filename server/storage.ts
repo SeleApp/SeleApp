@@ -77,7 +77,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllQuotas(): Promise<WildlifeQuota[]> {
-    return await db.select().from(wildlifeQuotas);
+    const quotas = await db
+      .select({
+        id: zones.id,
+        name: zones.name,
+        description: zones.description,
+        quotas: sql<any[]>`json_agg(
+          json_build_object(
+            'id', ${wildlifeQuotas.id},
+            'zoneId', ${wildlifeQuotas.zoneId},
+            'species', ${wildlifeQuotas.species},
+            'roeDeerCategory', ${wildlifeQuotas.roeDeerCategory},
+            'redDeerCategory', ${wildlifeQuotas.redDeerCategory},
+            'sex', ${wildlifeQuotas.sex},
+            'ageClass', ${wildlifeQuotas.ageClass},
+            'totalQuota', ${wildlifeQuotas.totalQuota},
+            'harvested', ${wildlifeQuotas.harvested}
+          )
+        )`,
+      })
+      .from(zones)
+      .leftJoin(wildlifeQuotas, eq(zones.id, wildlifeQuotas.zoneId))
+      .where(isNotNull(wildlifeQuotas.id))
+      .groupBy(zones.id, zones.name, zones.description)
+      .orderBy(zones.id);
+
+    return quotas as any;
   }
 
   async updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined> {
