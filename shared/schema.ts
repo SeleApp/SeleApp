@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // Enums
 export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN']);
-export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon']);
+export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon', 'full_day']);
 export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
 export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);

@@ -39,7 +39,7 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
   const [step, setStep] = useState(1);
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<"morning" | "afternoon" | null>(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<"morning" | "afternoon" | "full_day" | null>(null);
 
   const createReservationMutation = useMutation({
     mutationFn: async (data: ReservationData) => {
@@ -287,7 +287,7 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
                 {TIME_SLOTS.map((slot) => (
                   <Card
                     key={slot.id}
@@ -296,7 +296,7 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                         ? 'ring-6 ring-purple-600 bg-purple-100 shadow-xl border-purple-500 border-4'
                         : 'hover:bg-yellow-50 border-2 border-gray-300 hover:border-yellow-400'
                     }`}
-                    onClick={() => setSelectedTimeSlot(slot.id as "morning" | "afternoon")}
+                    onClick={() => setSelectedTimeSlot(slot.id as "morning" | "afternoon" | "full_day")}
                   >
                     <CardContent className="p-8 text-center flex flex-col justify-center h-full">
                       <div className="text-6xl mb-4">{slot.icon}</div>

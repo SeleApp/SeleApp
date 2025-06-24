@@ -200,9 +200,9 @@ export class DatabaseStorage implements IStorage {
 
   async createReservation(reservation: InsertReservation): Promise<Reservation> {
     try {
-      // Verifica che non ci sia già una prenotazione per lo stesso cacciatore nella stessa data
+      // Verifica conflitti di prenotazione per lo stesso cacciatore nella stessa data
       const existingReservations = await db
-        .select({ id: reservations.id })
+        .select({ id: reservations.id, timeSlot: reservations.timeSlot })
         .from(reservations)
         .where(
           and(
@@ -212,8 +212,22 @@ export class DatabaseStorage implements IStorage {
           )
         );
 
-      if (existingReservations.length > 0) {
-        throw new Error('Hai già una prenotazione attiva per questa data');
+      // Controlla conflitti specifici
+      for (const existing of existingReservations) {
+        // Se esiste già una prenotazione "tutto il giorno", non permettere altre
+        if (existing.timeSlot === 'full_day') {
+          throw new Error('Hai già una prenotazione per tutto il giorno in questa data');
+        }
+        
+        // Se sto prenotando "tutto il giorno" ma esistono già slot specifici
+        if (reservation.timeSlot === 'full_day') {
+          throw new Error('Non puoi prenotare tutto il giorno se hai già slot specifici');
+        }
+        
+        // Se sto prenotando lo stesso slot specifico
+        if (existing.timeSlot === reservation.timeSlot) {
+          throw new Error(`Hai già una prenotazione per ${reservation.timeSlot === 'morning' ? 'la mattina' : 'il pomeriggio'} in questa data`);
+        }
       }
 
       // Verifica che non ci siano più di 4 prenotazioni per zona/data/slot
