@@ -348,7 +348,7 @@ export default function AdminDashboard() {
               className="flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />
-              Gestione Avanzata
+              Gestione Quote
             </Button>
           </div>
         </div>
@@ -881,12 +881,116 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Hunters Management Tab */}
+          <TabsContent value="hunters">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">Gestione Account Cacciatori</h3>
+                  <Button
+                    onClick={() => setShowHunterModal(true)}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Users className="h-4 w-4" />
+                    Nuovo Cacciatore
+                  </Button>
+                </div>
+                
+                <div className="bg-white rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Stato</TableHead>
+                        <TableHead>Data Registrazione</TableHead>
+                        <TableHead>Azioni</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {hunters.map((hunter: any) => (
+                        <TableRow key={hunter.id}>
+                          <TableCell className="font-medium">
+                            {hunter.firstName} {hunter.lastName}
+                          </TableCell>
+                          <TableCell>{hunter.email}</TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={hunter.isActive ? "default" : "secondary"}
+                              className={hunter.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                            >
+                              {hunter.isActive ? "Attivo" : "Disattivo"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {hunter.createdAt && new Date(hunter.createdAt).toLocaleDateString('it-IT')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedHunter(hunter);
+                                  setShowHunterModal(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  // Toggle hunter status logic will be added
+                                  console.log('Toggle status for hunter:', hunter.id);
+                                }}
+                              >
+                                {hunter.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  if (confirm("Sei sicuro di voler eliminare questo cacciatore?")) {
+                                    console.log('Delete hunter:', hunter.id);
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {hunters.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="mx-auto mb-4" size={48} />
+                      <p className="text-lg">Nessun cacciatore registrato</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 
       <RegionalQuotaManager 
         open={showRegionalQuotaManager}
         onOpenChange={setShowRegionalQuotaManager}
+      />
+      
+      <HunterModal
+        open={showHunterModal}
+        onOpenChange={(open) => {
+          setShowHunterModal(open);
+          if (!open) setSelectedHunter(null);
+        }}
+        hunter={selectedHunter}
       />
     </div>
   );
