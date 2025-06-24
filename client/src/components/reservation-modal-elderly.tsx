@@ -29,9 +29,9 @@ const ZONE_GRID = [
 ];
 
 const TIME_SLOTS = [
-  { id: 'morning', label: 'Mattina', time: '06:00 - 12:00' },
-  { id: 'afternoon', label: 'Pomeriggio', time: '12:00 - 18:00' },
-  { id: 'full_day', label: 'Tutto il Giorno', time: '06:00 - 18:00' }
+  { id: 'morning', label: 'Mattina', time: 'Alba - 12:00' },
+  { id: 'afternoon', label: 'Pomeriggio', time: '12:00 - Tramonto' },
+  { id: 'full_day', label: 'Tutto il Giorno', time: 'Alba - Tramonto' }
 ];
 
 export default function ReservationModalElderly({ open, onOpenChange, zones }: ReservationModalProps) {
