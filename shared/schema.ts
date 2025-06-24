@@ -36,14 +36,26 @@ export const zones = pgTable("zones", {
 });
 
 // Wildlife quotas table
+// Tabella quote regionali - una sola entry per combinazione specie/categoria
+export const regionalQuotas = pgTable("regional_quotas", {
+  id: serial("id").primaryKey(),
+  species: speciesEnum("species").notNull(),
+  roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
+  redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  totalQuota: integer("total_quota").notNull().default(0),
+  harvested: integer("harvested").notNull().default(0),
+  season: text("season").notNull().default("2024-2025"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Manteniamo la tabella esistente per compatibilità ma deprecata
 export const wildlifeQuotas = pgTable("wildlife_quotas", {
   id: serial("id").primaryKey(),
   zoneId: integer("zone_id").references(() => zones.id).notNull(),
   species: speciesEnum("species").notNull(),
-  // Nuove categorie specifiche per specie
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
-  // Manteniamo i campi originali per compatibilità
   sex: sexEnum("sex"),
   ageClass: ageClassEnum("age_class"),
   totalQuota: integer("total_quota").notNull().default(0),
@@ -92,6 +104,16 @@ export const wildlifeQuotasRelations = relations(wildlifeQuotas, ({ one }) => ({
   }),
 }));
 
+// Relations per quote regionali
+export const regionalQuotasRelations = relations(regionalQuotas, ({ many }) => ({
+  huntReports: many(huntReports),
+}));
+
+// Relations per quote regionali
+export const regionalQuotasRelations = relations(regionalQuotas, ({ many }) => ({
+  huntReports: many(huntReports),
+}));
+
 export const reservationsRelations = relations(reservations, ({ one }) => ({
   hunter: one(users, {
     fields: [reservations.hunterId],
@@ -128,6 +150,12 @@ export const insertWildlifeQuotaSchema = createInsertSchema(wildlifeQuotas).omit
   id: true,
 });
 
+export const insertRegionalQuotaSchema = createInsertSchema(regionalQuotas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertReservationSchema = createInsertSchema(reservations).omit({
   id: true,
   createdAt: true,
@@ -147,6 +175,12 @@ export type InsertZone = z.infer<typeof insertZoneSchema>;
 
 export type WildlifeQuota = typeof wildlifeQuotas.$inferSelect;
 export type InsertWildlifeQuota = z.infer<typeof insertWildlifeQuotaSchema>;
+
+export type RegionalQuota = typeof regionalQuotas.$inferSelect;
+export type InsertRegionalQuota = z.infer<typeof insertRegionalQuotaSchema>;
+
+export type RegionalQuota = typeof regionalQuotas.$inferSelect;
+export type InsertRegionalQuota = z.infer<typeof insertRegionalQuotaSchema>;
 
 export type Reservation = typeof reservations.$inferSelect;
 export type InsertReservation = z.infer<typeof insertReservationSchema>;

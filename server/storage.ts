@@ -1,8 +1,8 @@
 import { 
-  users, zones, wildlifeQuotas, reservations, huntReports,
+  users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports,
   type User, type InsertUser, type Zone, type InsertZone,
-  type WildlifeQuota, type InsertWildlifeQuota, type Reservation, 
-  type InsertReservation, type HuntReport, type InsertHuntReport
+  type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
+  type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -190,47 +190,123 @@ export class DatabaseStorage implements IStorage {
       .where(eq(reservations.id, id));
   }
 
+  /**
+   * Crea un report di caccia e aggiorna automaticamente le quote regionali
+   * Le quote sono a livello regionale, non per zona - ogni prelievo scala la quota totale disponibile
+   */
   async createHuntReport(report: InsertHuntReport): Promise<HuntReport> {
     const [newReport] = await db.insert(huntReports).values(report).returning();
     
-    // If harvest reported, update quota
-    if (report.outcome === 'harvest' && report.species && report.sex && report.ageClass) {
-      // Get reservation to find zone
-      const [reservation] = await db
-        .select()
-        .from(reservations)
-        .where(eq(reservations.id, report.reservationId));
-      
-      if (reservation) {
-        // Find matching quota
-        const [quota] = await db
-          .select()
-          .from(wildlifeQuotas)
-          .where(
-            and(
-              eq(wildlifeQuotas.zoneId, reservation.zoneId),
-              eq(wildlifeQuotas.species, report.species),
-              eq(wildlifeQuotas.sex, report.sex),
-              eq(wildlifeQuotas.ageClass, report.ageClass)
-            )
-          );
-        
-        if (quota) {
-          await db
-            .update(wildlifeQuotas)
-            .set({ harvested: quota.harvested + 1 })
-            .where(eq(wildlifeQuotas.id, quota.id));
-        }
-      }
-      
-      // Mark reservation as completed
-      await db
-        .update(reservations)
-        .set({ status: 'completed' })
-        .where(eq(reservations.id, report.reservationId));
+    // Se è stato dichiarato un prelievo, aggiorna la quota regionale
+    if (report.outcome === 'harvest' && report.species) {
+      await this.updateRegionalQuotaAfterHarvest(report.species, report.sex, report.ageClass);
     }
     
+    // Marca la prenotazione come completata
+    await db
+      .update(reservations)
+      .set({ status: 'completed' })
+      .where(eq(reservations.id, report.reservationId));
+    
     return newReport;
+  }
+
+  /**
+   * Aggiorna le quote regionali dopo un prelievo
+   * Identifica la categoria corretta e decrementa la quota disponibile
+   */
+  private async updateRegionalQuotaAfterHarvest(
+    species: 'roe_deer' | 'red_deer',
+    sex?: 'male' | 'female' | null,
+    ageClass?: 'adult' | 'young' | null
+  ): Promise<void> {
+    let categoryToUpdate: string | null = null;
+    
+    // Determina la categoria basata su specie, sesso ed età
+    if (species === 'roe_deer' && sex && ageClass) {
+      // Capriolo: M0, F0, FA, M1, MA
+      if (sex === 'male' && ageClass === 'young') categoryToUpdate = 'M0';
+      else if (sex === 'female' && ageClass === 'young') categoryToUpdate = 'F0';
+      else if (sex === 'female' && ageClass === 'adult') categoryToUpdate = 'FA';
+      else if (sex === 'male' && ageClass === 'adult') categoryToUpdate = 'MA';
+    } else if (species === 'red_deer' && sex && ageClass) {
+      // Cervo: CL0, FF, MM, MCL1
+      if (ageClass === 'young') categoryToUpdate = 'CL0';
+      else if (sex === 'female' && ageClass === 'adult') categoryToUpdate = 'FF';
+      else if (sex === 'male' && ageClass === 'adult') categoryToUpdate = 'MM';
+    }
+    
+    if (!categoryToUpdate) {
+      console.warn('Impossibile determinare la categoria per il prelievo:', { species, sex, ageClass });
+      return;
+    }
+    
+    // Trova e aggiorna la quota regionale
+    const quotaCondition = species === 'roe_deer' 
+      ? eq(regionalQuotas.roeDeerCategory, categoryToUpdate as any)
+      : eq(regionalQuotas.redDeerCategory, categoryToUpdate as any);
+    
+    const [quotaToUpdate] = await db
+      .select()
+      .from(regionalQuotas)
+      .where(
+        and(
+          eq(regionalQuotas.species, species),
+          quotaCondition
+        )
+      );
+    
+    if (quotaToUpdate && quotaToUpdate.harvested < quotaToUpdate.totalQuota) {
+      await db
+        .update(regionalQuotas)
+        .set({ 
+          harvested: quotaToUpdate.harvested + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(regionalQuotas.id, quotaToUpdate.id));
+      
+      console.log(`Quota regionale aggiornata: ${species}-${categoryToUpdate}, prelevati: ${quotaToUpdate.harvested + 1}/${quotaToUpdate.totalQuota}`);
+    } else {
+      console.warn(`Quota esaurita o non trovata per: ${species}-${categoryToUpdate}`);
+    }
+  }
+
+  /**
+   * Verifica se una combinazione specie/categoria è ancora disponibile a livello regionale
+   * Da usare prima di permettere prenotazioni
+   */
+  async isSpeciesCategoryAvailable(
+    species: 'roe_deer' | 'red_deer',
+    category: string
+  ): Promise<boolean> {
+    const quotaCondition = species === 'roe_deer' 
+      ? eq(regionalQuotas.roeDeerCategory, category as any)
+      : eq(regionalQuotas.redDeerCategory, category as any);
+    
+    const [quota] = await db
+      .select()
+      .from(regionalQuotas)
+      .where(
+        and(
+          eq(regionalQuotas.species, species),
+          quotaCondition
+        )
+      );
+    
+    return quota ? quota.harvested < quota.totalQuota : false;
+  }
+
+  /**
+   * Ottiene tutte le quote regionali con stato disponibilità
+   */
+  async getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean })[]> {
+    const quotas = await db.select().from(regionalQuotas);
+    
+    return quotas.map(quota => ({
+      ...quota,
+      available: quota.totalQuota - quota.harvested,
+      isExhausted: quota.harvested >= quota.totalQuota
+    }));
   }
 
   async getHuntReports(): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]> {
