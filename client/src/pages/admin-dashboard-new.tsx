@@ -29,8 +29,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/stats"],
   });
 
-  const { data: regionalQuotas = [], isLoading: isLoadingQuotas } = useQuery({
+  const { data: regionalQuotas = [], isLoading: isLoadingQuotas, refetch: refetchQuotas } = useQuery({
     queryKey: ["/api/regional-quotas"],
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   const { data: reservations = [], isLoading: isLoadingReservations } = useQuery({
@@ -56,6 +58,7 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+      refetchQuotas(); // Force immediate refresh
       toast({ title: "Quota regionale aggiornata con successo" });
       setEditingQuota(null);
       setEditingField(null);
@@ -223,10 +226,14 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
-                  <Target className="h-8 w-8 text-red-600" />
+                  <Target className="h-8 w-8 text-amber-600" />
                   <div className="ml-4">
-                    <p className="text-sm text-gray-600">Capi Prelevati</p>
-                    <p className="text-2xl font-bold">{stats?.totalHarvested || 0}</p>
+                    <p className="text-sm text-gray-600">Capi Prelevati Capriolo</p>
+                    <p className="text-2xl font-bold">
+                      {isLoadingQuotas ? "..." : regionalQuotas
+                        .filter((q: any) => q.species === 'roe_deer')
+                        .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -234,10 +241,14 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
-                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                  <Target className="h-8 w-8 text-red-600" />
                   <div className="ml-4">
-                    <p className="text-sm text-gray-600">Quote Basse</p>
-                    <p className="text-2xl font-bold">{stats?.lowQuotas || 0}</p>
+                    <p className="text-sm text-gray-600">Capi Prelevati Cervo</p>
+                    <p className="text-2xl font-bold">
+                      {isLoadingQuotas ? "..." : regionalQuotas
+                        .filter((q: any) => q.species === 'red_deer')
+                        .reduce((sum: number, q: any) => sum + q.harvested, 0)}
+                    </p>
                   </div>
                 </div>
               </CardContent>

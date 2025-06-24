@@ -23,9 +23,11 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
   const [activeTab, setActiveTab] = useState("view");
   const [bulkData, setBulkData] = useState("");
 
-  const { data: quotas = [], isLoading } = useQuery({
+  const { data: quotas = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/regional-quotas"],
     enabled: open,
+    refetchOnWindowFocus: true,
+    refetchInterval: 5000, // Refresh every 5 seconds when open
   });
 
   const updateQuotaMutation = useMutation({
@@ -37,6 +39,7 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+      refetch(); // Force immediate refresh
       toast({ title: "Quota aggiornata con successo" });
     },
     onError: () => {
