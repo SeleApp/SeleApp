@@ -43,10 +43,18 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
 
   const createReservationMutation = useMutation({
     mutationFn: async (data: ReservationData) => {
-      return await apiRequest("/api/reservations", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      console.log("Sending reservation data:", data);
+      try {
+        const response = await apiRequest("/api/reservations", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        console.log("Reservation response:", response);
+        return response;
+      } catch (error) {
+        console.error("Reservation error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -58,6 +66,7 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
       onOpenChange(false);
     },
     onError: (error: any) => {
+      console.error("Mutation error:", error);
       toast({
         title: "Errore nella prenotazione",
         description: error.message || "Si è verificato un errore durante la prenotazione.",

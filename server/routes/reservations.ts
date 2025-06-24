@@ -18,6 +18,9 @@ router.get("/", authenticateToken, async (req: AuthRequest, res) => {
 
 router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
+    console.log("Creating reservation with data:", req.body);
+    console.log("User:", req.user);
+    
     if (req.user?.role !== 'HUNTER') {
       return res.status(403).json({ message: "Solo i cacciatori possono prenotare" });
     }
@@ -26,6 +29,8 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       ...req.body,
       hunterId: req.user.id,
     });
+
+    console.log("Parsed reservation data:", reservationData);
 
     // Check if zone exists and is active
     const zone = await storage.getZone(reservationData.zoneId);
