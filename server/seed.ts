@@ -40,9 +40,9 @@ async function seed() {
     // Get all zones
     const allZones = await db.select().from(zones);
 
-    // Create wildlife quotas for each zone
-    const quotaData = [];
-    for (const zone of allZones) {
+    // Skip creating zone-level quotas - we only use regional quotas now
+    // The 16 zones are just physical locations for hunting
+    console.log(`Created ${allZones.length} hunting zones for Cison di Val Marino`);
       // Roe deer quotas
       quotaData.push(
         {

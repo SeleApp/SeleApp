@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
 import ZoneCard from "@/components/zone-card";
 import ReservationModal from "@/components/reservation-modal";
@@ -26,6 +28,10 @@ export default function HunterDashboard() {
 
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/reservations"],
+  });
+
+  const { data: regionalQuotas = [] } = useQuery({
+    queryKey: ["/api/regional-quotas"],
   });
 
   const user = authService.getUser();
@@ -153,7 +159,7 @@ export default function HunterDashboard() {
 
           {/* Zone Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredZones.map((zone) => (
+            {filteredZones.slice(0, 16).map((zone) => (
               <ZoneCard
                 key={zone.id}
                 zone={zone}
