@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { createReservationSchema, type CreateReservationRequest } from "@shared/schema";
+import { createReservationSchema } from "@shared/schema";
 import type { ZoneWithQuotas, CreateReservationRequest as ClientCreateReservationRequest } from "@/lib/types";
 
 interface ReservationModalProps {
@@ -18,7 +17,6 @@ interface ReservationModalProps {
 }
 
 export default function ReservationModal({ open, onOpenChange, zones }: ReservationModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,7 +31,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  const createReservation = useMutation({
+  const mutation = useMutation({
     mutationFn: async (data: ClientCreateReservationRequest) => {
       const response = await apiRequest("POST", "/api/reservations", data);
       return response.json();
@@ -58,12 +56,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
   });
 
   const onSubmit = async (data: ClientCreateReservationRequest) => {
-    setIsLoading(true);
-    try {
-      await createReservation.mutateAsync(data);
-    } finally {
-      setIsLoading(false);
-    }
+    mutation.mutate(data);
   };
 
   const handleClose = () => {
@@ -71,104 +64,122 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
     onOpenChange(false);
   };
 
-  // Filter available zones (not quota exhausted)
-  const availableZones = zones.filter(zone => zone.quotaStatus !== '🔴');
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-900">
-            Nuova Prenotazione
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-2xl font-bold text-gray-900">Nuova Prenotazione</DialogTitle>
+          <DialogDescription className="text-lg text-gray-600">
+            Seleziona data, orario e zona per la tua prossima caccia.
+          </DialogDescription>
         </DialogHeader>
+        
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-8 py-6">
+            {/* Data Selection */}
+            <div className="space-y-3">
+              <Label className="text-xl font-semibold text-gray-900">📅 Data di Caccia</Label>
+              <Input
+                id="huntDate"
+                type="date"
+                className="w-full text-xl p-6 border-3 border-gray-300 rounded-xl focus:border-primary text-center"
+                {...register("huntDate", { required: "La data è obbligatoria" })}
+              />
+              {errors.huntDate && (
+                <p className="text-red-600 text-lg font-medium">{errors.huntDate.message}</p>
+              )}
+            </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <Label className="block text-lg font-medium text-gray-700 mb-2">
-              Zona
-            </Label>
-            <Select
-              value={form.watch("zoneId")?.toString() || ""}
-              onValueChange={(value) => form.setValue("zoneId", parseInt(value))}
-            >
-              <SelectTrigger className="input-large">
-                <SelectValue placeholder="Seleziona zona..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availableZones.map((zone) => (
-                  <SelectItem key={zone.id} value={zone.id.toString()}>
-                    {zone.name} {zone.quotaStatus}
-                  </SelectItem>
+            {/* Time Slot Selection */}
+            <div className="space-y-4">
+              <Label className="text-xl font-semibold text-gray-900">⏰ Fascia Oraria</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button
+                  type="button"
+                  onClick={() => setValue("timeSlot", "morning")}
+                  className={`p-8 rounded-xl border-3 text-xl font-medium transition-all ${
+                    watch("timeSlot") === "morning"
+                      ? "border-primary bg-primary/20 text-primary shadow-lg"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🌅</div>
+                    <div className="text-2xl font-bold">Alba - 12:00</div>
+                    <div className="text-lg text-gray-600 mt-2">Mattina</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("timeSlot", "afternoon")}
+                  className={`p-8 rounded-xl border-3 text-xl font-medium transition-all ${
+                    watch("timeSlot") === "afternoon"
+                      ? "border-primary bg-primary/20 text-primary shadow-lg"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🌇</div>
+                    <div className="text-2xl font-bold">12:00 - Tramonto</div>
+                    <div className="text-lg text-gray-600 mt-2">Pomeriggio</div>
+                  </div>
+                </button>
+              </div>
+              {errors.timeSlot && (
+                <p className="text-red-600 text-lg font-medium">{errors.timeSlot.message}</p>
+              )}
+            </div>
+
+            {/* Zone Selection */}
+            <div className="space-y-4">
+              <Label className="text-xl font-semibold text-gray-900">🗺️ Zona di Caccia</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-80 overflow-y-auto border-2 rounded-xl p-6 bg-gray-50">
+                {zones.slice(0, 16).map((zone) => (
+                  <button
+                    key={zone.id}
+                    type="button"
+                    onClick={() => setValue("zoneId", zone.id)}
+                    className={`p-6 rounded-xl border-3 text-center transition-all ${
+                      watch("zoneId") === zone.id
+                        ? "border-primary bg-primary/20 text-primary shadow-lg transform scale-105"
+                        : zone.quotaStatus === '🔴' 
+                        ? "border-red-300 bg-red-50 text-red-600 cursor-not-allowed opacity-60"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-white hover:shadow-md"
+                    }`}
+                    disabled={zone.quotaStatus === '🔴'}
+                  >
+                    <div className="text-2xl font-bold mb-2">{zone.name}</div>
+                    <div className="text-sm font-medium">
+                      {zone.quotaStatus === '🟢' ? '✅ Disponibile' : 
+                       zone.quotaStatus === '🟡' ? '⚠️ Quote Basse' : 
+                       '❌ Non Disponibile'}
+                    </div>
+                  </button>
                 ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.zoneId && (
-              <p className="text-destructive text-sm mt-1">
-                {form.formState.errors.zoneId.message}
-              </p>
-            )}
+              </div>
+              {errors.zoneId && (
+                <p className="text-red-600 text-lg font-medium">{errors.zoneId.message}</p>
+              )}
+            </div>
           </div>
 
-          <div>
-            <Label className="block text-lg font-medium text-gray-700 mb-2">
-              Data
-            </Label>
-            <input
-              type="date"
-              {...form.register("huntDate")}
-              className="input-large w-full"
-              min={new Date().toISOString().split('T')[0]}
-              disabled={isLoading}
-            />
-            {form.formState.errors.huntDate && (
-              <p className="text-destructive text-sm mt-1">
-                {form.formState.errors.huntDate.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label className="block text-lg font-medium text-gray-700 mb-2">
-              Fascia Oraria
-            </Label>
-            <Select
-              value={form.watch("timeSlot")}
-              onValueChange={(value) => form.setValue("timeSlot", value as "morning" | "afternoon")}
-            >
-              <SelectTrigger className="input-large">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="morning">Mattina (6:00 - 12:00)</SelectItem>
-                <SelectItem value="afternoon">Pomeriggio (14:00 - 18:00)</SelectItem>
-              </SelectContent>
-            </Select>
-            {form.formState.errors.timeSlot && (
-              <p className="text-destructive text-sm mt-1">
-                {form.formState.errors.timeSlot.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex space-x-4">
+          <DialogFooter className="flex flex-col sm:flex-row gap-4 pt-6">
             <Button
               type="button"
-              onClick={handleClose}
               variant="outline"
-              className="flex-1 btn-large"
-              disabled={isLoading}
+              onClick={handleClose}
+              className="text-xl py-4 px-8 h-auto"
             >
               Annulla
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || availableZones.length === 0}
-              className="flex-1 btn-large bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={mutation.isPending}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl py-4 px-8 h-auto font-semibold"
             >
-              {isLoading ? "Prenotazione..." : "Conferma"}
+              {mutation.isPending ? "Prenotazione in corso..." : "Conferma Prenotazione"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
