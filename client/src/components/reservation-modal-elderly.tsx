@@ -152,22 +152,29 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                   return (
                     <Card
                       key={zone.id}
-                      className={`cursor-pointer transition-all hover:scale-105 ${
+                      className={`cursor-pointer transition-all hover:scale-105 min-h-[120px] ${
                         selectedZone === zone.id
-                          ? 'ring-4 ring-green-500 bg-green-50'
-                          : 'hover:bg-gray-50'
+                          ? 'ring-6 ring-green-600 bg-green-100 shadow-xl border-green-500 border-4'
+                          : 'hover:bg-blue-50 border-2 border-gray-300 hover:border-blue-400'
                       }`}
                       onClick={() => setSelectedZone(zone.id)}
                     >
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-green-700">
+                      <CardContent className="p-6 text-center flex flex-col justify-center h-full">
+                        <div className={`text-4xl font-black mb-2 ${
+                          selectedZone === zone.id ? 'text-green-800' : 'text-blue-700'
+                        }`}>
                           {zone.id}
                         </div>
-                        <div className="text-sm text-gray-600 mt-1">
+                        <div className={`text-base font-semibold ${
+                          selectedZone === zone.id ? 'text-green-700' : 'text-gray-700'
+                        }`}>
                           {zone.name}
                         </div>
                         {selectedZone === zone.id && (
-                          <CheckCircle className="h-6 w-6 text-green-500 mx-auto mt-2" />
+                          <div className="mt-3">
+                            <CheckCircle className="h-8 w-8 text-green-600 mx-auto" />
+                            <div className="text-green-800 font-bold mt-1">SELEZIONATA</div>
+                          </div>
                         )}
                       </CardContent>
                     </Card>
@@ -203,20 +210,27 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                 {generateDateOptions().map((date) => (
                   <Card
                     key={date.value}
-                    className={`cursor-pointer transition-all hover:scale-105 ${
+                    className={`cursor-pointer transition-all hover:scale-105 min-h-[140px] ${
                       selectedDate === date.value
-                        ? 'ring-4 ring-blue-500 bg-blue-50'
-                        : 'hover:bg-gray-50'
+                        ? 'ring-6 ring-blue-600 bg-blue-100 shadow-xl border-blue-500 border-4'
+                        : 'hover:bg-orange-50 border-2 border-gray-300 hover:border-orange-400'
                     }`}
                     onClick={() => setSelectedDate(date.value)}
                   >
-                    <CardContent className="p-4 text-center">
-                      <Calendar className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                      <div className="text-sm font-medium capitalize">
+                    <CardContent className="p-4 text-center flex flex-col justify-center h-full">
+                      <Calendar className={`h-8 w-8 mx-auto mb-3 ${
+                        selectedDate === date.value ? 'text-blue-700' : 'text-orange-600'
+                      }`} />
+                      <div className={`text-sm font-bold capitalize leading-tight ${
+                        selectedDate === date.value ? 'text-blue-800' : 'text-gray-800'
+                      }`}>
                         {date.label}
                       </div>
                       {selectedDate === date.value && (
-                        <CheckCircle className="h-6 w-6 text-blue-500 mx-auto mt-2" />
+                        <div className="mt-3">
+                          <CheckCircle className="h-6 w-6 text-blue-600 mx-auto" />
+                          <div className="text-blue-800 font-bold text-xs mt-1">SELEZIONATA</div>
+                        </div>
                       )}
                     </CardContent>
                   </Card>
@@ -265,24 +279,33 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                 {TIME_SLOTS.map((slot) => (
                   <Card
                     key={slot.id}
-                    className={`cursor-pointer transition-all hover:scale-105 ${
+                    className={`cursor-pointer transition-all hover:scale-105 min-h-[200px] ${
                       selectedTimeSlot === slot.id
-                        ? 'ring-4 ring-orange-500 bg-orange-50'
-                        : 'hover:bg-gray-50'
+                        ? 'ring-6 ring-purple-600 bg-purple-100 shadow-xl border-purple-500 border-4'
+                        : 'hover:bg-yellow-50 border-2 border-gray-300 hover:border-yellow-400'
                     }`}
                     onClick={() => setSelectedTimeSlot(slot.id as "morning" | "afternoon")}
                   >
-                    <CardContent className="p-6 text-center">
-                      <div className="text-4xl mb-3">{slot.icon}</div>
-                      <div className="text-xl font-bold text-orange-700 mb-2">
+                    <CardContent className="p-8 text-center flex flex-col justify-center h-full">
+                      <div className="text-6xl mb-4">{slot.icon}</div>
+                      <div className={`text-2xl font-black mb-3 ${
+                        selectedTimeSlot === slot.id ? 'text-purple-800' : 'text-yellow-700'
+                      }`}>
                         {slot.label}
                       </div>
-                      <div className="text-gray-600 mb-3">
+                      <div className={`text-lg font-semibold mb-3 ${
+                        selectedTimeSlot === slot.id ? 'text-purple-700' : 'text-gray-700'
+                      }`}>
                         {slot.time}
                       </div>
-                      <Clock className="h-6 w-6 mx-auto text-orange-600" />
+                      <Clock className={`h-8 w-8 mx-auto ${
+                        selectedTimeSlot === slot.id ? 'text-purple-600' : 'text-yellow-600'
+                      }`} />
                       {selectedTimeSlot === slot.id && (
-                        <CheckCircle className="h-6 w-6 text-orange-500 mx-auto mt-2" />
+                        <div className="mt-4">
+                          <CheckCircle className="h-8 w-8 text-purple-600 mx-auto" />
+                          <div className="text-purple-800 font-bold mt-1">SELEZIONATO</div>
+                        </div>
                       )}
                     </CardContent>
                   </Card>
@@ -317,39 +340,60 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
                 <p className="text-gray-600">Controlla i dettagli prima di confermare</p>
               </div>
 
-              <Card className="max-w-md mx-auto">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="h-5 w-5 text-green-600" />
-                      <div>
-                        <div className="font-medium">Zona di Caccia</div>
-                        <div className="text-gray-600">{selectedZoneData?.name}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="font-medium">Data</div>
-                        <div className="text-gray-600">
-                          {new Date(selectedDate).toLocaleDateString('it-IT', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
+              <Card className="max-w-lg mx-auto border-4 border-green-500 shadow-2xl">
+                <CardContent className="p-8 bg-green-50">
+                  <div className="text-center mb-6">
+                    <div className="text-3xl font-black text-green-800 mb-2">RIEPILOGO PRENOTAZIONE</div>
+                    <div className="text-lg text-green-700">Controlla tutto prima di confermare</div>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-white p-4 rounded-lg border-2 border-green-300">
+                      <div className="flex items-center space-x-4">
+                        <div className="bg-green-500 p-3 rounded-full">
+                          <MapPin className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-gray-800">Zona di Caccia</div>
+                          <div className="text-xl font-black text-green-700">
+                            ZONA {selectedZone} - {selectedZoneData?.name}
+                          </div>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
-                      <Clock className="h-5 w-5 text-orange-600" />
-                      <div>
-                        <div className="font-medium">Orario</div>
-                        <div className="text-gray-600">
-                          {TIME_SLOTS.find(s => s.id === selectedTimeSlot)?.label} 
-                          ({TIME_SLOTS.find(s => s.id === selectedTimeSlot)?.time})
+                    <div className="bg-white p-4 rounded-lg border-2 border-blue-300">
+                      <div className="flex items-center space-x-4">
+                        <div className="bg-blue-500 p-3 rounded-full">
+                          <Calendar className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-gray-800">Data di Caccia</div>
+                          <div className="text-xl font-black text-blue-700 capitalize">
+                            {new Date(selectedDate).toLocaleDateString('it-IT', {
+                              weekday: 'long',
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border-2 border-purple-300">
+                      <div className="flex items-center space-x-4">
+                        <div className="bg-purple-500 p-3 rounded-full">
+                          <Clock className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-gray-800">Orario di Caccia</div>
+                          <div className="text-xl font-black text-purple-700">
+                            {TIME_SLOTS.find(s => s.id === selectedTimeSlot)?.label.toUpperCase()}
+                          </div>
+                          <div className="text-lg text-purple-600">
+                            {TIME_SLOTS.find(s => s.id === selectedTimeSlot)?.time}
+                          </div>
                         </div>
                       </div>
                     </div>

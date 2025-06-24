@@ -199,8 +199,50 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createReservation(reservation: InsertReservation): Promise<Reservation> {
-    const [newReservation] = await db.insert(reservations).values(reservation).returning();
-    return newReservation;
+    try {
+      // Verifica che non ci sia già una prenotazione per lo stesso cacciatore nella stessa data
+      const existingCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.hunterId, reservation.hunterId),
+            eq(reservations.huntDate, reservation.huntDate),
+            eq(reservations.status, 'active')
+          )
+        );
+
+      if (existingCount[0]?.count > 0) {
+        throw new Error('Hai già una prenotazione attiva per questa data');
+      }
+
+      // Verifica che non ci siano più di 4 prenotazioni per zona/data/slot
+      const slotCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.zoneId, reservation.zoneId),
+            eq(reservations.huntDate, reservation.huntDate),
+            eq(reservations.timeSlot, reservation.timeSlot),
+            eq(reservations.status, 'active')
+          )
+        );
+
+      if (slotCount[0]?.count >= 4) {
+        throw new Error('Slot di caccia pieno per questa zona, data e orario');
+      }
+
+      const [newReservation] = await db
+        .insert(reservations)
+        .values(reservation)
+        .returning();
+      
+      return newReservation;
+    } catch (error) {
+      console.error('Error in createReservation:', error);
+      throw error;
+    }
   }
 
   async cancelReservation(id: number): Promise<void> {
