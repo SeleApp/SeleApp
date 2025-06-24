@@ -2,27 +2,39 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 import { loginSchema, type LoginRequest } from "@shared/schema";
 import React from "react";
-import { LogIn } from "lucide-react";
+import { LogIn, UserPlus, Shield } from "lucide-react";
 import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<LoginRequest>({
+  const loginForm = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
+    },
+  });
+
+  const registerForm = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
     },
   });
 
@@ -37,7 +49,7 @@ export default function LoginPage() {
     }
   }, [navigate]);
 
-  const onSubmit = async (data: LoginRequest) => {
+  const onLogin = async (data: LoginRequest) => {
     setIsLoading(true);
     try {
       const response = await authService.login(data);
@@ -52,10 +64,10 @@ export default function LoginPage() {
       } else {
         navigate("/hunter");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Errore di accesso",
-        description: error instanceof Error ? error.message : "Credenziali non valide",
+        description: error.message || "Credenziali non valide",
         variant: "destructive",
       });
     } finally {
@@ -63,94 +75,239 @@ export default function LoginPage() {
     }
   };
 
-  // Redirect if already authenticated
-  if (authService.isAuthenticated()) {
-    const user = authService.getUser();
-    if (user?.role === "ADMIN") {
-      navigate("/admin");
-    } else {
-      navigate("/hunter");
+  const onRegister = async (data: any) => {
+    setIsLoading(true);
+
+    // Validazioni
+    if (data.password !== data.confirmPassword) {
+      toast({
+        title: "Errore",
+        description: "Le password non corrispondono",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
     }
-    return null;
-  }
+
+    if (data.password.length < 6) {
+      toast({
+        title: "Errore", 
+        description: "La password deve essere di almeno 6 caratteri",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await apiRequest("POST", "/api/auth/register", {
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: "HUNTER"
+      });
+
+      toast({
+        title: "Registrazione completata",
+        description: "Il tuo account cacciatore è stato creato. Ora puoi effettuare l'accesso.",
+      });
+
+      // Reset form e torna al login
+      setIsRegistering(false);
+      registerForm.reset();
+      loginForm.reset();
+    } catch (error: any) {
+      toast({
+        title: "Errore di registrazione",
+        description: error.message || "Errore nella creazione dell'account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary to-primary/80 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
-              <img 
-                src={logoPath} 
-                alt="SeleApp Logo" 
-                className="w-20 h-20 object-contain"
-              />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">SeleApp</h1>
-            <p className="text-lg text-gray-600">Cison di Val Marino</p>
-            <p className="text-base text-gray-500 mt-1">Sistema Gestione Caccia</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="space-y-1 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-600">
+            <Shield className="h-6 w-6 text-white" />
           </div>
-
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <Label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="la.tua@email.com"
-                {...form.register("email")}
-                className="input-large"
-                disabled={isLoading}
-              />
-              {form.formState.errors.email && (
-                <p className="text-destructive text-sm mt-1">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...form.register("password")}
-                className="input-large"
-                disabled={isLoading}
-              />
-              {form.formState.errors.password && (
-                <p className="text-destructive text-sm mt-1">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-large bg-primary hover:bg-primary/90 text-primary-foreground"
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            SeleApp Cison
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Sistema di Gestione Prenotazioni di Caccia
+          </p>
+        </CardHeader>
+        <CardContent>
+          {/* Toggle tra Login e Registrazione */}
+          <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(false);
+                registerForm.reset();
+                loginForm.reset();
+              }}
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                !isRegistering
+                  ? 'bg-white text-green-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              <LogIn className="mr-2" size={20} />
-              {isLoading ? "Accesso in corso..." : "Accedi"}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <a href="#" className="text-primary hover:underline text-base">
-              Password dimenticata?
-            </a>
+              <LogIn className="mr-2 h-4 w-4 inline" />
+              Accedi
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(true);
+                registerForm.reset();
+                loginForm.reset();
+              }}
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                isRegistering
+                  ? 'bg-white text-green-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <UserPlus className="mr-2 h-4 w-4 inline" />
+              Registrati
+            </button>
           </div>
 
-          <div className="mt-8 p-4 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-2 font-medium">Credenziali di test:</p>
-            <p className="text-sm text-gray-500">Admin: admin@seleapp.com / admin123</p>
-            <p className="text-sm text-gray-500">Cacciatore: mario.rossi@email.com / hunter123</p>
-          </div>
+          {/* Form di Login */}
+          {!isRegistering && (
+            <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  {...loginForm.register("email")}
+                  id="email"
+                  type="email"
+                  placeholder="mario.rossi@email.com"
+                  className="h-11"
+                />
+                {loginForm.formState.errors.email && (
+                  <p className="text-sm text-red-600">
+                    {loginForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  {...loginForm.register("password")}
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11"
+                />
+                {loginForm.formState.errors.password && (
+                  <p className="text-sm text-red-600">
+                    {loginForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-green-600 hover:bg-green-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  "Accesso in corso..."
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Accedi
+                  </>
+                )}
+              </Button>
+            </form>
+          )}
+
+          {/* Form di Registrazione */}
+          {isRegistering && (
+            <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nome</Label>
+                  <Input
+                    {...registerForm.register("firstName")}
+                    id="firstName"
+                    type="text"
+                    placeholder="Mario"
+                    className="h-11"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Cognome</Label>
+                  <Input
+                    {...registerForm.register("lastName")}
+                    id="lastName"
+                    type="text"
+                    placeholder="Rossi"
+                    className="h-11"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="registerEmail">Email</Label>
+                <Input
+                  {...registerForm.register("email")}
+                  id="registerEmail"
+                  type="email"
+                  placeholder="mario.rossi@email.com"
+                  className="h-11"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="registerPassword">Password</Label>
+                <Input
+                  {...registerForm.register("password")}
+                  id="registerPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Conferma Password</Label>
+                <Input
+                  {...registerForm.register("confirmPassword")}
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-green-600 hover:bg-green-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  "Registrazione in corso..."
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Crea Account Cacciatore
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-gray-500 text-center">
+                Creando un account, confermi di essere un cacciatore autorizzato per Cison di Val Marino
+              </p>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

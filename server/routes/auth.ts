@@ -40,20 +40,18 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, firstName, lastName } = req.body;
+    const userData = insertUserSchema.parse(req.body);
     
-    const existingUser = await storage.getUserByEmail(email);
+    const existingUser = await storage.getUserByEmail(userData.email);
     if (existingUser) {
-      return res.status(400).json({ message: "Email già registrata" });
+      return res.status(409).json({ message: "Email già registrata" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
     
     const user = await storage.createUser({
-      email,
+      ...userData,
       password: hashedPassword,
-      firstName,
-      lastName,
       role: 'HUNTER',
       isActive: true,
     });
