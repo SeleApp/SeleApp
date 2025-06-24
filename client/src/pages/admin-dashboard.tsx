@@ -77,6 +77,7 @@ export default function AdminDashboard() {
   const handleQuotaSave = (quotaId: number) => {
     const newValue = quotaValues[quotaId];
     if (newValue !== undefined && newValue >= 0) {
+      console.log('Saving quota:', { quotaId, newValue, editingType });
       if (editingType === 'harvested') {
         updateQuotaMutation.mutate({ quotaId, harvested: newValue });
       } else {
@@ -236,6 +237,8 @@ export default function AdminDashboard() {
 
                 {quotasLoading ? (
                   <div className="text-center py-8">Caricamento...</div>
+                ) : quotasData.length === 0 ? (
+                  <div className="text-center py-8">Nessuna quota trovata</div>
                 ) : (
                   <div className="space-y-6">
                     {/* Tabella Caprioli */}
@@ -258,6 +261,7 @@ export default function AdminDashboard() {
                           </TableHeader>
                           <TableBody>
                             {quotasData.map((zone: any) => {
+                              console.log('Zone data:', zone);
                               const roeDeerQuotas = zone.quotas?.filter((q: any) => q.species === 'roe_deer') || [];
                               const categories = ['M0', 'F0', 'FA', 'M1', 'MA'];
                               const totalHarvested = roeDeerQuotas.reduce((sum: number, q: any) => sum + q.harvested, 0);

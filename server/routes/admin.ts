@@ -18,14 +18,7 @@ router.get("/stats", authenticateToken, requireRole('ADMIN'), async (req: AuthRe
 // All quotas management
 router.get("/quotas", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
-    const quotas = await storage.getAllQuotas();
-    const zones = await storage.getAllZones();
-    
-    const quotasByZone = zones.map(zone => ({
-      ...zone,
-      quotas: quotas.filter(q => q.zoneId === zone.id),
-    }));
-    
+    const quotasByZone = await storage.getAllQuotas();
     res.json(quotasByZone);
   } catch (error) {
     console.error("Error fetching quotas:", error);

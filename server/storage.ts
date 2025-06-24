@@ -98,7 +98,10 @@ export class DatabaseStorage implements IStorage {
       })
       .from(zones)
       .leftJoin(wildlifeQuotas, eq(zones.id, wildlifeQuotas.zoneId))
-      .where(isNotNull(wildlifeQuotas.id))
+      .where(and(
+        eq(zones.isActive, true),
+        isNotNull(wildlifeQuotas.id)
+      ))
       .groupBy(zones.id, zones.name, zones.description)
       .orderBy(zones.id);
 
