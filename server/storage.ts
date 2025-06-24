@@ -46,6 +46,13 @@ export interface IStorage {
     totalHarvested: number;
     lowQuotas: number;
   }>;
+
+  // Hunter Management
+  getAllHunters(): Promise<User[]>;
+  updateHunterStatus(id: number, isActive: boolean): Promise<User | undefined>;
+  updateHunter(id: number, data: Partial<User>): Promise<User | undefined>;
+  createHunter(data: InsertUser): Promise<User>;
+  deleteHunter(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

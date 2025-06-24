@@ -126,6 +126,12 @@ Changelog:
   - **Data Integrity**: Fixed 32-zone bug by limiting display to exactly 16 zones
   - **Elderly-Friendly**: Simplified period management with text prompts instead of date pickers
   - System architecture: 16 physical zones + 9 regional quotas + real-time synchronization
+- June 24, 2025. **ADMIN HUNTER MANAGEMENT**: Replaced advanced quota management with hunter administration
+  - **Removed**: Complex advanced quota management interface
+  - **Added**: Hunter account management (create/edit/disable/delete accounts)
+  - **Added**: Hunt report correction system for fixing elderly hunter mistakes
+  - **Enhanced**: Admin can modify incorrect reports and manage user accounts
+  - **Elderly-Friendly Forms**: Redesigned reservation modal with large buttons, visual time slots, and compact zone grid
 
 # User Preferences
 
