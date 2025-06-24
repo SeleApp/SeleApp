@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { authService } from "./lib/auth";
 import LoginPage from "./pages/login";
-import HunterDashboard from "./pages/hunter-dashboard";
+import HunterDashboard from "./pages/hunter-dashboard-simple";
 import AdminDashboard from "./pages/admin-dashboard-new";
 import NotFound from "@/pages/not-found";
 
