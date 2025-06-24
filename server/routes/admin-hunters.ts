@@ -4,14 +4,10 @@ import { authenticateToken, requireRole, type AuthRequest } from "../middleware/
 
 const router = Router();
 
-console.log("Admin hunters router loaded");
-
 // Get all hunters
 router.get("/", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
-    console.log("Admin hunters endpoint called");
     const hunters = await storage.getAllHunters();
-    console.log("Hunters found:", hunters);
     res.json(hunters);
   } catch (error) {
     console.error("Error fetching hunters:", error);
