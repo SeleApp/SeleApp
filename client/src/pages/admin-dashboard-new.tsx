@@ -171,6 +171,136 @@ export default function AdminDashboard() {
     return regionalQuotas.filter((q: any) => q.species === selectedSpecies);
   };
 
+  // Hunter management component
+  const HunterManagementTable = () => {
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
+
+    const toggleHunterStatusMutation = useMutation({
+      mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
+        return await apiRequest(`/api/admin/hunters/${id}/status`, {
+          method: "PATCH",
+          body: JSON.stringify({ isActive }),
+        });
+      },
+      onSuccess: () => {
+        toast({
+          title: "Stato aggiornato",
+          description: "Lo stato del cacciatore è stato modificato con successo.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/hunters"] });
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Errore",
+          description: error.message || "Errore nell'aggiornamento dello stato.",
+          variant: "destructive",
+        });
+      },
+    });
+
+    const deleteHunterMutation = useMutation({
+      mutationFn: async (id: number) => {
+        return await apiRequest(`/api/admin/hunters/${id}`, {
+          method: "DELETE",
+        });
+      },
+      onSuccess: () => {
+        toast({
+          title: "Cacciatore eliminato",
+          description: "L'account del cacciatore è stato eliminato con successo.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/hunters"] });
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Errore",
+          description: error.message || "Errore nell'eliminazione del cacciatore.",
+          variant: "destructive",
+        });
+      },
+    });
+
+    return (
+      <div className="bg-white rounded-lg shadow">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Stato</TableHead>
+              <TableHead>Data Registrazione</TableHead>
+              <TableHead>Azioni</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {hunters.map((hunter: any) => (
+              <TableRow key={hunter.id}>
+                <TableCell className="font-medium">
+                  {hunter.firstName} {hunter.lastName}
+                </TableCell>
+                <TableCell>{hunter.email}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={hunter.isActive ? "default" : "secondary"}
+                    className={hunter.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                  >
+                    {hunter.isActive ? "Attivo" : "Disattivo"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {hunter.createdAt && format(new Date(hunter.createdAt), "dd/MM/yyyy", { locale: it })}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedHunter(hunter);
+                        setShowHunterModal(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleHunterStatusMutation.mutate({
+                        id: hunter.id,
+                        isActive: !hunter.isActive
+                      })}
+                    >
+                      {hunter.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (confirm("Sei sicuro di voler eliminare questo cacciatore?")) {
+                          deleteHunterMutation.mutate(hunter.id);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {hunters.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Users className="mx-auto mb-4" size={48} />
+            <p className="text-lg">Nessun cacciatore registrato</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const getSpeciesButtonVariant = (species: 'all' | 'roe_deer' | 'red_deer') => {
     return selectedSpecies === species ? 'default' : 'outline';
   };

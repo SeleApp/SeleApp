@@ -137,6 +137,12 @@ Changelog:
   - **Cervo Categories**: CL0, FF, MM, MCL1 (no translations, exact codes as provided)
   - **Removed**: Incorrect translations like "Cerbiatto", "Femmina Fertile" etc.
   - **Display**: Now shows exact category codes as specified by user requirements
+- June 24, 2025. **ADMIN FEATURES ENHANCEMENT**: Replaced advanced quota management with hunter account management
+  - **Added**: Complete hunter account management system (create/edit/activate/deactivate/delete)
+  - **Added**: New intuitive reservation form with step-by-step process for elderly users
+  - **Fixed**: Database query issues causing reservation errors
+  - **UI**: Large buttons, clear visual steps, and simplified elderly-friendly interface
+  - **Admin Tab**: "Gestione Cacciatori" replaces "Gestione Avanzata" as requested
 
 # User Preferences
 
