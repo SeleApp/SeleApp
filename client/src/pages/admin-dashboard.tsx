@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
   const [editingType, setEditingType] = useState<'harvested' | 'total'>('harvested');
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
+  const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
