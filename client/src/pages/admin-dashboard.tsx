@@ -107,6 +107,22 @@ export default function AdminDashboard() {
     return 'Unknown';
   };
 
+  // Helper per ottenere la descrizione della categoria
+  const getCategoryDescription = (category: string) => {
+    const descriptions: Record<string, string> = {
+      'M0': 'Maschio Giovane',
+      'F0': 'Femmina Giovane', 
+      'FA': 'Femmina Adulta',
+      'M1': 'Maschio Fusone',
+      'MA': 'Maschio Adulto',
+      'CL0': 'Piccolo M/F',
+      'FF': 'Femmina Adulta',
+      'MM': 'Maschio Adulto',
+      'MCL1': 'Maschio Fusone'
+    };
+    return descriptions[category] || category;
+  };
+
   if (statsLoading || reservationsLoading || quotasLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -252,8 +268,7 @@ export default function AdminDashboard() {
                                   <TableCell className="font-medium text-center bg-gray-50">{zone.name}</TableCell>
                                   {categories.map(category => {
                                     const quota = roeDeerQuotas.find((q: any) => 
-                                      q.roeDeerCategory === category || 
-                                      (q.sex && q.ageClass && getCategoryFromOldFormat(q, 'roe_deer') === category)
+                                      q.roeDeerCategory === category
                                     );
                                     
                                     if (!quota) {
@@ -380,8 +395,7 @@ export default function AdminDashboard() {
                                   <TableCell className="font-medium text-center bg-gray-50">{zone.name}</TableCell>
                                   {categories.map(category => {
                                     const quota = redDeerQuotas.find((q: any) => 
-                                      q.redDeerCategory === category || 
-                                      (q.sex && q.ageClass && getCategoryFromOldFormat(q, 'red_deer') === category)
+                                      q.redDeerCategory === category
                                     );
                                     
                                     if (!quota) {

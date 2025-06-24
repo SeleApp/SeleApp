@@ -110,6 +110,7 @@ Changelog:
 - June 23, 2025. Added quota management system with inline editing for both total quotas and harvested counts
 - June 23, 2025. Enhanced hunt reporting with detailed animal selection and automatic quota updates
 - June 24, 2025. Redesigned quota management with table format for better organization and real-time updates
+- June 24, 2025. Implemented species-specific categories: Capriolo (M0,F0,FA,M1,MA) and Cervo (CL0,FF,MM,MCL1)
 
 # User Preferences
 
