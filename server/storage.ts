@@ -5,7 +5,7 @@ import {
   type InsertReservation, type HuntReport, type InsertHuntReport
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, count } from "drizzle-orm";
+import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // Users
