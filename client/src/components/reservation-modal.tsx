@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { createReservationSchema, type CreateReservationRequest } from "@shared/schema";
@@ -27,9 +27,11 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
     defaultValues: {
       zoneId: 0,
       huntDate: "",
-      timeSlot: "morning",
+      timeSlot: undefined,
     },
   });
+
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
 
   const createReservation = useMutation({
     mutationFn: async (data: ClientCreateReservationRequest) => {
