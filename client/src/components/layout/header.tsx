@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth";
-import { Mountain, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function Header() {
   const user = authService.getUser();
@@ -14,8 +15,12 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
-              <Mountain className="text-white text-xl" size={24} />
+            <div className="w-12 h-12 mr-4 flex items-center justify-center">
+              <img 
+                src={logoPath} 
+                alt="SeleApp Logo" 
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">SeleApp</h1>
