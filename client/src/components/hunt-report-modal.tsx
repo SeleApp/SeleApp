@@ -145,7 +145,12 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                 </Label>
                 <Select
                   value={form.watch("species") || ""}
-                  onValueChange={(value) => form.setValue("species", value as "roe_deer" | "red_deer")}
+                  onValueChange={(value) => {
+                    form.setValue("species", value as "roe_deer" | "red_deer");
+                    // Reset category when species changes
+                    form.setValue("roeDeerCategory", undefined);
+                    form.setValue("redDeerCategory", undefined);
+                  }}
                 >
                   <SelectTrigger className="input-large">
                     <SelectValue placeholder="Seleziona la specie..." />
@@ -162,60 +167,69 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {form.watch("species") === "roe_deer" && (
                 <div>
                   <Label className="block text-lg font-medium text-gray-700 mb-2">
-                    Sesso *
+                    Categoria Capriolo *
                   </Label>
                   <Select
-                    value={form.watch("sex") || ""}
-                    onValueChange={(value) => form.setValue("sex", value as "male" | "female")}
+                    value={form.watch("roeDeerCategory") || ""}
+                    onValueChange={(value) => form.setValue("roeDeerCategory", value as "M0" | "F0" | "FA" | "M1" | "MA")}
                   >
                     <SelectTrigger className="input-large">
-                      <SelectValue placeholder="Seleziona..." />
+                      <SelectValue placeholder="Seleziona categoria..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">♂ Maschio</SelectItem>
-                      <SelectItem value="female">♀ Femmina</SelectItem>
+                      <SelectItem value="M0">M0 - Maschio Giovane</SelectItem>
+                      <SelectItem value="F0">F0 - Femmina Giovane</SelectItem>
+                      <SelectItem value="FA">FA - Femmina Adulta</SelectItem>
+                      <SelectItem value="M1">M1 - Maschio Fusone</SelectItem>
+                      <SelectItem value="MA">MA - Maschio Adulto</SelectItem>
                     </SelectContent>
                   </Select>
-                  {form.formState.errors.sex && (
+                  {form.formState.errors.roeDeerCategory && (
                     <p className="text-destructive text-sm mt-1">
-                      {form.formState.errors.sex.message}
+                      {form.formState.errors.roeDeerCategory.message}
                     </p>
                   )}
                 </div>
+              )}
 
+              {form.watch("species") === "red_deer" && (
                 <div>
                   <Label className="block text-lg font-medium text-gray-700 mb-2">
-                    Classe d'Età *
+                    Categoria Cervo *
                   </Label>
                   <Select
-                    value={form.watch("ageClass") || ""}
-                    onValueChange={(value) => form.setValue("ageClass", value as "adult" | "young")}
+                    value={form.watch("redDeerCategory") || ""}
+                    onValueChange={(value) => form.setValue("redDeerCategory", value as "CL0" | "FF" | "MM" | "MCL1")}
                   >
                     <SelectTrigger className="input-large">
-                      <SelectValue placeholder="Seleziona..." />
+                      <SelectValue placeholder="Seleziona categoria..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="adult">🦌 Adulto (&gt;1 anno)</SelectItem>
-                      <SelectItem value="young">🦌 Giovane (&lt;1 anno)</SelectItem>
+                      <SelectItem value="CL0">CL0 - Piccolo (M/F)</SelectItem>
+                      <SelectItem value="FF">FF - Femmina Adulta</SelectItem>
+                      <SelectItem value="MM">MM - Maschio Adulto</SelectItem>
+                      <SelectItem value="MCL1">MCL1 - Maschio Fusone</SelectItem>
                     </SelectContent>
                   </Select>
-                  {form.formState.errors.ageClass && (
+                  {form.formState.errors.redDeerCategory && (
                     <p className="text-destructive text-sm mt-1">
-                      {form.formState.errors.ageClass.message}
+                      {form.formState.errors.redDeerCategory.message}
                     </p>
                   )}
                 </div>
-              </div>
+              )}
 
-              {form.watch("species") && form.watch("sex") && form.watch("ageClass") && (
+              {((form.watch("species") === "roe_deer" && form.watch("roeDeerCategory")) || 
+                (form.watch("species") === "red_deer" && form.watch("redDeerCategory"))) && (
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                   <p className="text-green-800 font-medium">
                     ✓ Capo selezionato: {form.watch("species") === "roe_deer" ? "Capriolo" : "Cervo"}{" "}
-                    {form.watch("sex") === "male" ? "Maschio" : "Femmina"}{" "}
-                    {form.watch("ageClass") === "adult" ? "Adulto" : "Giovane"}
+                    {form.watch("species") === "roe_deer" 
+                      ? form.watch("roeDeerCategory") 
+                      : form.watch("redDeerCategory")}
                   </p>
                 </div>
               )}

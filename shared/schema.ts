@@ -9,6 +9,9 @@ export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon']);
 export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
 export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
+// Nuove categorie specifiche per specie
+export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
+export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
 export const reservationStatusEnum = pgEnum('reservation_status', ['active', 'completed', 'cancelled']);
 export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest']);
 
@@ -35,13 +38,18 @@ export const zones = pgTable("zones", {
 // Wildlife quotas table
 export const wildlifeQuotas = pgTable("wildlife_quotas", {
   id: serial("id").primaryKey(),
-  zoneId: integer("zone_id").notNull(),
+  zoneId: integer("zone_id").references(() => zones.id).notNull(),
   species: speciesEnum("species").notNull(),
-  sex: sexEnum("sex").notNull(),
-  ageClass: ageClassEnum("age_class").notNull(),
-  totalQuota: integer("total_quota").notNull(),
+  // Nuove categorie specifiche per specie
+  roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
+  redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  // Manteniamo i campi originali per compatibilità
+  sex: sexEnum("sex"),
+  ageClass: ageClassEnum("age_class"),
+  totalQuota: integer("total_quota").notNull().default(0),
   harvested: integer("harvested").notNull().default(0),
-  season: text("season").notNull().default('2024-2025'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Reservations table

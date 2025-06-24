@@ -90,6 +90,23 @@ export default function AdminDashboard() {
     setQuotaValues({});
   };
 
+  // Helper function per mappare vecchio formato a nuove categorie
+  const getCategoryFromOldFormat = (quota: any, species: string) => {
+    if (species === 'roe_deer') {
+      if (quota.sex === 'male' && quota.ageClass === 'young') return 'M0';
+      if (quota.sex === 'female' && quota.ageClass === 'young') return 'F0';
+      if (quota.sex === 'female' && quota.ageClass === 'adult') return 'FA';
+      if (quota.sex === 'male' && quota.ageClass === 'adult') return 'MA';
+      return 'M1'; // default per maschi adulti senza distinzione
+    } else if (species === 'red_deer') {
+      if (quota.ageClass === 'young') return 'CL0';
+      if (quota.sex === 'female' && quota.ageClass === 'adult') return 'FF';
+      if (quota.sex === 'male' && quota.ageClass === 'adult') return 'MM';
+      return 'MCL1'; // default per maschi fusone
+    }
+    return 'Unknown';
+  };
+
   if (statsLoading || reservationsLoading || quotasLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -204,149 +221,263 @@ export default function AdminDashboard() {
                 {quotasLoading ? (
                   <div className="text-center py-8">Caricamento...</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="font-bold">Zona</TableHead>
-                          <TableHead className="font-bold">Specie</TableHead>
-                          <TableHead className="font-bold">Sesso</TableHead>
-                          <TableHead className="font-bold">Età</TableHead>
-                          <TableHead className="font-bold text-center">Prelevati</TableHead>
-                          <TableHead className="font-bold text-center">Quota Totale</TableHead>
-                          <TableHead className="font-bold text-center">Disponibili</TableHead>
-                          <TableHead className="font-bold text-center">Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {quotasData.flatMap((zone: any) =>
-                          zone.quotas?.map((quota: any) => {
-                            const available = quota.totalQuota - quota.harvested;
-                            const percentage = quota.totalQuota > 0 ? (quota.harvested / quota.totalQuota) * 100 : 0;
-                            
-                            return (
-                              <TableRow key={quota.id} className="hover:bg-gray-50">
-                                <TableCell className="font-medium">{zone.name}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center">
-                                    <span className="mr-2">🦌</span>
-                                    {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
-                                    {quota.sex === 'male' ? '♂ Maschio' : '♀ Femmina'}
-                                  </span>
-                                </TableCell>
-                                <TableCell>
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100">
-                                    {quota.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  {editingQuota === quota.id && editingType === 'harvested' ? (
-                                    <div className="flex items-center justify-center space-x-1">
-                                      <Input
-                                        type="number"
-                                        min="0"
-                                        max={quota.totalQuota}
-                                        value={quotaValues[quota.id] ?? quota.harvested}
-                                        onChange={(e) => setQuotaValues({
-                                          ...quotaValues,
-                                          [quota.id]: parseInt(e.target.value) || 0
-                                        })}
-                                        className="w-16 h-8 text-sm text-center"
-                                      />
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleQuotaSave(quota.id)}
-                                        disabled={updateQuotaMutation.isPending}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        <Check size={12} />
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={handleQuotaCancel}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        <X size={12} />
-                                      </Button>
+                  <div className="space-y-6">
+                    {/* Tabella Caprioli */}
+                    <div>
+                      <h4 className="text-lg font-semibold mb-3 text-green-700 flex items-center">
+                        🦌 Gestione Quote Capriolo
+                      </h4>
+                      <div className="overflow-x-auto border rounded-lg">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-green-50">
+                              <TableHead className="font-bold text-center">Zona</TableHead>
+                              <TableHead className="font-bold text-center">M0<br/><small>(Maschio Giovane)</small></TableHead>
+                              <TableHead className="font-bold text-center">F0<br/><small>(Femmina Giovane)</small></TableHead>
+                              <TableHead className="font-bold text-center">FA<br/><small>(Femmina Adulta)</small></TableHead>
+                              <TableHead className="font-bold text-center">M1<br/><small>(Maschio Fusone)</small></TableHead>
+                              <TableHead className="font-bold text-center">MA<br/><small>(Maschio Adulto)</small></TableHead>
+                              <TableHead className="font-bold text-center bg-blue-100">Totale<br/><small>(Prelevati/Quota)</small></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {quotasData.map((zone: any) => {
+                              const roeDeerQuotas = zone.quotas?.filter((q: any) => q.species === 'roe_deer') || [];
+                              const categories = ['M0', 'F0', 'FA', 'M1', 'MA'];
+                              const totalHarvested = roeDeerQuotas.reduce((sum: number, q: any) => sum + q.harvested, 0);
+                              const totalQuota = roeDeerQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
+                              
+                              return (
+                                <TableRow key={`roe-${zone.id}`} className="hover:bg-green-25">
+                                  <TableCell className="font-medium text-center bg-gray-50">{zone.name}</TableCell>
+                                  {categories.map(category => {
+                                    const quota = roeDeerQuotas.find((q: any) => 
+                                      q.roeDeerCategory === category || 
+                                      (q.sex && q.ageClass && getCategoryFromOldFormat(q, 'roe_deer') === category)
+                                    );
+                                    
+                                    if (!quota) {
+                                      return <TableCell key={category} className="text-center">-</TableCell>;
+                                    }
+                                    
+                                    const available = quota.totalQuota - quota.harvested;
+                                    const percentage = quota.totalQuota > 0 ? (quota.harvested / quota.totalQuota) * 100 : 0;
+                                    
+                                    return (
+                                      <TableCell key={category} className="text-center">
+                                        <div className="space-y-1">
+                                          {/* Prelevati */}
+                                          {editingQuota === quota.id && editingType === 'harvested' ? (
+                                            <div className="flex items-center justify-center space-x-1">
+                                              <Input
+                                                type="number"
+                                                min="0"
+                                                max={quota.totalQuota}
+                                                value={quotaValues[quota.id] ?? quota.harvested}
+                                                onChange={(e) => setQuotaValues({
+                                                  ...quotaValues,
+                                                  [quota.id]: parseInt(e.target.value) || 0
+                                                })}
+                                                className="w-12 h-6 text-xs text-center"
+                                              />
+                                              <Button size="sm" onClick={() => handleQuotaSave(quota.id)} className="h-5 w-5 p-0">
+                                                <Check size={10} />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <Button
+                                              variant="ghost"
+                                              onClick={() => handleQuotaEdit(quota.id, quota.harvested, 'harvested')}
+                                              className="h-6 px-2 text-sm font-bold hover:bg-blue-100"
+                                            >
+                                              {quota.harvested}
+                                            </Button>
+                                          )}
+                                          
+                                          <div className="text-xs text-gray-500">/</div>
+                                          
+                                          {/* Quota Totale */}
+                                          {editingQuota === quota.id && editingType === 'total' ? (
+                                            <div className="flex items-center justify-center space-x-1">
+                                              <Input
+                                                type="number"
+                                                min="0"
+                                                max="99"
+                                                value={quotaValues[quota.id] ?? quota.totalQuota}
+                                                onChange={(e) => setQuotaValues({
+                                                  ...quotaValues,
+                                                  [quota.id]: parseInt(e.target.value) || 0
+                                                })}
+                                                className="w-12 h-6 text-xs text-center"
+                                              />
+                                              <Button size="sm" onClick={() => handleQuotaSave(quota.id)} className="h-5 w-5 p-0">
+                                                <Check size={10} />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <Button
+                                              variant="ghost"
+                                              onClick={() => handleQuotaEdit(quota.id, quota.totalQuota, 'total')}
+                                              className="h-6 px-2 text-sm font-bold hover:bg-green-100"
+                                            >
+                                              {quota.totalQuota}
+                                            </Button>
+                                          )}
+                                          
+                                          {/* Indicatore Status */}
+                                          <div className={`w-2 h-2 rounded-full mx-auto ${
+                                            percentage >= 100 ? 'bg-red-500' : 
+                                            percentage >= 80 ? 'bg-orange-400' : 'bg-green-500'
+                                          }`}></div>
+                                        </div>
+                                      </TableCell>
+                                    );
+                                  })}
+                                  <TableCell className="text-center bg-blue-50">
+                                    <div className="font-bold text-lg">
+                                      <span className="text-blue-600">{totalHarvested}</span>
+                                      <span className="text-gray-500">/</span>
+                                      <span className="text-green-600">{totalQuota}</span>
                                     </div>
-                                  ) : (
-                                    <Button
-                                      variant="ghost"
-                                      onClick={() => handleQuotaEdit(quota.id, quota.harvested, 'harvested')}
-                                      className="font-semibold text-lg hover:bg-blue-100"
-                                    >
-                                      {quota.harvested}
-                                    </Button>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  {editingQuota === quota.id && editingType === 'total' ? (
-                                    <div className="flex items-center justify-center space-x-1">
-                                      <Input
-                                        type="number"
-                                        min="0"
-                                        max="999"
-                                        value={quotaValues[quota.id] ?? quota.totalQuota}
-                                        onChange={(e) => setQuotaValues({
-                                          ...quotaValues,
-                                          [quota.id]: parseInt(e.target.value) || 0
-                                        })}
-                                        className="w-16 h-8 text-sm text-center"
-                                      />
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleQuotaSave(quota.id)}
-                                        disabled={updateQuotaMutation.isPending}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        <Check size={12} />
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={handleQuotaCancel}
-                                        className="h-6 w-6 p-0"
-                                      >
-                                        <X size={12} />
-                                      </Button>
+                                    <div className="text-xs text-gray-600">
+                                      Disp: {totalQuota - totalHarvested}
                                     </div>
-                                  ) : (
-                                    <Button
-                                      variant="ghost"
-                                      onClick={() => handleQuotaEdit(quota.id, quota.totalQuota, 'total')}
-                                      className="font-semibold text-lg hover:bg-green-100"
-                                    >
-                                      {quota.totalQuota}
-                                    </Button>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <span className={`font-semibold ${available <= 0 ? 'text-red-600' : available <= 2 ? 'text-orange-600' : 'text-green-600'}`}>
-                                    {available}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <div className="flex items-center justify-center">
-                                    {percentage >= 100 ? (
-                                      <Badge variant="destructive">Esaurita</Badge>
-                                    ) : percentage >= 80 ? (
-                                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">Attenzione</Badge>
-                                    ) : (
-                                      <Badge variant="secondary" className="bg-green-100 text-green-800">Disponibile</Badge>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          }) || []
-                        )}
-                      </TableBody>
-                    </Table>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+
+                    {/* Tabella Cervi */}
+                    <div>
+                      <h4 className="text-lg font-semibold mb-3 text-amber-700 flex items-center">
+                        🦌 Gestione Quote Cervo
+                      </h4>
+                      <div className="overflow-x-auto border rounded-lg">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-amber-50">
+                              <TableHead className="font-bold text-center">Zona</TableHead>
+                              <TableHead className="font-bold text-center">CL0<br/><small>(Piccolo M/F)</small></TableHead>
+                              <TableHead className="font-bold text-center">FF<br/><small>(Femmina Adulta)</small></TableHead>
+                              <TableHead className="font-bold text-center">MM<br/><small>(Maschio Adulto)</small></TableHead>
+                              <TableHead className="font-bold text-center">MCL1<br/><small>(Maschio Fusone)</small></TableHead>
+                              <TableHead className="font-bold text-center bg-blue-100">Totale<br/><small>(Prelevati/Quota)</small></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {quotasData.map((zone: any) => {
+                              const redDeerQuotas = zone.quotas?.filter((q: any) => q.species === 'red_deer') || [];
+                              const categories = ['CL0', 'FF', 'MM', 'MCL1'];
+                              const totalHarvested = redDeerQuotas.reduce((sum: number, q: any) => sum + q.harvested, 0);
+                              const totalQuota = redDeerQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
+                              
+                              return (
+                                <TableRow key={`red-${zone.id}`} className="hover:bg-amber-25">
+                                  <TableCell className="font-medium text-center bg-gray-50">{zone.name}</TableCell>
+                                  {categories.map(category => {
+                                    const quota = redDeerQuotas.find((q: any) => 
+                                      q.redDeerCategory === category || 
+                                      (q.sex && q.ageClass && getCategoryFromOldFormat(q, 'red_deer') === category)
+                                    );
+                                    
+                                    if (!quota) {
+                                      return <TableCell key={category} className="text-center">-</TableCell>;
+                                    }
+                                    
+                                    const available = quota.totalQuota - quota.harvested;
+                                    const percentage = quota.totalQuota > 0 ? (quota.harvested / quota.totalQuota) * 100 : 0;
+                                    
+                                    return (
+                                      <TableCell key={category} className="text-center">
+                                        <div className="space-y-1">
+                                          {/* Prelevati */}
+                                          {editingQuota === quota.id && editingType === 'harvested' ? (
+                                            <div className="flex items-center justify-center space-x-1">
+                                              <Input
+                                                type="number"
+                                                min="0"
+                                                max={quota.totalQuota}
+                                                value={quotaValues[quota.id] ?? quota.harvested}
+                                                onChange={(e) => setQuotaValues({
+                                                  ...quotaValues,
+                                                  [quota.id]: parseInt(e.target.value) || 0
+                                                })}
+                                                className="w-12 h-6 text-xs text-center"
+                                              />
+                                              <Button size="sm" onClick={() => handleQuotaSave(quota.id)} className="h-5 w-5 p-0">
+                                                <Check size={10} />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <Button
+                                              variant="ghost"
+                                              onClick={() => handleQuotaEdit(quota.id, quota.harvested, 'harvested')}
+                                              className="h-6 px-2 text-sm font-bold hover:bg-blue-100"
+                                            >
+                                              {quota.harvested}
+                                            </Button>
+                                          )}
+                                          
+                                          <div className="text-xs text-gray-500">/</div>
+                                          
+                                          {/* Quota Totale */}
+                                          {editingQuota === quota.id && editingType === 'total' ? (
+                                            <div className="flex items-center justify-center space-x-1">
+                                              <Input
+                                                type="number"
+                                                min="0"
+                                                max="99"
+                                                value={quotaValues[quota.id] ?? quota.totalQuota}
+                                                onChange={(e) => setQuotaValues({
+                                                  ...quotaValues,
+                                                  [quota.id]: parseInt(e.target.value) || 0
+                                                })}
+                                                className="w-12 h-6 text-xs text-center"
+                                              />
+                                              <Button size="sm" onClick={() => handleQuotaSave(quota.id)} className="h-5 w-5 p-0">
+                                                <Check size={10} />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <Button
+                                              variant="ghost"
+                                              onClick={() => handleQuotaEdit(quota.id, quota.totalQuota, 'total')}
+                                              className="h-6 px-2 text-sm font-bold hover:bg-green-100"
+                                            >
+                                              {quota.totalQuota}
+                                            </Button>
+                                          )}
+                                          
+                                          {/* Indicatore Status */}
+                                          <div className={`w-2 h-2 rounded-full mx-auto ${
+                                            percentage >= 100 ? 'bg-red-500' : 
+                                            percentage >= 80 ? 'bg-orange-400' : 'bg-green-500'
+                                          }`}></div>
+                                        </div>
+                                      </TableCell>
+                                    );
+                                  })}
+                                  <TableCell className="text-center bg-blue-50">
+                                    <div className="font-bold text-lg">
+                                      <span className="text-blue-600">{totalHarvested}</span>
+                                      <span className="text-gray-500">/</span>
+                                      <span className="text-green-600">{totalQuota}</span>
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      Disp: {totalQuota - totalHarvested}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
