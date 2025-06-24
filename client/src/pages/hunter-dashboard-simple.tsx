@@ -32,6 +32,10 @@ export default function HunterDashboard() {
     queryKey: ["/api/regional-quotas"],
   });
 
+  const { data: reports = [] } = useQuery({
+    queryKey: ["/api/reports"],
+  });
+
   const activeReservations = reservations.filter(r => r.status === 'active');
   const completedReservations = reservations.filter(r => r.status === 'completed');
 
@@ -69,7 +73,16 @@ export default function HunterDashboard() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Cacciatore</h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard Cacciatore</h1>
+            <Button
+              onClick={() => setShowReservationModal(true)}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Plus className="h-4 w-4" />
+              Nuova Prenotazione
+            </Button>
+          </div>
           <p className="text-gray-600">Benvenuto, {authService.getUser()?.firstName}</p>
         </div>
 
@@ -90,16 +103,7 @@ export default function HunterDashboard() {
           </TabsList>
 
           <TabsContent value="quotas" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
-              <Button
-                onClick={() => setShowReservationModal(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Plus className="h-4 w-4" />
-                Nuova Prenotazione
-              </Button>
-            </div>
+            <h3 className="text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
 
             <div className="flex items-center gap-4 mb-4">
               <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
@@ -255,24 +259,49 @@ export default function HunterDashboard() {
           <TabsContent value="reports" className="space-y-6">
             <h3 className="text-2xl font-bold text-gray-900">I Miei Report di Caccia</h3>
             <div className="space-y-4">
-              {completedReservations.length > 0 ? (
-                completedReservations.map((reservation) => (
-                  <Card key={reservation.id}>
+              {reports.length > 0 ? (
+                reports.map((report: any) => (
+                  <Card key={report.id}>
                     <CardContent className="p-6">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900">{reservation.zone.name}</h4>
-                          <p className="text-gray-600">
-                            {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
-                            {reservation.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
-                          </p>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900">
+                              {report.reservation?.zone?.name || 'Zona non disponibile'}
+                            </h4>
+                            <p className="text-gray-600">
+                              {report.reservation?.huntDate && format(new Date(report.reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
+                              {report.reservation?.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
+                            </p>
+                          </div>
                           <Badge 
-                            variant="secondary" 
-                            className="mt-2"
+                            variant={report.outcome === 'harvest' ? 'default' : 'secondary'}
                           >
-                            Report Completato
+                            {report.outcome === 'harvest' ? 'Prelievo' : 'Nessun Prelievo'}
                           </Badge>
                         </div>
+                        
+                        {report.outcome === 'harvest' && report.species && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-sm font-medium text-gray-700">Dettagli Prelievo:</p>
+                            <div className="mt-1 space-y-1">
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">Specie:</span> {report.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">Sesso:</span> {report.sex === 'male' ? 'Maschio' : 'Femmina'}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">Età:</span> {report.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
+                              </p>
+                              {report.notes && (
+                                <p className="text-sm text-gray-600">
+                                  <span className="font-medium">Note:</span> {report.notes}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
