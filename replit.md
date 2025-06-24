@@ -156,6 +156,12 @@ Changelog:
   - **Mobile-First Design**: Reorganized layout with title above tabs, wrapped filter buttons
   - **Table Optimization**: Added horizontal scroll and smaller text sizes for mobile tables
   - **Touch-Friendly**: Improved button sizes and spacing for better mobile interaction
+- June 24, 2025. **USER REGISTRATION SYSTEM**: Added public hunter registration functionality
+  - **Login/Register Toggle**: Interactive toggle between login and registration forms
+  - **Self-Registration**: New hunters can create their own accounts with validation
+  - **Form Validation**: Password confirmation, length validation, and duplicate email checks
+  - **Auto-Role Assignment**: Public registrations automatically assigned HUNTER role
+  - **User-Friendly**: Clear UI with icons, proper spacing, and responsive design
 
 # User Preferences
 
