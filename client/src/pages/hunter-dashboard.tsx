@@ -6,12 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import ZoneCard from "@/components/zone-card";
 import ReservationModal from "@/components/reservation-modal";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { authService } from "@/lib/auth";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
-import { CalendarCheck, Target, MapPin, Plus, Calendar, ClipboardList } from "lucide-react";
+import { CalendarCheck, Target, Plus, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -19,8 +18,6 @@ export default function HunterDashboard() {
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<number | null>(null);
-  const [dateFilter, setDateFilter] = useState("");
-  const [timeSlotFilter, setTimeSlotFilter] = useState("");
 
   const { data: zones = [], isLoading: zonesLoading } = useQuery<ZoneWithQuotas[]>({
     queryKey: ["/api/zones"],
