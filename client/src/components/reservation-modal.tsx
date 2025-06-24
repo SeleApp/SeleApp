@@ -78,7 +78,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
           <div className="space-y-8 py-6">
             {/* Data Selection */}
             <div className="space-y-3">
-              <Label className="text-xl font-semibold text-gray-900">📅 Data di Caccia</Label>
+              <Label className="text-xl font-semibold text-gray-900">Data di Caccia</Label>
               <Input
                 id="huntDate"
                 type="date"
@@ -92,7 +92,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
 
             {/* Time Slot Selection */}
             <div className="space-y-4">
-              <Label className="text-xl font-semibold text-gray-900">⏰ Fascia Oraria</Label>
+              <Label className="text-xl font-semibold text-gray-900">Fascia Oraria</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <button
                   type="button"
@@ -104,7 +104,6 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                   }`}
                 >
                   <div className="text-center">
-                    <div className="text-3xl mb-2">🌅</div>
                     <div className="text-2xl font-bold">Alba - 12:00</div>
                     <div className="text-lg text-gray-600 mt-2">Mattina</div>
                   </div>
@@ -119,7 +118,6 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                   }`}
                 >
                   <div className="text-center">
-                    <div className="text-3xl mb-2">🌇</div>
                     <div className="text-2xl font-bold">12:00 - Tramonto</div>
                     <div className="text-lg text-gray-600 mt-2">Pomeriggio</div>
                   </div>
@@ -132,7 +130,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
 
             {/* Zone Selection */}
             <div className="space-y-4">
-              <Label className="text-xl font-semibold text-gray-900">🗺️ Zona di Caccia</Label>
+              <Label className="text-xl font-semibold text-gray-900">Zona di Caccia</Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-80 overflow-y-auto border-2 rounded-xl p-6 bg-gray-50">
                 {zones.slice(0, 16).map((zone) => (
                   <button
@@ -150,9 +148,9 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                   >
                     <div className="text-2xl font-bold mb-2">{zone.name}</div>
                     <div className="text-sm font-medium">
-                      {zone.quotaStatus === '🟢' ? '✅ Disponibile' : 
-                       zone.quotaStatus === '🟡' ? '⚠️ Quote Basse' : 
-                       '❌ Non Disponibile'}
+                      {zone.quotaStatus === '🟢' ? 'Disponibile' : 
+                       zone.quotaStatus === '🟡' ? 'Quote Basse' : 
+                       'Non Disponibile'}
                     </div>
                   </button>
                 ))}
