@@ -79,7 +79,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getZoneQuotas(zoneId: number): Promise<WildlifeQuota[]> {
-    return await db.select().from(wildlifeQuotas).where(eq(wildlifeQuotas.zoneId, zoneId));
+    return await db.select({
+      id: wildlifeQuotas.id,
+      zoneId: wildlifeQuotas.zoneId,
+      species: wildlifeQuotas.species,
+      totalQuota: wildlifeQuotas.totalQuota,
+      harvested: wildlifeQuotas.harvested,
+      isActive: wildlifeQuotas.isActive
+    }).from(wildlifeQuotas).where(eq(wildlifeQuotas.zoneId, zoneId));
   }
 
   async getAllQuotas(): Promise<WildlifeQuota[]> {

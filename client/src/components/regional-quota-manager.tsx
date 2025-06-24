@@ -27,7 +27,8 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
     queryKey: ["/api/regional-quotas"],
     enabled: open,
     refetchOnWindowFocus: true,
-    refetchInterval: 5000, // Refresh every 5 seconds when open
+    refetchInterval: open ? 3000 : false, // Refresh every 3 seconds when open
+    staleTime: 0, // Always consider data stale
   });
 
   const updateQuotaMutation = useMutation({
@@ -156,7 +157,8 @@ export default function RegionalQuotaManager({ open, onOpenChange }: RegionalQuo
                         />
                       </TableCell>
                       <TableCell>{quota.harvested}</TableCell>
-                      <TableCell className="font-bold">{quota.available}</TableCell>
+                      <TableCell className="font-bold">{quota.totalQuota - quota.harvested}</TableCell>
+                      <TableCell>{quota.notes || `${formatDate(quota.huntingStartDate)} - ${formatDate(quota.huntingEndDate)}`}</TableCell>
                       <TableCell>{getStatusBadge(quota)}</TableCell>
                       <TableCell className="text-xs">
                         <div>Inizio: {formatDate(quota.huntingStartDate)}</div>
