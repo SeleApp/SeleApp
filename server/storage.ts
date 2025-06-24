@@ -409,7 +409,8 @@ export class DatabaseStorage implements IStorage {
   async getHuntReports(): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]> {
     const results = await db
       .select({
-        id: huntReports.id,
+        // Hunt report fields
+        reportId: huntReports.id,
         reservationId: huntReports.reservationId,
         outcome: huntReports.outcome,
         species: huntReports.species,
@@ -417,6 +418,8 @@ export class DatabaseStorage implements IStorage {
         ageClass: huntReports.ageClass,
         notes: huntReports.notes,
         reportedAt: huntReports.reportedAt,
+        
+        // Reservation fields
         resId: reservations.id,
         resHunterId: reservations.hunterId,
         resZoneId: reservations.zoneId,
@@ -424,26 +427,60 @@ export class DatabaseStorage implements IStorage {
         resTimeSlot: reservations.timeSlot,
         resStatus: reservations.status,
         resCreatedAt: reservations.createdAt,
+        
+        // Zone fields
         zoneId: zones.id,
         zoneName: zones.name,
         zoneDescription: zones.description,
         zoneIsActive: zones.isActive,
+        
+        // Hunter fields
         hunterId: users.id,
         hunterEmail: users.email,
-        hunterPassword: users.password,
         hunterFirstName: users.firstName,
         hunterLastName: users.lastName,
         hunterRole: users.role,
         hunterIsActive: users.isActive,
-        hunterCreatedAt: users.createdAt,
       })
       .from(huntReports)
       .innerJoin(reservations, eq(huntReports.reservationId, reservations.id))
       .innerJoin(zones, eq(reservations.zoneId, zones.id))
       .innerJoin(users, eq(reservations.hunterId, users.id))
       .orderBy(desc(huntReports.reportedAt));
-    
-    return results as any;
+
+    return results.map(row => ({
+      id: row.reportId,
+      reservationId: row.reservationId,
+      outcome: row.outcome,
+      species: row.species,
+      sex: row.sex,
+      ageClass: row.ageClass,
+      notes: row.notes,
+      reportedAt: row.reportedAt,
+      reservation: {
+        id: row.resId,
+        hunterId: row.resHunterId,
+        zoneId: row.resZoneId,
+        huntDate: row.resHuntDate,
+        timeSlot: row.resTimeSlot,
+        status: row.resStatus,
+        createdAt: row.resCreatedAt,
+        zone: {
+          id: row.zoneId,
+          name: row.zoneName,
+          description: row.zoneDescription,
+          isActive: row.zoneIsActive,
+        },
+        hunter: {
+          id: row.hunterId,
+          email: row.hunterEmail,
+          firstName: row.hunterFirstName,
+          lastName: row.hunterLastName,
+          role: row.hunterRole,
+          isActive: row.hunterIsActive,
+        },
+      },
+    }));
   }
 
   async getAdminStats(): Promise<{

@@ -267,7 +267,7 @@ export default function HunterDashboard() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="text-lg font-semibold text-gray-900">
-                              {report.reservation?.zone?.name || 'Zona non disponibile'}
+                              {report.reservation?.zone?.name || `Zona ${report.reservation?.zoneId || 'N/A'}`}
                             </h4>
                             <p className="text-gray-600">
                               {report.reservation?.huntDate && format(new Date(report.reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
