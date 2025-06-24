@@ -109,11 +109,6 @@ export const regionalQuotasRelations = relations(regionalQuotas, ({ many }) => (
   huntReports: many(huntReports),
 }));
 
-// Relations per quote regionali
-export const regionalQuotasRelations = relations(regionalQuotas, ({ many }) => ({
-  huntReports: many(huntReports),
-}));
-
 export const reservationsRelations = relations(reservations, ({ one }) => ({
   hunter: one(users, {
     fields: [reservations.hunterId],
