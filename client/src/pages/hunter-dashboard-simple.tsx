@@ -18,6 +18,7 @@ export default function HunterDashboard() {
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<number | null>(null);
+  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
 
   const { data: zones = [], isLoading: zonesLoading } = useQuery<ZoneWithQuotas[]>({
     queryKey: ["/api/zones"],
@@ -37,6 +38,11 @@ export default function HunterDashboard() {
   const handleReportHunt = (reservationId: number) => {
     setSelectedReservation(reservationId);
     setShowReportModal(true);
+  };
+
+  const getFilteredQuotas = () => {
+    if (selectedSpecies === 'all') return regionalQuotas;
+    return regionalQuotas.filter((q: any) => q.species === selectedSpecies);
   };
 
   if (zonesLoading || reservationsLoading) {
@@ -95,6 +101,36 @@ export default function HunterDashboard() {
               </Button>
             </div>
 
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'all' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('all')}
+                  className="h-8"
+                >
+                  Tutte
+                </Button>
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'roe_deer' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('roe_deer')}
+                  className="h-8"
+                >
+                  Capriolo
+                </Button>
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'red_deer' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('red_deer')}
+                  className="h-8"
+                >
+                  Cervo
+                </Button>
+              </div>
+            </div>
+
             <Card>
               <CardContent className="p-6">
                 <Table>
@@ -109,7 +145,7 @@ export default function HunterDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {regionalQuotas.map((quota: any) => {
+                    {getFilteredQuotas().map((quota: any) => {
                       const available = quota.totalQuota - quota.harvested;
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
