@@ -110,8 +110,7 @@ export default function LoginPage() {
 
       // Reset form e torna al login
       setIsRegistering(false);
-      registerForm.reset();
-      loginForm.reset();
+      form.reset();
     } catch (error: any) {
       toast({
         title: "Errore di registrazione",
@@ -146,8 +145,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => {
                 setIsRegistering(false);
-                registerForm.reset();
-                loginForm.reset();
+                form.reset();
               }}
               className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
                 !isRegistering
@@ -162,8 +160,6 @@ export default function LoginPage() {
               type="button"
               onClick={() => {
                 setIsRegistering(true);
-                registerForm.reset();
-                loginForm.reset();
               }}
               className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
                 isRegistering
