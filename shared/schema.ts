@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN']);
+export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN', 'SUPERADMIN']);
 export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon', 'full_day']);
 export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
@@ -15,6 +15,15 @@ export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM
 export const reservationStatusEnum = pgEnum('reservation_status', ['active', 'completed', 'cancelled']);
 export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest']);
 
+// Reserves table (multi-tenant support)
+export const reserves = pgTable("reserves", {
+  id: text("id").primaryKey(), // UUID
+  name: text("name").notNull(),
+  comune: text("comune").notNull(),
+  emailContatto: text("email_contatto").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -24,6 +33,7 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   role: userRoleEnum("role").notNull().default('HUNTER'),
   isActive: boolean("is_active").notNull().default(true),
+  reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -33,10 +43,11 @@ export const zones = pgTable("zones", {
   name: text("name").notNull(),
   description: text("description"),
   isActive: boolean("is_active").notNull().default(true),
+  reserveId: text("reserve_id").notNull(),
 });
 
 // Wildlife quotas table
-// Tabella quote regionali - una sola entry per combinazione specie/categoria
+// Tabella quote regionali - una sola entry per combinazione specie/categoria per riserva
 export const regionalQuotas = pgTable("regional_quotas", {
   id: serial("id").primaryKey(),
   species: speciesEnum("species").notNull(),
@@ -50,6 +61,7 @@ export const regionalQuotas = pgTable("regional_quotas", {
   huntingEndDate: timestamp("hunting_end_date"),
   isActive: boolean("is_active").notNull().default(true),
   notes: text("notes"), // Note dell'admin sulla categoria
+  reserveId: text("reserve_id").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -77,6 +89,7 @@ export const reservations = pgTable("reservations", {
   huntDate: timestamp("hunt_date").notNull(),
   timeSlot: timeSlotEnum("time_slot").notNull(),
   status: reservationStatusEnum("status").notNull().default('active'),
+  reserveId: text("reserve_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -92,17 +105,42 @@ export const huntReports = pgTable("hunt_reports", {
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
   notes: text("notes"),
   killCardPhoto: text("kill_card_photo"), // Base64 della foto della scheda di abbattimento
+  reserveId: text("reserve_id").notNull(),
   reportedAt: timestamp("reported_at").notNull().defaultNow(),
 });
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const reservesRelations = relations(reserves, ({ many }) => ({
+  users: many(users),
+  zones: many(zones),
+  regionalQuotas: many(regionalQuotas),
   reservations: many(reservations),
+  huntReports: many(huntReports),
 }));
 
-export const zonesRelations = relations(zones, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
+  reservations: many(reservations),
+  reserve: one(reserves, {
+    fields: [users.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+export const zonesRelations = relations(zones, ({ many, one }) => ({
   reservations: many(reservations),
   wildlifeQuotas: many(wildlifeQuotas),
+  reserve: one(reserves, {
+    fields: [zones.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+export const regionalQuotasRelations = relations(regionalQuotas, ({ one, many }) => ({
+  reserve: one(reserves, {
+    fields: [regionalQuotas.reserveId],
+    references: [reserves.id],
+  }),
+  huntReports: many(huntReports),
 }));
 
 export const wildlifeQuotasRelations = relations(wildlifeQuotas, ({ one }) => ({
@@ -110,11 +148,6 @@ export const wildlifeQuotasRelations = relations(wildlifeQuotas, ({ one }) => ({
     fields: [wildlifeQuotas.zoneId],
     references: [zones.id],
   }),
-}));
-
-// Relations per quote regionali
-export const regionalQuotasRelations = relations(regionalQuotas, ({ many }) => ({
-  huntReports: many(huntReports),
 }));
 
 export const reservationsRelations = relations(reservations, ({ one }) => ({
@@ -126,6 +159,10 @@ export const reservationsRelations = relations(reservations, ({ one }) => ({
     fields: [reservations.zoneId],
     references: [zones.id],
   }),
+  reserve: one(reserves, {
+    fields: [reservations.reserveId],
+    references: [reserves.id],
+  }),
   huntReport: one(huntReports, {
     fields: [reservations.id],
     references: [huntReports.reservationId],
@@ -136,6 +173,10 @@ export const huntReportsRelations = relations(huntReports, ({ one }) => ({
   reservation: one(reservations, {
     fields: [huntReports.reservationId],
     references: [reservations.id],
+  }),
+  reserve: one(reserves, {
+    fields: [huntReports.reserveId],
+    references: [reserves.id],
   }),
 }));
 

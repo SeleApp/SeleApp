@@ -1,0 +1,46 @@
+Voglio trasformare la mia app WildReserve (Node.js + Express + PostgreSQL + Drizzle ORM + React) in una **web app multi-tenant**, in modo da poterla usare con più riserve alpine (es. Riserva di Cison di Valmarino, Riserva di Valstagna, ecc.) tutte con lo stesso progetto, ma dati separati.
+
+🧱 Obiettivo: ogni riserva ha i suoi utenti, zone, prenotazioni, capi e rapporti. Nessuna riserva deve poter vedere o accedere ai dati delle altre.
+
+✳️ Cosa devi fare per me:
+
+1. **Crea una tabella `Reserves` nel database**, con campi:  
+   - id (UUID)  
+   - name  
+   - comune  
+   - emailContatto  
+   - createdAt
+
+2. **Collega la tabella `Reserves` a tutte le tabelle principali**, aggiungendo il campo `reserveId` come foreign key a:
+   - `Users`  
+   - `Zones`  
+   - `Reservations`  
+   - `Reports`  
+   - `Wildlife` (quote regionali)
+
+3. **Modifica le API esistenti** per:
+   - filtrare i dati in base al `reserveId` dell’utente loggato (tramite JWT)
+   - impedire l’accesso a dati di riserve diverse
+   - quando un nuovo utente viene creato da un admin, deve ereditare automaticamente il `reserveId` di chi lo crea
+
+4. **Aggiungi un ruolo opzionale `SUPERADMIN`** che può:
+   - creare nuove riserve  
+   - accedere a una dashboard di tutte le riserve  
+   - switchare o impersonare una riserva se necessario (a scopo gestionale)
+
+5. **Mantieni la struttura a ruoli attuale**, ma ora ogni `ADMIN` è legato a una riserva specifica.
+
+6. **Aggiungi una pagina dashboard “Gestione Riserve” solo per SUPERADMIN**, dove può:
+   - vedere l’elenco riserve
+   - cliccare per entrare come admin di quella riserva
+   - vedere il numero di utenti, zone, capi caricati per ciascuna
+
+📦 Extra:
+- Tutti i dati già esistenti nella versione attuale dell'app devono essere automaticamente assegnati a una riserva predefinita (es: Riserva di Cison di Valmarino)
+- Scrivimi solo i file modificati e segnala i punti aggiornati
+- Se servono modifiche al file `schema.ts`, scrivimi l’intera tabella aggiornata
+
+📌 Usa Drizzle ORM, Express con TypeScript, React + Tailwind per mantenere lo stile esistente.  
+L’obiettivo è un’**app centralizzata multi-riserva**, pronta per essere venduta e utilizzata da più clienti.
+
+Grazie.
