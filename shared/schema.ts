@@ -21,6 +21,7 @@ export const reserves = pgTable("reserves", {
   name: text("name").notNull(),
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
+  accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -195,7 +196,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const registerHunterSchema = insertUserSchema.extend({
   password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
   confirmPassword: z.string(),
-  reserveName: z.string().min(1, "Nome riserva è obbligatorio"),
+  reserveId: z.string().min(1, "La selezione della riserva è obbligatoria"),
+  accessCode: z.string().min(1, "Il codice d'accesso è obbligatorio"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Le password non coincidono",
   path: ["confirmPassword"],
