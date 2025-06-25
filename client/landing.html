@@ -3,112 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeleApp - Gestione Caccia di Selezione Cison di Valmarino</title>
-    <meta name="description" content="SeleApp: sistema digitale per la gestione delle prenotazioni di caccia di selezione nella Riserva di Cison di Valmarino. Accesso semplice e intuitivo per cacciatori.">
+    <title>SeleApp - Gestione Digitale Caccia di Selezione | Cison di Valmarino</title>
+    <meta name="description" content="SeleApp è il sistema digitale professionale per la gestione delle prenotazioni di caccia di selezione nella Riserva di Cison di Valmarino. Piattaforma sicura e moderna per cacciatori e amministratori.">
+    <meta name="keywords" content="SeleApp, caccia di selezione, Cison di Valmarino, prenotazioni caccia, gestione digitale, riserva caccia">
+    
+    <!-- Open Graph per condivisioni social -->
+    <meta property="og:title" content="SeleApp - Gestione Digitale Caccia di Selezione">
+    <meta property="og:description" content="Sistema professionale per prenotazioni di caccia nella Riserva di Cison di Valmarino">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Custom styles for better readability -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png">
+    
+    <!-- Custom Professional Styles -->
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-green: #1f4924;
+            --secondary-green: #2d5a31;
+            --accent-green: #4ade80;
+            --light-green: #f0fdf4;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --gradient-primary: linear-gradient(135deg, #1f4924 0%, #2d5a31 50%, #4ade80 100%);
         }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .hero-gradient {
+            background: var(--gradient-primary);
+        }
+        
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: var(--gradient-primary);
+            border: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(31, 73, 36, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(31, 73, 36, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
             transition: all 0.3s ease;
         }
-        .btn-primary:hover {
+        
+        .btn-secondary:hover {
+            background: var(--primary-green);
+            color: white;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
-        .logo-placeholder {
-            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .logo-shadow {
+            filter: drop-shadow(0 10px 20px rgba(31, 73, 36, 0.3));
+        }
+        
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animated-bg {
+            background: linear-gradient(-45deg, #f8fafc, #e2e8f0, #f1f5f9, #e7edf4);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
-    <!-- Header con Logo -->
-    <header class="w-full bg-white/80 backdrop-blur-sm shadow-sm">
-        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-center">
-            <div class="flex items-center space-x-4">
-                <!-- Logo Placeholder -->
-                <div class="logo-placeholder w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                    🦌
+<body class="animated-bg min-h-screen">
+    <!-- Header Professionale -->
+    <header class="w-full glass-effect shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img 
+                        src="/assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png" 
+                        alt="SeleApp Logo" 
+                        class="w-12 h-12 logo-shadow"
+                    />
+                    <div>
+                        <h1 class="text-2xl font-bold text-gradient">SeleApp</h1>
+                        <p class="text-sm font-medium" style="color: var(--text-secondary);">Cison di Valmarino</p>
+                    </div>
                 </div>
-                <div class="text-center sm:text-left">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">SeleApp</h1>
-                    <p class="text-sm text-gray-600">Cison di Valmarino</p>
-                </div>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#features" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Funzionalità</a>
+                    <a href="#contact" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Contatti</a>
+                    <a href="/app" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
+                        Accedi
+                    </a>
+                </nav>
             </div>
         </div>
     </header>
 
-    <!-- Contenuto Principale -->
-    <main class="flex-1 flex items-center justify-center px-6 py-12">
-        <div class="max-w-2xl mx-auto text-center">
-            <!-- Titolo Principale -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 mb-6 leading-tight">
-                Benvenuto in SeleApp
-            </h1>
-            
-            <!-- Sottotitolo -->
-            <p class="text-lg sm:text-xl text-gray-600 mb-12 leading-relaxed max-w-xl mx-auto">
-                Gestione digitale della caccia di selezione nella Riserva di Cison di Valmarino
-            </p>
-            
-            <!-- Call to Action -->
-            <div class="mb-16">
-                <a href="/app" class="btn-primary inline-block px-12 py-4 text-white font-semibold text-xl rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    Accedi all'App
-                </a>
-                <p class="text-sm text-gray-500 mt-4">
-                    Prenota le tue sessioni di caccia in modo semplice e veloce
-                </p>
-            </div>
-            
-            <!-- Caratteristiche -->
-            <div class="grid md:grid-cols-3 gap-8 mb-16">
-                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-                    <div class="text-3xl mb-4">📅</div>
-                    <h3 class="font-semibold text-lg mb-2">Prenotazioni Facili</h3>
-                    <p class="text-gray-600 text-sm">Sistema intuitivo per prenotare le tue sessioni di caccia</p>
+    <!-- Hero Section -->
+    <section class="relative px-6 lg:px-8 py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Contenuto Principale -->
+                <div class="fade-in">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full glass-effect text-sm font-medium mb-6" style="color: var(--primary-green);">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        Sistema Digitale Professionale
+                    </div>
+                    
+                    <h1 class="hero-title text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight" style="color: var(--text-primary);">
+                        Benvenuto in
+                        <span class="text-gradient block">SeleApp</span>
+                    </h1>
+                    
+                    <p class="hero-subtitle text-xl lg:text-2xl mb-8 leading-relaxed" style="color: var(--text-secondary);">
+                        La piattaforma digitale più avanzata per la gestione professionale della caccia di selezione nella Riserva di Cison di Valmarino
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                        <a href="/app" class="btn-primary px-8 py-4 text-white font-semibold text-lg rounded-xl inline-flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                            Accedi all'Applicazione
+                        </a>
+                        <a href="#features" class="btn-secondary px-8 py-4 font-semibold text-lg rounded-xl inline-flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Scopri di Più
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center text-sm" style="color: var(--text-secondary);">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Accesso sicuro e protetto per tutti i cacciatori autorizzati
+                    </div>
                 </div>
-                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-                    <div class="text-3xl mb-4">🎯</div>
-                    <h3 class="font-semibold text-lg mb-2">Gestione Quote</h3>
-                    <p class="text-gray-600 text-sm">Monitoraggio in tempo reale delle quote regionali</p>
-                </div>
-                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
-                    <div class="text-3xl mb-4">📊</div>
-                    <h3 class="font-semibold text-lg mb-2">Report Digitali</h3>
-                    <p class="text-gray-600 text-sm">Invio report di caccia con foto delle schede di abbattimento</p>
+                
+                <!-- Logo Hero -->
+                <div class="relative lg:order-last flex justify-center">
+                    <div class="relative">
+                        <div class="absolute inset-0 hero-gradient opacity-20 blur-3xl rounded-full scale-110"></div>
+                        <img 
+                            src="/assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png" 
+                            alt="SeleApp Logo Professionale" 
+                            class="relative w-80 h-80 lg:w-96 lg:h-96 object-contain logo-shadow"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Footer con Contatti -->
-    <footer class="bg-white/80 backdrop-blur-sm border-t border-gray-200">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <div class="text-center">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contatti</h3>
-                <div class="space-y-2">
-                    <p class="text-gray-600">
-                        <span class="font-medium">Email:</span> 
-                        <a href="mailto:info@seleapp.it" class="text-blue-600 hover:text-blue-800 transition-colors">
-                            info@seleapp.it
-                        </a>
+    <!-- Features Section -->
+    <section id="features" class="py-20 lg:py-32 px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-gradient">
+                    Funzionalità Avanzate
+                </h2>
+                <p class="text-xl max-w-3xl mx-auto" style="color: var(--text-secondary);">
+                    SeleApp offre tutti gli strumenti necessari per una gestione moderna e professionale delle attività di caccia di selezione
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Prenotazioni Intelligenti</h3>
+                    <p style="color: var(--text-secondary);">Sistema avanzato di prenotazione con controllo automatico delle disponibilità e gestione conflitti</p>
+                </div>
+                
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Monitoraggio Quote</h3>
+                    <p style="color: var(--text-secondary);">Tracciamento in tempo reale delle quote regionali con aggiornamenti automatici e notifiche</p>
+                </div>
+                
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Report Fotografici</h3>
+                    <p style="color: var(--text-secondary);">Sistema di caricamento obbligatorio delle foto delle schede di abbattimento per la tracciabilità</p>
+                </div>
+                
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Notifiche Email</h3>
+                    <p style="color: var(--text-secondary);">Sistema automatico di notifiche per conferme prenotazioni e cancellazioni</p>
+                </div>
+                
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Sicurezza Avanzata</h3>
+                    <p style="color: var(--text-secondary);">Accesso protetto con autenticazione sicura e controllo ruoli utente</p>
+                </div>
+                
+                <div class="feature-card p-8 rounded-2xl">
+                    <div class="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Interfaccia Intuitiva</h3>
+                    <p style="color: var(--text-secondary);">Design ottimizzato per utenti di tutte le età con interfaccia semplice e chiara</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-6 lg:px-8 hero-gradient">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
+                Inizia Oggi
+            </h2>
+            <p class="text-xl text-green-100 mb-12 max-w-2xl mx-auto">
+                Unisciti alla community di cacciatori che hanno scelto SeleApp per la gestione professionale delle loro attività
+            </p>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="glass-effect p-8 rounded-2xl border border-white/20">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Contatto Email</h3>
+                    <a href="mailto:info@seleapp.it" class="text-green-100 hover:text-white transition-colors text-lg font-medium">
+                        info@seleapp.it
+                    </a>
+                </div>
+                
+                <div class="glass-effect p-8 rounded-2xl border border-white/20">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Località</h3>
+                    <p class="text-green-100 text-lg font-medium">
+                        Riserva di Caccia<br>Cison di Valmarino
                     </p>
-                    <p class="text-gray-600">
-                        <span class="font-medium">Riserva:</span> Cison di Valmarino
+                </div>
+            </div>
+            
+            <a href="/app" class="btn-primary bg-white text-green-800 hover:bg-green-50 px-12 py-4 text-xl font-bold rounded-xl inline-flex items-center">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+                Accedi Subito a SeleApp
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer Professionale -->
+    <footer class="glass-effect border-t border-white/20 py-12 px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img 
+                            src="/assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png" 
+                            alt="SeleApp Logo" 
+                            class="w-10 h-10"
+                        />
+                        <h3 class="text-xl font-bold text-gradient">SeleApp</h3>
+                    </div>
+                    <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">
+                        Il sistema digitale più avanzato per la gestione professionale della caccia di selezione in Italia.
                     </p>
                 </div>
                 
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <p class="text-sm text-gray-500">
-                        © 2025 SeleApp - Sistema di gestione caccia di selezione
-                    </p>
+                <div>
+                    <h4 class="font-semibold mb-4" style="color: var(--text-primary);">Funzionalità</h4>
+                    <ul class="space-y-2 text-sm" style="color: var(--text-secondary);">
+                        <li>Prenotazioni Online</li>
+                        <li>Gestione Quote</li>
+                        <li>Report Fotografici</li>
+                        <li>Notifiche Email</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4" style="color: var(--text-primary);">Supporto</h4>
+                    <ul class="space-y-2 text-sm" style="color: var(--text-secondary);">
+                        <li>
+                            <a href="mailto:info@seleapp.it" class="hover:text-green-600 transition-colors">
+                                info@seleapp.it
+                            </a>
+                        </li>
+                        <li>Cison di Valmarino</li>
+                        <li>Assistenza Tecnica</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm" style="color: var(--text-secondary);">
+                    © 2025 SeleApp. Tutti i diritti riservati. Sistema di gestione caccia di selezione.
+                </p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-sm hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Privacy Policy</a>
+                    <a href="#" class="text-sm hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Termini di Servizio</a>
                 </div>
             </div>
         </div>
