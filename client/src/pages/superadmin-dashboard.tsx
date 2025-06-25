@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, MapPin, Target, Calendar, Building2 } from "lucide-react";
+import { Plus, Users, MapPin, Target, Calendar, Building2, LogOut } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
@@ -31,6 +31,12 @@ interface Reserve {
 export default function SuperAdminDashboard() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/app";
+  };
 
   const { data: reserves, isLoading } = useQuery<Reserve[]>({
     queryKey: ["/api/reserves"],
@@ -100,13 +106,14 @@ export default function SuperAdminDashboard() {
                 Gestisci tutte le riserve di caccia sulla piattaforma SeleApp
               </p>
             </div>
-            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuova Riserva
-                </Button>
-              </DialogTrigger>
+            <div className="flex gap-3">
+              <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuova Riserva
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Crea Nuova Riserva</DialogTitle>
@@ -174,6 +181,15 @@ export default function SuperAdminDashboard() {
                 </form>
               </DialogContent>
             </Dialog>
+              <Button 
+                onClick={handleLogout}
+                variant="outline" 
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
 

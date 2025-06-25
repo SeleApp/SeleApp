@@ -10,7 +10,7 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings, LogOut } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 
 // This is the old admin dashboard, replace with the new one
@@ -21,6 +21,12 @@ export default function AdminDashboard() {
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/app";
+  };
 
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
