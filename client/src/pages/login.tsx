@@ -144,9 +144,7 @@ export default function LoginPage() {
               className="h-20 w-20 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            SeleApp Cison
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">SeleApp</CardTitle>
           <p className="text-sm text-gray-600">
             Sistema di Gestione Prenotazioni di Caccia
           </p>
