@@ -17,6 +17,15 @@ interface ReservationEmailData {
   reservationId: number;
 }
 
+interface ContactRequestData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  organization: string;
+  phone: string;
+  message: string;
+}
+
 export class EmailService {
   
   /**
@@ -195,6 +204,71 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Errore invio email cancellazione prenotazione:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Invia email per richieste di contatto dal form della landing page
+   */
+  static async sendContactRequest(data: ContactRequestData): Promise<boolean> {
+    try {
+      const emailParams = new EmailParams()
+        .setFrom(fromEmail)
+        .setFromName("SeleApp Contact Form")
+        .setRecipients([
+          new Recipient("seleapp.info@gmail.com", "SeleApp Support")
+        ])
+        .setReplyTo(data.email, `${data.firstName} ${data.lastName}`)
+        .setSubject(`Nuova Richiesta di Informazioni - ${data.firstName} ${data.lastName}`)
+        .setHtml(`
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
+            <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #28a745; text-align: center; margin-bottom: 30px;">
+                Nuova Richiesta di Informazioni
+              </h2>
+              
+              <div style="background-color: #e8f5e8; border: 1px solid #c3e6c3; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #155724; margin-top: 0;">Dati del Richiedente:</h3>
+                <p style="margin: 5px 0; color: #155724;"><strong>Nome:</strong> ${data.firstName} ${data.lastName}</p>
+                <p style="margin: 5px 0; color: #155724;"><strong>Email:</strong> ${data.email}</p>
+                <p style="margin: 5px 0; color: #155724;"><strong>Organizzazione:</strong> ${data.organization}</p>
+                <p style="margin: 5px 0; color: #155724;"><strong>Telefono:</strong> ${data.phone}</p>
+              </div>
+              
+              <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #495057; margin-top: 0;">Messaggio:</h3>
+                <p style="color: #495057; line-height: 1.6; white-space: pre-wrap;">${data.message}</p>
+              </div>
+              
+              <p style="color: #666; font-size: 14px; margin-top: 30px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+                Ricevuto tramite il form di contatto di SeleApp<br>
+                Data: ${new Date().toLocaleString('it-IT')}
+              </p>
+            </div>
+          </div>
+        `)
+        .setText(`
+          NUOVA RICHIESTA DI INFORMAZIONI - SeleApp
+          
+          Dati del Richiedente:
+          - Nome: ${data.firstName} ${data.lastName}
+          - Email: ${data.email}
+          - Organizzazione: ${data.organization}
+          - Telefono: ${data.phone}
+          
+          Messaggio:
+          ${data.message}
+          
+          Ricevuto tramite il form di contatto di SeleApp
+          Data: ${new Date().toLocaleString('it-IT')}
+        `);
+
+      await mailerSend.email.send(emailParams);
+      console.log(`Richiesta di contatto inviata da ${data.email}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio richiesta di contatto:', error);
       return false;
     }
   }
