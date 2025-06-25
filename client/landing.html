@@ -410,32 +410,7 @@
                 </a>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-8 mb-12">
-                <div class="glass-effect p-8 rounded-2xl border border-white/20">
-                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Contatto Email</h3>
-                    <a href="mailto:seleapp.info@gmail.com" class="text-green-100 hover:text-white transition-colors text-lg font-medium">
-                        seleapp.info@gmail.com
-                    </a>
-                </div>
-                
-                <div class="glass-effect p-8 rounded-2xl border border-white/20">
-                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Supporto</h3>
-                    <p class="text-green-100 text-lg font-medium">
-                        Assistenza Tecnica<br>Sistema Professionale
-                    </p>
-                </div>
-            </div>
+
             
             <a href="/app" class="btn-primary bg-white text-green-800 hover:bg-green-50 px-12 py-4 text-xl font-bold rounded-xl inline-flex items-center">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,5 +474,64 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const loadingText = document.getElementById('loadingText');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Hide previous messages
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // Show loading state
+            submitText.classList.add('hidden');
+            loadingText.classList.remove('hidden');
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const data = {
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
+                    email: formData.get('email'),
+                    organization: formData.get('organization'),
+                    phone: formData.get('phone'),
+                    message: formData.get('message')
+                };
+                
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    successMessage.classList.remove('hidden');
+                    this.reset(); // Reset form
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Errore nel server');
+                }
+            } catch (error) {
+                console.error('Errore invio form:', error);
+                errorText.textContent = error.message || 'Errore nell\'invio. Riprova o contattaci direttamente a seleapp.info@gmail.com';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Reset button state
+                submitText.classList.remove('hidden');
+                loadingText.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
