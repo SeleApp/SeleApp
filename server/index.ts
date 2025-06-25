@@ -48,6 +48,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Serve assets folder for logo and images
+  app.use("/assets", express.static(path.join(process.cwd(), "attached_assets")));
+
   // Serve static landing page at root - must be before Vite setup
   app.get("/", (req: Request, res: Response) => {
     res.sendFile(path.join(process.cwd(), "client", "landing.html"));
