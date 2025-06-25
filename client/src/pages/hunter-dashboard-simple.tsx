@@ -44,6 +44,12 @@ export default function HunterDashboard() {
     setShowReportModal(true);
   };
 
+  const handleCancelReservation = (reservationId: number) => {
+    if (window.confirm("Sei sicuro di voler annullare questa prenotazione?")) {
+      cancelReservationMutation.mutate(reservationId);
+    }
+  };
+
   const getFilteredQuotas = () => {
     if (selectedSpecies === 'all') return regionalQuotas;
     return regionalQuotas.filter((q: any) => q.species === selectedSpecies);
@@ -238,15 +244,29 @@ export default function HunterDashboard() {
                               ? "Completata"
                               : "Annullata"}
                           </Badge>
-                          {reservation.status === "active" && (
-                            <Button
-                              onClick={() => handleReportHunt(reservation.id)}
-                              className="bg-accent hover:bg-accent/90 text-accent-foreground"
-                            >
-                              <ClipboardList className="mr-1" size={16} />
-                              Report
-                            </Button>
-                          )}
+                          <div className="flex gap-2">
+                            {reservation.status === "active" && (
+                              <>
+                                <Button
+                                  onClick={() => handleReportHunt(reservation.id)}
+                                  className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                                  size="sm"
+                                >
+                                  <ClipboardList className="mr-1" size={14} />
+                                  Report
+                                </Button>
+                                <Button
+                                  onClick={() => handleCancelReservation(reservation.id)}
+                                  variant="destructive"
+                                  size="sm"
+                                  disabled={cancelReservationMutation.isPending}
+                                >
+                                  <X className="mr-1" size={14} />
+                                  Annulla
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
