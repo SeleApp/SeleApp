@@ -197,6 +197,15 @@ Changelog:
   - **Modern Design**: Professional gradient themes, glass effects, Inter font, animations
   - **SEO Enhanced**: Updated meta tags, Open Graph, and descriptions for professional positioning
   - **Responsive Layout**: Hero section, features grid, contact cards, and professional footer
+- June 25, 2025. **LOGOUT SYSTEM**: Implemented comprehensive logout functionality for all user roles
+  - **SUPERADMIN Logout**: Added logout button in dashboard header with proper authentication cleanup
+  - **Universal Support**: ADMIN and HUNTER dashboards already had logout through Header component
+  - **Clean Redirect**: Logout now redirects to /app login page instead of landing page
+  - **Token Cleanup**: Proper removal of authentication tokens and user data from localStorage
+- June 25, 2025. **LANDING PAGE CLEANUP**: Removed promotional elements for cleaner professional appearance
+  - **Button Removal**: Eliminated "Accedi Subito a SeleApp" button from contact section
+  - **Clean Contact Form**: Section now ends with form only, no additional navigation elements
+  - **Professional Flow**: Smooth transition from contact form to footer without distractions
 
 # User Preferences
 
