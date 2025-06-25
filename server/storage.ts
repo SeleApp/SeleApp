@@ -65,6 +65,11 @@ export interface IStorage {
   updateHunter(id: number, data: Partial<User>, reserveId: string): Promise<User | undefined>;
   createHunter(data: InsertUser): Promise<User>;
   deleteHunter(id: number, reserveId: string): Promise<void>;
+  
+  // Reserve Validation and Admin Management (SUPERADMIN only)
+  validateActiveReserve(reserveName: string): Promise<boolean>;
+  createAdminAccount(data: InsertUser): Promise<User>;
+  getAllAdmins(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -708,6 +713,43 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHunter(id: number): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  /**
+   * Valida se una riserva è attiva e può registrare nuovi cacciatori
+   */
+  async validateActiveReserve(reserveName: string): Promise<boolean> {
+    const [reserve] = await db
+      .select()
+      .from(reserves)
+      .where(and(eq(reserves.name, reserveName), eq(reserves.isActive, true)));
+    
+    return !!reserve;
+  }
+
+  /**
+   * Crea un account admin (solo SUPERADMIN)
+   */
+  async createAdminAccount(data: InsertUser): Promise<User> {
+    const [admin] = await db
+      .insert(users)
+      .values({
+        ...data,
+        role: 'ADMIN',
+      })
+      .returning();
+    return admin;
+  }
+
+  /**
+   * Ottiene tutti gli account admin (solo SUPERADMIN)
+   */
+  async getAllAdmins(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.role, 'ADMIN'))
+      .orderBy(users.firstName, users.lastName);
   }
 }
 

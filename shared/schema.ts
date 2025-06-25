@@ -21,6 +21,7 @@ export const reserves = pgTable("reserves", {
   name: text("name").notNull(),
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
+  isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -32,6 +33,7 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   role: userRoleEnum("role").notNull().default('HUNTER'),
+  reserveName: text("reserve_name"), // Nome della riserva per validazione registrazione cacciatori
   isActive: boolean("is_active").notNull().default(true),
   reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -190,6 +192,20 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+export const registerHunterSchema = insertUserSchema.extend({
+  password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
+  confirmPassword: z.string(),
+  reserveName: z.string().min(1, "Nome riserva è obbligatorio"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Le password non coincidono",
+  path: ["confirmPassword"],
+});
+
+export const createAdminSchema = insertUserSchema.extend({
+  password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
+  role: z.literal("ADMIN"),
+});
+
 export const insertZoneSchema = createInsertSchema(zones).omit({
   id: true,
 });
@@ -256,3 +272,6 @@ export const createReservationSchema = insertReservationSchema.extend({
 });
 
 export type CreateReservationRequest = z.infer<typeof createReservationSchema>;
+
+export type RegisterHunterRequest = z.infer<typeof registerHunterSchema>;
+export type CreateAdminRequest = z.infer<typeof createAdminSchema>;
