@@ -29,13 +29,34 @@ export default function AdminDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const cancelReservationMutation = useMutation({
+    mutationFn: async (reservationId: number) => {
+      return await apiRequest("DELETE", `/api/reservations/${reservationId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Prenotazione annullata",
+        description: "La prenotazione è stata annullata con successo.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Errore nell'annullamento della prenotazione.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCancelReservation = (reservationId: number) => {
     if (window.confirm("Sei sicuro di voler annullare questa prenotazione?")) {
       cancelReservationMutation.mutate(reservationId);
     }
   };
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["/api/admin/stats"],
@@ -879,6 +900,7 @@ export default function AdminDashboard() {
                           <TableHead>Data</TableHead>
                           <TableHead>Turno</TableHead>
                           <TableHead>Stato</TableHead>
+                          <TableHead>Azioni</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -892,8 +914,15 @@ export default function AdminDashboard() {
                               {new Date(reservation.huntDate).toLocaleDateString('it-IT')}
                             </TableCell>
                             <TableCell>
-                              <Badge variant={reservation.timeSlot === 'morning' ? 'default' : 'secondary'}>
-                                {reservation.timeSlot === 'morning' ? 'Mattina' : 'Pomeriggio'}
+                              <Badge variant={
+                                reservation.timeSlot === 'morning' ? 'default' : 
+                                reservation.timeSlot === 'afternoon' ? 'secondary' : 'outline'
+                              }>
+                                {reservation.timeSlot === 'morning' 
+                                  ? 'Alba-12:00' 
+                                  : reservation.timeSlot === 'afternoon' 
+                                  ? '12:00-Tramonto' 
+                                  : 'Alba-Tramonto'}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -904,6 +933,19 @@ export default function AdminDashboard() {
                                 {reservation.status === 'active' ? 'Attiva' :
                                  reservation.status === 'completed' ? 'Completata' : 'Cancellata'}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {reservation.status === 'active' && (
+                                <Button
+                                  onClick={() => handleCancelReservation(reservation.id)}
+                                  variant="destructive"
+                                  size="sm"
+                                  disabled={cancelReservationMutation.isPending}
+                                >
+                                  <XCircle className="mr-1" size={14} />
+                                  Annulla
+                                </Button>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
