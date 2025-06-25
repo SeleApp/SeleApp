@@ -225,6 +225,14 @@ Changelog:
   - **SUPERADMIN Tools**: Access code generation and management in reserve creation interface
   - **Security Layer**: Only hunters with correct reserve access codes can register accounts
   - **API Endpoints**: Added `/api/reserves/active` for secure reserve listing during registration
+- June 25, 2025. **COOKIE POLICY E FAQ SYSTEM**: Implemented comprehensive cookie management and FAQ section
+  - **Cookie Banner**: Professional popup with accept/reject/customize options and localStorage persistence
+  - **Cookie Categories**: Detailed breakdown of necessary, analytical, and marketing cookies
+  - **FAQ Section**: Complete FAQ with 6 key questions about registration, features, and support
+  - **Interactive Elements**: Toggle functionality for FAQ items with smooth animations
+  - **Performance Optimization**: Removed Tailwind CDN and configured local CSS for better performance
+  - **User Experience**: Automatic cookie banner display after 1 second with customizable preferences
+  - **Landing Page Enhancement**: Professional FAQ section integrated with existing design system
 
 # User Preferences
 

@@ -9,6 +9,7 @@ import HunterDashboard from "./pages/hunter-dashboard-simple";
 import AdminDashboard from "./pages/admin-dashboard-new";
 import SuperAdminDashboard from "./pages/superadmin-dashboard";
 import NotFound from "@/pages/not-found";
+import CookieBanner from "@/components/cookie-banner";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
   component: React.ComponentType; 
@@ -50,6 +51,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <CookieBanner />
       </TooltipProvider>
     </QueryClientProvider>
   );
