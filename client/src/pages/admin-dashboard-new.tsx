@@ -32,26 +32,6 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const cancelReservationMutation = useMutation({
-    mutationFn: async (reservationId: number) => {
-      return await apiRequest("DELETE", `/api/reservations/${reservationId}`, {});
-    },
-    onSuccess: () => {
-      toast({
-        title: "Prenotazione annullata",
-        description: "La prenotazione è stata annullata con successo.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Errore",
-        description: error.message || "Errore nell'annullamento della prenotazione.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCancelReservation = (reservationId: number) => {
     if (window.confirm("Sei sicuro di voler annullare questa prenotazione?")) {
       cancelReservationMutation.mutate(reservationId);
