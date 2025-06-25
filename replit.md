@@ -187,9 +187,16 @@ Changelog:
   - **Landing Page**: Static HTML at `/` with Tailwind CSS, large buttons, and responsive design
   - **App Access**: "Accedi all'App" button redirects to `/app` which serves the React PWA
   - **Elderly-Friendly**: Large fonts, clear contrast, minimal design optimized for 50+ users
-  - **Contact Section**: Includes info@seleapp.it email and Cison di Valmarino location
+  - **Contact Section**: Includes seleapp.info@gmail.com email, no geographic references
   - **Dual Routing**: Server serves landing.html at root, React app accessible via /app route
   - **SEO Optimized**: Proper meta tags and description for search engines
+- June 25, 2025. **PROFESSIONAL LANDING PAGE REDESIGN**: Complete overhaul with original SeleApp logo
+  - **Original Logo**: Implemented authentic SeleApp logo with deer design and professional styling
+  - **Generic Branding**: Removed all "Cison di Valmarino" references for universal applicability
+  - **Updated Contact**: Changed email to seleapp.info@gmail.com across all sections
+  - **Modern Design**: Professional gradient themes, glass effects, Inter font, animations
+  - **SEO Enhanced**: Updated meta tags, Open Graph, and descriptions for professional positioning
+  - **Responsive Layout**: Hero section, features grid, contact cards, and professional footer
 
 # User Preferences
 
