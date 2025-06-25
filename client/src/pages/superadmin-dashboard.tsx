@@ -38,10 +38,20 @@ export default function SuperAdminDashboard() {
 
   const createReserveMutation = useMutation({
     mutationFn: async (data: Omit<CreateReserveData, 'id'>) => {
-      return apiRequest("/api/reserves", {
+      const response = await fetch("/api/reserves", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error("Errore nella creazione della riserva");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });

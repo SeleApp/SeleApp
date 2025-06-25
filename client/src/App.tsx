@@ -7,6 +7,7 @@ import { authService } from "./lib/auth";
 import LoginPage from "./pages/login";
 import HunterDashboard from "./pages/hunter-dashboard-simple";
 import AdminDashboard from "./pages/admin-dashboard-new";
+import SuperAdminDashboard from "./pages/superadmin-dashboard";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
@@ -34,6 +35,9 @@ function Router() {
       </Route>
       <Route path="/admin">
         <ProtectedRoute component={AdminDashboard} requiredRole="ADMIN" />
+      </Route>
+      <Route path="/superadmin">
+        <ProtectedRoute component={SuperAdminDashboard} requiredRole="SUPERADMIN" />
       </Route>
       <Route component={NotFound} />
     </Switch>

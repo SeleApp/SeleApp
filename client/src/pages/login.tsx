@@ -41,7 +41,10 @@ export default function LoginPage() {
   // Check authentication on mount
   React.useEffect(() => {
     if (authService.isAuthenticated()) {
-      if (authService.isAdmin()) {
+      const user = authService.getUser();
+      if (user?.role === "SUPERADMIN") {
+        navigate("/superadmin");
+      } else if (user?.role === "ADMIN") {
         navigate("/admin");
       } else {
         navigate("/hunter");
@@ -59,7 +62,9 @@ export default function LoginPage() {
       });
 
       // Redirect based on role
-      if (response.user.role === "ADMIN") {
+      if (response.user.role === "SUPERADMIN") {
+        navigate("/superadmin");
+      } else if (response.user.role === "ADMIN") {
         navigate("/admin");
       } else {
         navigate("/hunter");
