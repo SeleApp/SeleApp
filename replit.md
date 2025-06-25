@@ -218,6 +218,13 @@ Changelog:
   - **Account Overview**: List all existing admin accounts with status indicators
   - **Role-Based Security**: Proper authentication and authorization for admin operations
   - **Database Integration**: Secure password hashing and account storage system
+- June 25, 2025. **ACCESS CODE SECURITY SYSTEM**: Implemented comprehensive access code validation to prevent unauthorized registrations
+  - **Database Schema Update**: Added `accessCode` field to reserves table for registration security
+  - **Frontend Registration**: New AccessCodeRegistration component with reserve selection and code validation
+  - **Backend Validation**: Enhanced registration endpoint validates reserveId + accessCode combination
+  - **SUPERADMIN Tools**: Access code generation and management in reserve creation interface
+  - **Security Layer**: Only hunters with correct reserve access codes can register accounts
+  - **API Endpoints**: Added `/api/reserves/active` for secure reserve listing during registration
 
 # User Preferences
 
