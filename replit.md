@@ -170,6 +170,19 @@ Changelog:
   - **Admin Control**: Added cancel button in admin dashboard for managing all active reservations
   - **Consistent UI**: Same cancellation functionality available to both hunters and admins
   - **Clean History**: Cancelled reservations are hidden from hunter view to keep interface clean
+- June 25, 2025. **ADMIN RESERVATION MANAGEMENT**: Enhanced admin dashboard with complete reservation control
+  - **Time Slot Display**: Fixed time slot display to show Alba-12:00, 12:00-Tramonto, Alba-Tramonto
+  - **Admin Cancellation**: Added functional cancel button for all active reservations in admin view
+  - **Role-Based Access**: Admin can cancel any reservation, hunters only their own
+  - **Debug Logging**: Added comprehensive logging for troubleshooting cancellation issues
+  - **Database Fix**: Corrected reservation retrieval logic to properly handle admin vs hunter access
+- June 25, 2025. **EMAIL NOTIFICATION SYSTEM**: Implemented automatic email notifications using MailerSend
+  - **Reservation Confirmation**: Automatic email sent when hunter creates new reservation
+  - **Cancellation Notifications**: Email sent when reservation is cancelled by hunter or admin
+  - **Beautiful Templates**: HTML and text email templates with hunting-themed design
+  - **Smart Detection**: System detects if cancellation was done by hunter or admin for appropriate messaging
+  - **Error Handling**: Email failures don't affect reservation operations, logged for debugging
+  - **Professional Design**: Styled emails with clear information and important reminders
 
 # User Preferences
 

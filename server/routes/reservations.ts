@@ -2,6 +2,7 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 import { createReservationSchema } from "@shared/schema";
+import { EmailService } from "../services/emailService";
 
 const router = Router();
 
@@ -90,6 +91,28 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     });
 
     console.log("Reservation created successfully:", reservation);
+
+    // Invia email di conferma
+    try {
+      const timeSlotText = reservation.timeSlot === 'morning' 
+        ? 'morning' 
+        : reservation.timeSlot === 'afternoon' 
+        ? 'afternoon' 
+        : 'full_day';
+
+      await EmailService.sendReservationConfirmation({
+        hunterEmail: req.user.email,
+        hunterName: `${req.user.firstName} ${req.user.lastName}`,
+        zoneName: zone.name,
+        huntDate: reservation.huntDate.toISOString(),
+        timeSlot: timeSlotText,
+        reservationId: reservation.id
+      });
+    } catch (emailError) {
+      console.error("Errore invio email conferma:", emailError);
+      // Non fallire la prenotazione se l'email non viene inviata
+    }
+
     res.status(201).json(reservation);
   } catch (error) {
     console.error("Error creating reservation:", error);
@@ -135,6 +158,24 @@ router.delete("/:id", authenticateToken, async (req: AuthRequest, res) => {
 
     await storage.cancelReservation(reservationId);
     console.log(`Successfully cancelled reservation ${reservationId}`);
+
+    // Invia email di notifica cancellazione
+    try {
+      const cancelledBy = req.user?.role === 'ADMIN' && reservation.hunterId !== req.user.id ? 'admin' : 'hunter';
+      
+      await EmailService.sendReservationCancellation({
+        hunterEmail: reservation.hunter.email,
+        hunterName: `${reservation.hunter.firstName} ${reservation.hunter.lastName}`,
+        zoneName: reservation.zone.name,
+        huntDate: reservation.huntDate.toISOString(),
+        timeSlot: reservation.timeSlot,
+        reservationId: reservation.id
+      }, cancelledBy);
+    } catch (emailError) {
+      console.error("Errore invio email cancellazione:", emailError);
+      // Non fallire la cancellazione se l'email non viene inviata
+    }
+
     res.json({ message: "Prenotazione cancellata" });
   } catch (error) {
     console.error("Error cancelling reservation:", error);
