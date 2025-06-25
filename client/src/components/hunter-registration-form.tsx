@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { registerHunterSchema, type RegisterHunterRequest } from "@shared/schema";
-import { UserPlus, Shield, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { registerHunterSchema, type RegisterHunterRequest, type Reserve } from "@shared/schema";
+import { UserPlus, Shield, CheckCircle, XCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface HunterRegistrationFormProps {
   onSuccess: () => void;
@@ -17,11 +18,9 @@ interface HunterRegistrationFormProps {
 
 export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRegistrationFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [reserveValidation, setReserveValidation] = useState<{
-    checking: boolean;
-    valid: boolean | null;
-    message: string;
-  }>({ checking: false, valid: null, message: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [activeReserves, setActiveReserves] = useState<Reserve[]>([]);
+  const [loadingReserves, setLoadingReserves] = useState(true);
   const { toast } = useToast();
 
   const form = useForm<RegisterHunterRequest>({
@@ -32,9 +31,39 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
       confirmPassword: "",
       firstName: "",
       lastName: "",
-      reserveName: "",
+      reserveId: "",
+      accessCode: "",
     },
   });
+
+  // Carica le riserve attive all'avvio
+  useEffect(() => {
+    const fetchActiveReserves = async () => {
+      try {
+        const response = await fetch('/api/reserves/active');
+        if (response.ok) {
+          const reserves = await response.json();
+          setActiveReserves(reserves);
+        } else {
+          toast({
+            title: "Errore",
+            description: "Impossibile caricare le riserve disponibili",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Errore di Connessione",
+          description: "Impossibile contattare il server",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingReserves(false);
+      }
+    };
+
+    fetchActiveReserves();
+  }, [toast]);
 
   // Validazione riserva in tempo reale
   const validateReserve = async (reserveName: string) => {

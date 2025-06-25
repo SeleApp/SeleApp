@@ -39,16 +39,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Endpoint per registrazione cacciatori con validazione riserva
+  // Get active reserves for registration
+  app.get("/api/reserves/active", async (req: Request, res: Response) => {
+    try {
+      const activeReserves = await storage.getActiveReserves();
+      res.json(activeReserves);
+    } catch (error) {
+      console.error("Error fetching active reserves:", error);
+      res.status(500).json({ error: "Errore nel recupero delle riserve attive" });
+    }
+  });
+
+  // Endpoint per registrazione cacciatori con validazione codice d'accesso
   app.post("/api/auth/register-hunter", async (req: Request, res: Response) => {
     try {
       const data = registerHunterSchema.parse(req.body);
       
-      // Valida che la riserva sia attiva
-      const isValidReserve = await storage.validateActiveReserve(data.reserveName);
-      if (!isValidReserve) {
+      // Verifica riserva, stato attivo e codice d'accesso
+      const reserve = await storage.validateReserveAccess(data.reserveId, data.accessCode);
+      if (!reserve) {
         return res.status(400).json({ 
-          error: "La riserva specificata non è attiva o non esiste. Contatta l'amministratore." 
+          error: "Codice di accesso errato o riserva non attiva." 
         });
       }
 
@@ -66,10 +77,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName,
-        reserveName: data.reserveName,
+        reserveId: data.reserveId,
         role: 'HUNTER',
         isActive: true,
-      });
+      }, data.reserveId);
 
       res.status(201).json({ 
         message: "Cacciatore registrato con successo",

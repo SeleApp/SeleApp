@@ -68,6 +68,8 @@ export interface IStorage {
   
   // Reserve Validation and Admin Management (SUPERADMIN only)
   validateActiveReserve(reserveName: string): Promise<boolean>;
+  getActiveReserves(): Promise<Reserve[]>;
+  validateReserveAccess(reserveId: string, accessCode: string): Promise<Reserve | null>;
   createAdminAccount(data: InsertUser): Promise<User>;
   getAllAdmins(): Promise<User[]>;
 }
@@ -716,7 +718,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Valida se una riserva è attiva e può registrare nuovi cacciatori
+   * Ottiene tutte le riserve attive per la registrazione
+   */
+  async getActiveReserves(): Promise<Reserve[]> {
+    return await db
+      .select()
+      .from(reserves)
+      .where(eq(reserves.isActive, true));
+  }
+
+  /**
+   * Valida l'accesso a una riserva tramite ID e codice d'accesso
+   */
+  async validateReserveAccess(reserveId: string, accessCode: string): Promise<Reserve | null> {
+    const [reserve] = await db
+      .select()
+      .from(reserves)
+      .where(and(
+        eq(reserves.id, reserveId),
+        eq(reserves.accessCode, accessCode),
+        eq(reserves.isActive, true)
+      ));
+    
+    return reserve || null;
+  }
+
+  /**
+   * Valida se una riserva è attiva e può registrare nuovi cacciatori (legacy)
    */
   async validateActiveReserve(reserveName: string): Promise<boolean> {
     const [reserve] = await db
