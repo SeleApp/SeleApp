@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Header from "@/components/layout/header";
 import ReservationModal from "@/components/reservation-modal-elderly";
 import HuntReportModal from "@/components/hunt-report-modal";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
-import { CalendarCheck, Target, Plus, ClipboardList } from "lucide-react";
+import { CalendarCheck, Target, Plus, ClipboardList, X } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
