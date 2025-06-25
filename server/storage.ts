@@ -31,6 +31,7 @@ export interface IStorage {
   
   // Reservations
   getReservations(hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]>;
+  getReservation(id: number): Promise<Reservation | undefined>;
   getZoneReservations(zoneId: number, date: string, timeSlot: string): Promise<Reservation[]>;
   createReservation(reservation: InsertReservation): Promise<Reservation>;
   cancelReservation(id: number): Promise<void>;
