@@ -225,6 +225,13 @@ Changelog:
   - **SUPERADMIN Tools**: Access code generation and management in reserve creation interface
   - **Security Layer**: Only hunters with correct reserve access codes can register accounts
   - **API Endpoints**: Added `/api/reserves/active` for secure reserve listing during registration
+- June 25, 2025. **LANDING PAGE ENHANCEMENTS**: Added professional FAQ section and cookie policy popup with complete functionality
+  - **FAQ Section**: Comprehensive 6-item FAQ with elegant accordion-style interface and glass effects
+  - **Cookie Policy**: Professional popup with detailed cookie categories and preference management
+  - **Interactive Elements**: Smooth animations, toggle functionality, and user preference persistence
+  - **Mobile Responsive**: Fully optimized for all device sizes with touch-friendly controls
+  - **JavaScript Integration**: Complete functionality with localStorage for cookie consent management
+  - **Professional Design**: Maintains existing landing page aesthetic with gradient backgrounds and modern styling
 
 # User Preferences
 

@@ -224,7 +224,16 @@ export default function LoginPage() {
 
           {/* Form di Registrazione */}
           {isRegistering && (
-            <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+            <AccessCodeRegistration 
+              onSuccess={() => {
+                toast({
+                  title: "Registrazione Completata",
+                  description: "Account creato con successo. Puoi ora effettuare il login.",
+                });
+                setIsRegistering(false);
+              }}
+              onCancel={() => setIsRegistering(false)}
+            />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nome</Label>
