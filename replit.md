@@ -162,6 +162,11 @@ Changelog:
   - **Form Validation**: Password confirmation, length validation, and duplicate email checks
   - **Auto-Role Assignment**: Public registrations automatically assigned HUNTER role
   - **User-Friendly**: Clear UI with icons, proper spacing, and responsive design
+- June 25, 2025. **RESERVATION CANCELLATION**: Added ability for hunters to cancel active reservations
+  - **Cancel Button**: Added cancel button for active reservations in hunter dashboard
+  - **Confirmation Dialog**: Browser confirmation before canceling to prevent accidents
+  - **Real-time Updates**: Automatic refresh of reservation list after cancellation
+  - **User-Friendly**: Clear visual feedback and error handling for cancellation process
 
 # User Preferences
 
