@@ -288,13 +288,127 @@
 
     <!-- Contact Section -->
     <section id="contact" class="py-20 px-6 lg:px-8 hero-gradient">
-        <div class="max-w-4xl mx-auto text-center">
+        <div class="max-w-4xl mx-auto">
             <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
-                Contatti
+                Richiedi Informazioni
             </h2>
-            <p class="text-xl text-green-100 mb-12 max-w-2xl mx-auto">
-                Per informazioni sulla piattaforma SeleApp contattaci tramite i canali ufficiali
-            </p>
+            <div class="text-center mb-12">
+                <p class="text-xl text-green-100 max-w-2xl mx-auto">
+                    Interessato a SeleApp per la tua riserva? Compila il form e ti contatteremo per fornirti tutte le informazioni
+                </p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto">
+                <form id="contactForm" class="glass-effect p-8 rounded-2xl border border-white/20">
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="firstName" class="block text-white font-medium mb-2">Nome *</label>
+                            <input 
+                                type="text" 
+                                id="firstName" 
+                                name="firstName" 
+                                required
+                                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
+                                placeholder="Il tuo nome"
+                            >
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-white font-medium mb-2">Cognome *</label>
+                            <input 
+                                type="text" 
+                                id="lastName" 
+                                name="lastName" 
+                                required
+                                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
+                                placeholder="Il tuo cognome"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="email" class="block text-white font-medium mb-2">Email *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
+                            placeholder="la-tua-email@esempio.it"
+                        >
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="organization" class="block text-white font-medium mb-2">Riserva/Organizzazione</label>
+                        <input 
+                            type="text" 
+                            id="organization" 
+                            name="organization"
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
+                            placeholder="Nome della riserva o organizzazione"
+                        >
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="phone" class="block text-white font-medium mb-2">Telefono</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone"
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
+                            placeholder="+39 xxx xxx xxxx"
+                        >
+                    </div>
+                    
+                    <div class="mb-8">
+                        <label for="message" class="block text-white font-medium mb-2">Messaggio *</label>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            rows="5" 
+                            required
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all resize-none"
+                            placeholder="Descrivi le tue esigenze e il tipo di informazioni di cui hai bisogno..."
+                        ></textarea>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-white text-green-800 font-bold py-4 px-8 rounded-lg hover:bg-green-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    >
+                        <span id="submitText">Invia Richiesta</span>
+                        <span id="loadingText" class="hidden">Invio in corso...</span>
+                    </button>
+                    
+                    <p class="text-green-100 text-sm mt-4 text-center">
+                        * Campi obbligatori. Ti risponderemo entro 24 ore.
+                    </p>
+                </form>
+                
+                <!-- Success/Error Messages -->
+                <div id="successMessage" class="hidden mt-6 p-4 bg-green-600 text-white rounded-lg text-center">
+                    <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Messaggio inviato con successo! Ti contatteremo presto.
+                </div>
+                
+                <div id="errorMessage" class="hidden mt-6 p-4 bg-red-600 text-white rounded-lg text-center">
+                    <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span id="errorText">Errore nell'invio. Riprova o contattaci direttamente a seleapp.info@gmail.com</span>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="/app" class="btn-primary bg-white text-green-800 hover:bg-green-50 px-12 py-4 text-xl font-bold rounded-xl inline-flex items-center">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Accedi Subito a SeleApp
+                </a>
+            </div>
             
             <div class="grid md:grid-cols-2 gap-8 mb-12">
                 <div class="glass-effect p-8 rounded-2xl border border-white/20">
