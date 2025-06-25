@@ -6,6 +6,7 @@ import reservationsRoutes from "./routes/reservations";
 import reportsRoutes from "./routes/reports";
 import adminRoutes from "./routes/admin";
 import regionalQuotasRoutes from "./routes/regional-quotas";
+import reservesRoutes from "./routes/reserves";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -15,6 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reports", reportsRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/regional-quotas", regionalQuotasRoutes);
+  app.use("/api/reserves", reservesRoutes);
   
   // Admin hunters routes
   const adminHuntersRoutes = await import("./routes/admin-hunters");

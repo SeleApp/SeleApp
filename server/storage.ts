@@ -163,18 +163,16 @@ export class DatabaseStorage implements IStorage {
     return newZone;
   }
 
-  async getZoneQuotas(zoneId: number): Promise<WildlifeQuota[]> {
-    return await db.select({
-      id: wildlifeQuotas.id,
-      zoneId: wildlifeQuotas.zoneId,
-      species: wildlifeQuotas.species,
-      totalQuota: wildlifeQuotas.totalQuota,
-      harvested: wildlifeQuotas.harvested,
-      isActive: wildlifeQuotas.isActive
-    }).from(wildlifeQuotas).where(eq(wildlifeQuotas.zoneId, zoneId));
+  async getZoneQuotas(zoneId: number, reserveId: string): Promise<WildlifeQuota[]> {
+    return await db.select().from(wildlifeQuotas)
+      .innerJoin(zones, eq(wildlifeQuotas.zoneId, zones.id))
+      .where(and(
+        eq(wildlifeQuotas.zoneId, zoneId),
+        eq(zones.reserveId, reserveId)
+      ));
   }
 
-  async getAllQuotas(): Promise<WildlifeQuota[]> {
+  async getAllQuotas(reserveId: string): Promise<WildlifeQuota[]> {
     const quotas = await db
       .select({
         id: zones.id,
@@ -206,7 +204,7 @@ export class DatabaseStorage implements IStorage {
     return quotas as any;
   }
 
-  async updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined> {
+  async updateQuota(id: number, reserveId: string, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined> {
     const updateData: any = {};
     if (harvested !== undefined) updateData.harvested = harvested;
     if (totalQuota !== undefined) updateData.totalQuota = totalQuota;
@@ -223,7 +221,7 @@ export class DatabaseStorage implements IStorage {
     return quota || undefined;
   }
 
-  async getReservations(hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]> {
+  async getReservations(reserveId: string, hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]> {
     const query = db
       .select({
         id: reservations.id,
