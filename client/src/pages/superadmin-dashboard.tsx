@@ -9,9 +9,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, MapPin, Target, Calendar, Building2, LogOut } from "lucide-react";
+import { Plus, Users, MapPin, Target, Calendar, Building2, LogOut, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
+import AdminManagementModal from "@/components/admin-management-modal";
 
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
 

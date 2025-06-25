@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
-import { apiRequest } from "@/lib/queryClient";
-import { loginSchema, registerHunterSchema, type LoginRequest, type RegisterHunterRequest } from "@shared/schema";
+import { loginSchema, type LoginRequest } from "@shared/schema";
+import HunterRegistrationForm from "@/components/hunter-registration-form";
 import React from "react";
-import { LogIn, UserPlus, Shield } from "lucide-react";
+import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function LoginPage() {
