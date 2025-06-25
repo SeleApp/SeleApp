@@ -58,9 +58,12 @@ export interface CreateHuntReportRequest {
   reservationId: number;
   outcome: 'no_harvest' | 'harvest';
   species?: 'roe_deer' | 'red_deer';
+  roeDeerCategory?: 'M0' | 'F0' | 'FA' | 'M1' | 'MA';
+  redDeerCategory?: 'CL0' | 'FF' | 'MM' | 'MCL1';
   sex?: 'male' | 'female';
   ageClass?: 'adult' | 'young';
   notes?: string;
+  killCardPhoto: string; // Base64 della foto obbligatoria
 }
 
 export const TIME_SLOT_LABELS = {

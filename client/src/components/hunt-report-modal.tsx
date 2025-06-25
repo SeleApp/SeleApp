@@ -33,12 +33,38 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       reservationId: reservation.id,
       outcome: "no_harvest",
       species: undefined,
+      roeDeerCategory: undefined,
+      redDeerCategory: undefined,
       sex: undefined,
       ageClass: undefined,
       notes: "",
       killCardPhoto: "",
     },
   });
+
+  // Funzione per gestire l'upload della foto
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Verifica dimensione file (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File troppo grande",
+          description: "La foto deve essere inferiore a 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target?.result as string;
+        setKillCardPhoto(base64);
+        form.setValue("killCardPhoto", base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const createReport = useMutation({
     mutationFn: async (data: CreateHuntReportRequest) => {
@@ -76,29 +102,20 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     }
   }, [outcome, form]);
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: "File troppo grande",
-          description: "La foto deve essere inferiore a 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setKillCardPhoto(base64);
-        form.setValue("killCardPhoto", base64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const onSubmit = async (data: CreateHuntReportRequest) => {
+    // Validate that if harvest, we have species
+    if (data.outcome === "harvest" && !data.species) {
+      toast({
+        title: "Errore",
+        description: "Per un prelievo devi specificare la specie",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate photo upload
     if (!killCardPhoto) {
       toast({
         title: "Foto mancante",
@@ -118,9 +135,20 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
   };
 
   const handleClose = () => {
-    form.reset();
+    setIsLoading(false);
     setShowHarvestDetails(false);
     setKillCardPhoto("");
+    form.reset({
+      reservationId: reservation.id,
+      outcome: "no_harvest",
+      species: undefined,
+      roeDeerCategory: undefined,
+      redDeerCategory: undefined,
+      sex: undefined,
+      ageClass: undefined,
+      notes: "",
+      killCardPhoto: "",
+    });
     onOpenChange(false);
   };
 
