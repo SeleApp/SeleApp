@@ -185,6 +185,11 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
 
+  async getReservation(id: number): Promise<Reservation | undefined> {
+    const [reservation] = await db.select().from(reservations).where(eq(reservations.id, id));
+    return reservation || undefined;
+  }
+
   async getZoneReservations(zoneId: number, date: string, timeSlot: string): Promise<Reservation[]> {
     return await db
       .select()

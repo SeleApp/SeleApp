@@ -102,19 +102,39 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
 router.delete("/:id", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { id } = req.params;
-    const reservations = await storage.getReservations(req.user?.id);
-    const reservation = reservations.find(r => r.id === parseInt(id));
+    const reservationId = parseInt(req.params.id);
+    
+    if (isNaN(reservationId)) {
+      return res.status(400).json({ message: "ID prenotazione non valido" });
+    }
+
+    console.log(`Admin/Hunter ${req.user?.email} attempting to cancel reservation ${reservationId}`);
+
+    // Per admin: ottieni tutte le prenotazioni, per hunter: solo le proprie
+    const reservations = await storage.getReservations(req.user?.role === 'ADMIN' ? undefined : req.user?.id);
+    const reservation = reservations.find(r => r.id === reservationId);
+    
+    console.log(`Found ${reservations.length} reservations, looking for ID ${reservationId}`);
+    console.log('Available reservation IDs:', reservations.map(r => r.id));
     
     if (!reservation) {
       return res.status(404).json({ message: "Prenotazione non trovata" });
     }
 
+    console.log(`Found reservation:`, { id: reservation.id, status: reservation.status, hunterId: reservation.hunterId });
+
+    // Verifica autorizzazioni
     if (req.user?.role === 'HUNTER' && reservation.hunterId !== req.user.id) {
       return res.status(403).json({ message: "Non puoi cancellare questa prenotazione" });
     }
 
-    await storage.cancelReservation(parseInt(id));
+    // Verifica che sia attiva
+    if (reservation.status !== 'active') {
+      return res.status(400).json({ message: "Impossibile cancellare una prenotazione non attiva" });
+    }
+
+    await storage.cancelReservation(reservationId);
+    console.log(`Successfully cancelled reservation ${reservationId}`);
     res.json({ message: "Prenotazione cancellata" });
   } catch (error) {
     console.error("Error cancelling reservation:", error);
