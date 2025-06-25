@@ -28,24 +28,6 @@ export default function LoginPage() {
     },
   });
 
-  const registerForm = useForm<RegisterHunterRequest>({
-    resolver: zodResolver(registerHunterSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      reserveName: "",
-    },
-  });
-
-  const [reserveValidation, setReserveValidation] = useState<{
-    checking: boolean;
-    valid: boolean | null;
-    message: string;
-  }>({ checking: false, valid: null, message: "" });
-
   // Check authentication on mount
   React.useEffect(() => {
     if (authService.isAuthenticated()) {

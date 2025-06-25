@@ -206,6 +206,18 @@ Changelog:
   - **Button Removal**: Eliminated "Accedi Subito a SeleApp" button from contact section
   - **Clean Contact Form**: Section now ends with form only, no additional navigation elements
   - **Professional Flow**: Smooth transition from contact form to footer without distractions
+- June 25, 2025. **HUNTER REGISTRATION WITH RESERVE VALIDATION**: Implemented secure registration system with active reserve verification
+  - **Reserve Validation**: Only hunters with active reserve contracts can register
+  - **Real-time Verification**: API endpoint validates reserve names against active contracts database
+  - **Enhanced Security**: Prevents unauthorized registrations by requiring valid reserve association
+  - **User-Friendly Interface**: Clear validation indicators with success/error states
+  - **Professional Forms**: Dedicated registration component with proper error handling
+- June 25, 2025. **ADMIN ACCOUNT MANAGEMENT FOR SUPERADMIN**: Added comprehensive admin account creation and management
+  - **SUPERADMIN Control**: Exclusive ability to create and manage admin accounts
+  - **Admin Creation Interface**: Professional modal with form validation and error handling
+  - **Account Overview**: List all existing admin accounts with status indicators
+  - **Role-Based Security**: Proper authentication and authorization for admin operations
+  - **Database Integration**: Secure password hashing and account storage system
 
 # User Preferences
 

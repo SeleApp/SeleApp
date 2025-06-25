@@ -318,7 +318,7 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
         )}
-      </div>
+
         {/* Admin Management Modal */}
         <AdminManagementModal 
           open={adminModalOpen} 
