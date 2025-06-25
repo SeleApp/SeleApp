@@ -167,6 +167,8 @@ Changelog:
   - **Confirmation Dialog**: Browser confirmation before canceling to prevent accidents
   - **Real-time Updates**: Automatic refresh of reservation list after cancellation
   - **User-Friendly**: Clear visual feedback and error handling for cancellation process
+  - **Admin Control**: Added cancel button in admin dashboard for managing all active reservations
+  - **Consistent UI**: Same cancellation functionality available to both hunters and admins
 
 # User Preferences
 

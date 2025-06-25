@@ -10,7 +10,7 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX, ClipboardList, Plus, MapPin, BarChart3 } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX, ClipboardList, Plus, MapPin, BarChart3, XCircle } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 import HunterManagementModal from "@/components/hunter-management-modal";
 import AdminReportModal from "@/components/admin-report-modal";
@@ -28,6 +28,12 @@ export default function AdminDashboard() {
   const [showHunterManagement, setShowHunterManagement] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
+
+  const handleCancelReservation = (reservationId: number) => {
+    if (window.confirm("Sei sicuro di voler annullare questa prenotazione?")) {
+      cancelReservationMutation.mutate(reservationId);
+    }
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -47,6 +53,26 @@ export default function AdminDashboard() {
 
   const { data: hunters = [] } = useQuery({
     queryKey: ["/api/admin/hunters"],
+  });
+
+  const cancelReservationMutation = useMutation({
+    mutationFn: async (reservationId: number) => {
+      return await apiRequest("DELETE", `/api/reservations/${reservationId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Prenotazione annullata",
+        description: "La prenotazione è stata annullata con successo.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Errore nell'annullamento della prenotazione.",
+        variant: "destructive",
+      });
+    },
   });
 
   const { data: reports = [] } = useQuery({
