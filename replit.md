@@ -183,6 +183,13 @@ Changelog:
   - **Smart Detection**: System detects if cancellation was done by hunter or admin for appropriate messaging
   - **Error Handling**: Email failures don't affect reservation operations, logged for debugging
   - **Professional Design**: Styled emails with clear information and important reminders
+- June 25, 2025. **STATIC LANDING PAGE**: Created elderly-friendly landing page with dual routing system
+  - **Landing Page**: Static HTML at `/` with Tailwind CSS, large buttons, and responsive design
+  - **App Access**: "Accedi all'App" button redirects to `/app` which serves the React PWA
+  - **Elderly-Friendly**: Large fonts, clear contrast, minimal design optimized for 50+ users
+  - **Contact Section**: Includes info@seleapp.it email and Cison di Valmarino location
+  - **Dual Routing**: Server serves landing.html at root, React app accessible via /app route
+  - **SEO Optimized**: Proper meta tags and description for search engines
 
 # User Preferences
 
