@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import { storage } from "../storage";
 import { generateToken } from "../middleware/auth";
-import { loginSchema } from "@shared/schema";
+import { loginSchema, insertUserSchema } from "@shared/schema";
 
 const router = Router();
 
