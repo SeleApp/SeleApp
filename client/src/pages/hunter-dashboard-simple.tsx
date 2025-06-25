@@ -62,6 +62,9 @@ export default function HunterDashboard() {
 
   const activeReservations = reservations.filter(r => r.status === 'active');
   const completedReservations = reservations.filter(r => r.status === 'completed');
+  
+  // Filtra solo prenotazioni attive e completate, nasconde quelle annullate
+  const visibleReservations = reservations.filter(r => r.status === 'active' || r.status === 'completed');
 
   const handleReportHunt = (reservationId: number) => {
     setSelectedReservation(reservationId);
@@ -231,8 +234,8 @@ export default function HunterDashboard() {
           <TabsContent value="reservations" className="space-y-6">
             <h3 className="text-2xl font-bold text-gray-900">Le Mie Prenotazioni</h3>
             <div className="space-y-4">
-              {reservations.length > 0 ? (
-                reservations.map((reservation) => (
+              {visibleReservations.length > 0 ? (
+                visibleReservations.map((reservation) => (
                   <Card key={reservation.id} className="border-l-4 border-l-available">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-center">
