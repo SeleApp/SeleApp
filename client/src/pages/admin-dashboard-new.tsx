@@ -963,6 +963,7 @@ export default function AdminDashboard() {
                           <TableHead>Orario</TableHead>
                           <TableHead>Esito</TableHead>
                           <TableHead>Dettagli Prelievo</TableHead>
+                          <TableHead>Foto</TableHead>
                           <TableHead>Note</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -1003,6 +1004,32 @@ export default function AdminDashboard() {
                                 </div>
                               ) : (
                                 <span className="text-gray-400">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {report.killCardPhoto ? (
+                                <button
+                                  onClick={() => {
+                                    const modal = document.createElement('div');
+                                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                                    modal.innerHTML = `
+                                      <div class="bg-white p-4 rounded-lg max-w-2xl max-h-[80vh] overflow-auto">
+                                        <div class="flex justify-between items-center mb-4">
+                                          <h3 class="text-lg font-bold">Scheda di Abbattimento - ${report.reservation?.hunter?.firstName} ${report.reservation?.hunter?.lastName}</h3>
+                                          <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                                        </div>
+                                        <img src="${report.killCardPhoto}" alt="Scheda di abbattimento" class="max-w-full h-auto rounded-lg" />
+                                      </div>
+                                    `;
+                                    document.body.appendChild(modal);
+                                    modal.onclick = (e) => e.target === modal && modal.remove();
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-sm underline"
+                                >
+                                  Visualizza Foto
+                                </button>
+                              ) : (
+                                <span className="text-gray-400 text-sm">Nessuna foto</span>
                               )}
                             </TableCell>
                             <TableCell>
