@@ -132,8 +132,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-600">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center">
+            <img
+              src={logoPath}
+              alt="SeleApp Logo"
+              className="h-20 w-20 object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             SeleApp Cison
