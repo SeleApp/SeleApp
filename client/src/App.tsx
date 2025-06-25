@@ -28,6 +28,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LoginPage} />
+      <Route path="/app" component={LoginPage} />
       <Route path="/hunter">
         <ProtectedRoute component={HunterDashboard} requiredRole="HUNTER" />
       </Route>

@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -45,6 +46,11 @@ app.use((req, res, next) => {
 
     res.status(status).json({ message });
     throw err;
+  });
+
+  // Serve static landing page at root - must be before Vite setup
+  app.get("/", (req: Request, res: Response) => {
+    res.sendFile(path.join(process.cwd(), "client", "landing.html"));
   });
 
   // importantly only setup vite in development and after

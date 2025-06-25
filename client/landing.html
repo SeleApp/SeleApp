@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeleApp - Gestione Caccia di Selezione Cison di Valmarino</title>
+    <meta name="description" content="SeleApp: sistema digitale per la gestione delle prenotazioni di caccia di selezione nella Riserva di Cison di Valmarino. Accesso semplice e intuitivo per cacciatori.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom styles for better readability -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+        .logo-placeholder {
+            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <!-- Header con Logo -->
+    <header class="w-full bg-white/80 backdrop-blur-sm shadow-sm">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-center">
+            <div class="flex items-center space-x-4">
+                <!-- Logo Placeholder -->
+                <div class="logo-placeholder w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                    🦌
+                </div>
+                <div class="text-center sm:text-left">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">SeleApp</h1>
+                    <p class="text-sm text-gray-600">Cison di Valmarino</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenuto Principale -->
+    <main class="flex-1 flex items-center justify-center px-6 py-12">
+        <div class="max-w-2xl mx-auto text-center">
+            <!-- Titolo Principale -->
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+                Benvenuto in SeleApp
+            </h1>
+            
+            <!-- Sottotitolo -->
+            <p class="text-lg sm:text-xl text-gray-600 mb-12 leading-relaxed max-w-xl mx-auto">
+                Gestione digitale della caccia di selezione nella Riserva di Cison di Valmarino
+            </p>
+            
+            <!-- Call to Action -->
+            <div class="mb-16">
+                <a href="/app" class="btn-primary inline-block px-12 py-4 text-white font-semibold text-xl rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    Accedi all'App
+                </a>
+                <p class="text-sm text-gray-500 mt-4">
+                    Prenota le tue sessioni di caccia in modo semplice e veloce
+                </p>
+            </div>
+            
+            <!-- Caratteristiche -->
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
+                    <div class="text-3xl mb-4">📅</div>
+                    <h3 class="font-semibold text-lg mb-2">Prenotazioni Facili</h3>
+                    <p class="text-gray-600 text-sm">Sistema intuitivo per prenotare le tue sessioni di caccia</p>
+                </div>
+                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
+                    <div class="text-3xl mb-4">🎯</div>
+                    <h3 class="font-semibold text-lg mb-2">Gestione Quote</h3>
+                    <p class="text-gray-600 text-sm">Monitoraggio in tempo reale delle quote regionali</p>
+                </div>
+                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-xl shadow-sm">
+                    <div class="text-3xl mb-4">📊</div>
+                    <h3 class="font-semibold text-lg mb-2">Report Digitali</h3>
+                    <p class="text-gray-600 text-sm">Invio report di caccia con foto delle schede di abbattimento</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer con Contatti -->
+    <footer class="bg-white/80 backdrop-blur-sm border-t border-gray-200">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <div class="text-center">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contatti</h3>
+                <div class="space-y-2">
+                    <p class="text-gray-600">
+                        <span class="font-medium">Email:</span> 
+                        <a href="mailto:info@seleapp.it" class="text-blue-600 hover:text-blue-800 transition-colors">
+                            info@seleapp.it
+                        </a>
+                    </p>
+                    <p class="text-gray-600">
+                        <span class="font-medium">Riserva:</span> Cison di Valmarino
+                    </p>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-500">
+                        © 2025 SeleApp - Sistema di gestione caccia di selezione
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
