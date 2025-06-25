@@ -13,8 +13,8 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="it_IT">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Local Build -->
+    <link href="/src/index.css" rel="stylesheet">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -404,6 +404,142 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 lg:py-32 px-6 lg:px-8" style="background: var(--light-gray);">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-gradient">
+                    Domande Frequenti
+                </h2>
+                <p class="text-xl max-w-2xl mx-auto" style="color: var(--text-secondary);">
+                    Tutto quello che devi sapere su SeleApp
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Cos'è SeleApp e come funziona?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            SeleApp è una piattaforma digitale completa per la gestione delle riserve di caccia alpine. 
+                            Permette ai cacciatori di prenotare zone di caccia, consultare le quote disponibili e 
+                            registrare i propri abbattimenti, mentre agli amministratori offre strumenti per 
+                            monitorare le attività e gestire le risorse faunistiche.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Come posso registrarmi come cacciatore?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            Per registrarti devi avere un codice d'accesso fornito dalla tua riserva di caccia. 
+                            Clicca su "Accedi all'App", seleziona "Registrati", scegli la tua riserva dall'elenco 
+                            e inserisci il codice d'accesso. Completa la registrazione con i tuoi dati personali 
+                            e una password sicura.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Come funzionano le prenotazioni delle zone?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            Puoi prenotare le zone di caccia direttamente dall'app selezionando la data, 
+                            la fascia oraria (mattina, pomeriggio o giornata intera) e la zona desiderata. 
+                            Il sistema verifica automaticamente la disponibilità delle quote e previene 
+                            conflitti con altre prenotazioni.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Cosa sono le quote regionali?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            Le quote regionali rappresentano il numero massimo di capi che possono essere 
+                            abbattuti per ogni specie e categoria (es. Capriolo M0, F0, FA, M1, MA e 
+                            Cervo CL0, FF, MM, MCL1). Queste quote sono stabilite dalla regione e 
+                            vengono aggiornate in tempo reale ad ogni abbattimento registrato.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">L'app funziona su dispositivi mobili?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            Sì, SeleApp è completamente responsiva e ottimizzata per dispositivi mobili. 
+                            Puoi utilizzarla comodamente dal tuo smartphone o tablet. L'interfaccia è 
+                            progettata per essere semplice e intuitiva, perfetta anche per utenti meno 
+                            esperti di tecnologia.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="glass-effect rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200 faq-toggle" onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Chi contattare per supporto tecnico?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6">
+                        <p class="leading-relaxed" style="color: var(--text-secondary);">
+                            Per qualsiasi problema tecnico o domanda sull'utilizzo dell'app, puoi 
+                            contattarci all'indirizzo email seleapp.info@gmail.com. Il nostro team 
+                            di supporto risponderà il prima possibile per aiutarti a risolvere 
+                            ogni difficoltà.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer Professionale -->
     <footer class="glass-effect border-t border-white/20 py-12 px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
@@ -457,6 +593,75 @@
             </div>
         </div>
     </footer>
+
+    <!-- Cookie Banner -->
+    <div id="cookieBanner" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50 hidden">
+        <div class="glass-effect max-w-md w-full rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Cookie Policy</h3>
+                </div>
+                <button onclick="hideCookieBanner()" class="p-1 hover:bg-gray-100 rounded">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">
+                    Utilizziamo i cookie per migliorare la tua esperienza di navigazione, 
+                    fornire funzionalità personalizzate e analizzare il nostro traffico.
+                </p>
+
+                <div id="cookieDetails" class="hidden space-y-3 p-3 bg-gray-50 rounded-lg text-xs">
+                    <div>
+                        <h4 class="font-medium mb-1" style="color: var(--text-primary);">Cookie Necessari</h4>
+                        <p style="color: var(--text-secondary);">
+                            Essenziali per il funzionamento del sito (autenticazione, preferenze).
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-1" style="color: var(--text-primary);">Cookie Analitici</h4>
+                        <p style="color: var(--text-secondary);">
+                            Ci aiutano a capire come i visitatori interagiscono con il sito.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        <button onclick="acceptAllCookies()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                            Accetta Tutti
+                        </button>
+                        <button onclick="acceptNecessaryCookies()" class="flex-1 border border-gray-300 hover:bg-gray-50 py-2 px-4 rounded-lg font-medium transition-colors">
+                            Solo Necessari
+                        </button>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="toggleCookieDetails()" class="flex-1 text-xs py-2 px-4 hover:bg-gray-100 rounded transition-colors">
+                            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Personalizza
+                        </button>
+                        <button onclick="rejectAllCookies()" class="flex-1 text-xs py-2 px-4 text-red-600 hover:bg-red-50 rounded transition-colors">
+                            Rifiuta Tutti
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-xs text-center" style="color: var(--text-secondary);">
+                    Puoi modificare le tue preferenze in qualsiasi momento.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
@@ -513,6 +718,58 @@
                 submitText.classList.remove('hidden');
                 loadingText.classList.add('hidden');
                 submitBtn.disabled = false;
+            }
+        });
+        
+        // FAQ Toggle Functionality
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('svg');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Cookie Banner Management
+        function showCookieBanner() {
+            document.getElementById('cookieBanner').classList.remove('hidden');
+        }
+        
+        function hideCookieBanner() {
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+        
+        function toggleCookieDetails() {
+            const details = document.getElementById('cookieDetails');
+            details.classList.toggle('hidden');
+        }
+        
+        function acceptAllCookies() {
+            localStorage.setItem('cookieConsent', 'all');
+            hideCookieBanner();
+        }
+        
+        function acceptNecessaryCookies() {
+            localStorage.setItem('cookieConsent', 'necessary');
+            hideCookieBanner();
+        }
+        
+        function rejectAllCookies() {
+            localStorage.setItem('cookieConsent', 'rejected');
+            hideCookieBanner();
+        }
+        
+        // Check and show cookie banner on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cookieConsent = localStorage.getItem('cookieConsent');
+            if (!cookieConsent) {
+                // Show banner after 1 second delay
+                setTimeout(showCookieBanner, 1000);
             }
         });
     </script>
