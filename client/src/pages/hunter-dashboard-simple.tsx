@@ -21,6 +21,8 @@ export default function HunterDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<number | null>(null);
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: zones = [], isLoading: zonesLoading } = useQuery<ZoneWithQuotas[]>({
     queryKey: ["/api/zones"],
@@ -36,6 +38,26 @@ export default function HunterDashboard() {
 
   const { data: reports = [] } = useQuery({
     queryKey: ["/api/reports"],
+  });
+
+  const cancelReservationMutation = useMutation({
+    mutationFn: async (reservationId: number) => {
+      return await apiRequest("DELETE", `/api/reservations/${reservationId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Prenotazione annullata",
+        description: "La tua prenotazione è stata annullata con successo.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore",
+        description: error.message || "Errore nell'annullamento della prenotazione.",
+        variant: "destructive",
+      });
+    },
   });
 
   const activeReservations = reservations.filter(r => r.status === 'active');
