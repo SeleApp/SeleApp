@@ -23,6 +23,7 @@ interface HuntReportModalProps {
 export default function HuntReportModal({ open, onOpenChange, reservation }: HuntReportModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showHarvestDetails, setShowHarvestDetails] = useState(false);
+  const [killCardPhoto, setKillCardPhoto] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,6 +36,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       sex: undefined,
       ageClass: undefined,
       notes: "",
+      killCardPhoto: "",
     },
   });
 
@@ -74,10 +76,42 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     }
   }, [outcome, form]);
 
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File troppo grande",
+          description: "La foto deve essere inferiore a 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target?.result as string;
+        setKillCardPhoto(base64);
+        form.setValue("killCardPhoto", base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = async (data: CreateHuntReportRequest) => {
+    if (!killCardPhoto) {
+      toast({
+        title: "Foto mancante",
+        description: "È obbligatorio caricare la foto della scheda di abbattimento",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await createReport.mutateAsync(data);
+      const submitData = { ...data, killCardPhoto };
+      await createReport.mutateAsync(submitData);
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +120,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
   const handleClose = () => {
     form.reset();
     setShowHarvestDetails(false);
+    setKillCardPhoto("");
     onOpenChange(false);
   };
 
@@ -236,6 +271,41 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             </div>
           )}
 
+          {/* Sezione caricamento foto obbligatoria */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <Label className="block text-lg font-medium text-amber-800 mb-3">
+              📸 Foto Scheda di Abbattimento *
+            </Label>
+            <p className="text-amber-700 text-sm mb-4">
+              È obbligatorio caricare una foto della scheda di abbattimento compilata
+            </p>
+            
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 mb-4"
+            />
+            
+            {killCardPhoto && (
+              <div className="mt-4">
+                <p className="text-green-700 font-medium mb-2">✓ Foto caricata con successo</p>
+                <img 
+                  src={killCardPhoto} 
+                  alt="Anteprima scheda di abbattimento" 
+                  className="max-w-full h-48 object-cover rounded-lg border border-gray-300"
+                />
+              </div>
+            )}
+            
+            {!killCardPhoto && (
+              <div className="border-2 border-dashed border-amber-300 rounded-lg p-8 text-center text-amber-600">
+                <p className="text-lg font-medium">Nessuna foto caricata</p>
+                <p className="text-sm">Seleziona un file per continuare</p>
+              </div>
+            )}
+          </div>
+
           <div>
             <Label className="block text-lg font-medium text-gray-700 mb-2">
               Note (opzionale)
@@ -261,10 +331,10 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !killCardPhoto}
               className="flex-1 btn-large bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              {isLoading ? "Invio..." : "Invia Report"}
+              {isLoading ? "Invio..." : !killCardPhoto ? "Carica la Foto" : "Invia Report"}
             </Button>
           </div>
         </form>

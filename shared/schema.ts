@@ -88,7 +88,10 @@ export const huntReports = pgTable("hunt_reports", {
   species: speciesEnum("species"),
   sex: sexEnum("sex"),
   ageClass: ageClassEnum("age_class"),
+  roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
+  redDeerCategory: redDeerCategoryEnum("red_deer_category"),
   notes: text("notes"),
+  killCardPhoto: text("kill_card_photo"), // Base64 della foto della scheda di abbattimento
   reportedAt: timestamp("reported_at").notNull().defaultNow(),
 });
 
