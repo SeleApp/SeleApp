@@ -32,6 +32,7 @@ interface Reserve {
 
 export default function SuperAdminDashboard() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const handleLogout = () => {
@@ -182,6 +183,15 @@ export default function SuperAdminDashboard() {
               </DialogContent>
             </Dialog>
               <Button 
+                onClick={() => setAdminModalOpen(true)}
+                variant="outline"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Gestisci Admin
+              </Button>
+              
+              <Button 
                 onClick={handleLogout}
                 variant="outline" 
                 className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
@@ -308,6 +318,12 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
         )}
+      </div>
+        {/* Admin Management Modal */}
+        <AdminManagementModal 
+          open={adminModalOpen} 
+          onOpenChange={setAdminModalOpen} 
+        />
       </div>
     </div>
   );
