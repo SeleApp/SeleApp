@@ -21,6 +21,11 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
   const [showPassword, setShowPassword] = useState(false);
   const [activeReserves, setActiveReserves] = useState<Reserve[]>([]);
   const [loadingReserves, setLoadingReserves] = useState(true);
+  const [reserveValidation, setReserveValidation] = useState<{
+    checking: boolean;
+    valid: boolean | null;
+    message: string;
+  }>({ checking: false, valid: null, message: "" });
   const { toast } = useToast();
 
   const form = useForm<RegisterHunterRequest>({

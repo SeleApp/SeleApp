@@ -17,6 +17,7 @@ import RegionalQuotaManager from "@/components/regional-quota-manager";
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
+  const [editingType, setEditingType] = useState<'harvested' | 'total' | null>(null);
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
   const [showRegionalQuotaManager, setShowRegionalQuotaManager] = useState(false);
   const { toast } = useToast();
