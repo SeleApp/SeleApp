@@ -181,6 +181,10 @@ export const huntReportsRelations = relations(huntReports, ({ one }) => ({
 }));
 
 // Insert schemas
+export const insertReserveSchema = createInsertSchema(reserves).omit({
+  createdAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -213,6 +217,9 @@ export const insertHuntReportSchema = createInsertSchema(huntReports).omit({
 });
 
 // Types
+export type Reserve = typeof reserves.$inferSelect;
+export type InsertReserve = z.infer<typeof insertReserveSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
