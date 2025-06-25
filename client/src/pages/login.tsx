@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
-import { loginSchema, type LoginRequest } from "@shared/schema";
+import { loginSchema, registerHunterSchema, type LoginRequest, type RegisterHunterRequest } from "@shared/schema";
 import React from "react";
 import { LogIn, UserPlus, Shield } from "lucide-react";
 import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
@@ -28,15 +28,23 @@ export default function LoginPage() {
     },
   });
 
-  const registerForm = useForm({
+  const registerForm = useForm<RegisterHunterRequest>({
+    resolver: zodResolver(registerHunterSchema),
     defaultValues: {
       email: "",
       password: "",
       confirmPassword: "",
       firstName: "",
       lastName: "",
+      reserveName: "",
     },
   });
+
+  const [reserveValidation, setReserveValidation] = useState<{
+    checking: boolean;
+    valid: boolean | null;
+    message: string;
+  }>({ checking: false, valid: null, message: "" });
 
   // Check authentication on mount
   React.useEffect(() => {
