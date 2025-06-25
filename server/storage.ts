@@ -1,6 +1,6 @@
 import { 
-  users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports,
-  type User, type InsertUser, type Zone, type InsertZone,
+  users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves,
+  type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport
 } from "@shared/schema";
@@ -8,76 +8,153 @@ import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
-  // Users
-  getUser(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Reserves Management (SUPERADMIN only)
+  getAllReserves(): Promise<Reserve[]>;
+  getReserve(id: string): Promise<Reserve | undefined>;
+  createReserve(reserve: InsertReserve): Promise<Reserve>;
+  getReserveStats(reserveId: string): Promise<{
+    totalUsers: number;
+    totalZones: number;
+    totalQuotas: number;
+    activeReservations: number;
+  }>;
   
-  // Zones
-  getAllZones(): Promise<Zone[]>;
-  getZone(id: number): Promise<Zone | undefined>;
+  // Users (filtered by reserveId for non-SUPERADMIN)
+  getUser(id: number, reserveId?: string): Promise<User | undefined>;
+  getUserByEmail(email: string, reserveId?: string): Promise<User | undefined>;
+  createUser(user: InsertUser, creatorReserveId?: string): Promise<User>;
+  
+  // Zones (filtered by reserveId)
+  getAllZones(reserveId: string): Promise<Zone[]>;
+  getZone(id: number, reserveId: string): Promise<Zone | undefined>;
   createZone(zone: InsertZone): Promise<Zone>;
   
   // Wildlife Quotas (deprecato - ora si usano le quote regionali)
-  getZoneQuotas(zoneId: number): Promise<WildlifeQuota[]>;
-  getAllQuotas(): Promise<WildlifeQuota[]>;
-  updateQuota(id: number, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined>;
+  getZoneQuotas(zoneId: number, reserveId: string): Promise<WildlifeQuota[]>;
+  getAllQuotas(reserveId: string): Promise<WildlifeQuota[]>;
+  updateQuota(id: number, reserveId: string, harvested?: number, totalQuota?: number): Promise<WildlifeQuota | undefined>;
   
-  // Regional Quotas Management
-  getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
-  updateRegionalQuota(id: number, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
+  // Regional Quotas Management (filtered by reserveId)
+  getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
+  updateRegionalQuota(id: number, reserveId: string, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
   createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
-  isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string): Promise<boolean>;
+  isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string, reserveId: string): Promise<boolean>;
   
-  // Reservations
-  getReservations(hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]>;
-  getReservation(id: number): Promise<Reservation | undefined>;
-  getZoneReservations(zoneId: number, date: string, timeSlot: string): Promise<Reservation[]>;
+  // Reservations (filtered by reserveId)
+  getReservations(reserveId: string, hunterId?: number): Promise<(Reservation & { zone: Zone; hunter: User })[]>;
+  getReservation(id: number, reserveId: string): Promise<Reservation | undefined>;
+  getZoneReservations(zoneId: number, date: string, timeSlot: string, reserveId: string): Promise<Reservation[]>;
   createReservation(reservation: InsertReservation): Promise<Reservation>;
-  cancelReservation(id: number): Promise<void>;
+  cancelReservation(id: number, reserveId: string): Promise<void>;
   
-  // Hunt Reports
+  // Hunt Reports (filtered by reserveId)
   createHuntReport(report: InsertHuntReport): Promise<HuntReport>;
-  getHuntReports(): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]>;
+  getHuntReports(reserveId: string): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]>;
   
-  // Admin Statistics
-  getAdminStats(): Promise<{
+  // Admin Statistics (filtered by reserveId)
+  getAdminStats(reserveId: string): Promise<{
     activeHunters: number;
     todayReservations: number;
     totalHarvested: number;
     lowQuotas: number;
   }>;
 
-  // Hunter Management
-  getAllHunters(): Promise<User[]>;
-  updateHunterStatus(id: number, isActive: boolean): Promise<User | undefined>;
-  updateHunter(id: number, data: Partial<User>): Promise<User | undefined>;
+  // Hunter Management (filtered by reserveId)
+  getAllHunters(reserveId: string): Promise<User[]>;
+  updateHunterStatus(id: number, isActive: boolean, reserveId: string): Promise<User | undefined>;
+  updateHunter(id: number, data: Partial<User>, reserveId: string): Promise<User | undefined>;
   createHunter(data: InsertUser): Promise<User>;
-  deleteHunter(id: number): Promise<void>;
+  deleteHunter(id: number, reserveId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+  // Reserves Management (SUPERADMIN only)
+  async getAllReserves(): Promise<Reserve[]> {
+    return await db.select().from(reserves);
+  }
+
+  async getReserve(id: string): Promise<Reserve | undefined> {
+    const [reserve] = await db.select().from(reserves).where(eq(reserves.id, id));
+    return reserve || undefined;
+  }
+
+  async createReserve(reserve: InsertReserve): Promise<Reserve> {
+    const [newReserve] = await db.insert(reserves).values(reserve).returning();
+    return newReserve;
+  }
+
+  async getReserveStats(reserveId: string): Promise<{
+    totalUsers: number;
+    totalZones: number;
+    totalQuotas: number;
+    activeReservations: number;
+  }> {
+    const [userCount] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(eq(users.reserveId, reserveId));
+
+    const [zoneCount] = await db
+      .select({ count: count() })
+      .from(zones)
+      .where(eq(zones.reserveId, reserveId));
+
+    const [quotaCount] = await db
+      .select({ count: count() })
+      .from(regionalQuotas)
+      .where(eq(regionalQuotas.reserveId, reserveId));
+
+    const [reservationCount] = await db
+      .select({ count: count() })
+      .from(reservations)
+      .where(and(
+        eq(reservations.reserveId, reserveId),
+        eq(reservations.status, 'active')
+      ));
+
+    return {
+      totalUsers: userCount.count,
+      totalZones: zoneCount.count,
+      totalQuotas: quotaCount.count,
+      activeReservations: reservationCount.count,
+    };
+  }
+
+  async getUser(id: number, reserveId?: string): Promise<User | undefined> {
+    const conditions = [eq(users.id, id)];
+    if (reserveId) {
+      conditions.push(eq(users.reserveId, reserveId));
+    }
+    const [user] = await db.select().from(users).where(and(...conditions));
     return user || undefined;
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+  async getUserByEmail(email: string, reserveId?: string): Promise<User | undefined> {
+    const conditions = [eq(users.email, email)];
+    if (reserveId) {
+      conditions.push(eq(users.reserveId, reserveId));
+    }
+    const [user] = await db.select().from(users).where(and(...conditions));
     return user || undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+  async createUser(insertUser: InsertUser, creatorReserveId?: string): Promise<User> {
+    // Se viene specificato un reserveId del creatore, lo eredita
+    const userData = creatorReserveId ? { ...insertUser, reserveId: creatorReserveId } : insertUser;
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
-  async getAllZones(): Promise<Zone[]> {
-    return await db.select().from(zones).where(eq(zones.isActive, true));
+  async getAllZones(reserveId: string): Promise<Zone[]> {
+    return await db.select().from(zones).where(
+      and(eq(zones.isActive, true), eq(zones.reserveId, reserveId))
+    );
   }
 
-  async getZone(id: number): Promise<Zone | undefined> {
-    const [zone] = await db.select().from(zones).where(eq(zones.id, id));
+  async getZone(id: number, reserveId: string): Promise<Zone | undefined> {
+    const [zone] = await db.select().from(zones).where(
+      and(eq(zones.id, id), eq(zones.reserveId, reserveId))
+    );
     return zone || undefined;
   }
 
