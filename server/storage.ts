@@ -480,7 +480,7 @@ export class DatabaseStorage implements IStorage {
   /**
    * Aggiorna una quota regionale (admin può modificare totali, periodi, note)
    */
-  async updateRegionalQuota(id: number, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined> {
+  async updateRegionalQuota(id: number, reserveId: string, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined> {
     try {
       const updateData = { 
         ...data, 

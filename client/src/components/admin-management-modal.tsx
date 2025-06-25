@@ -43,7 +43,7 @@ export default function AdminManagementModal({ open, onOpenChange }: AdminManage
   });
 
   // Query per ottenere tutti gli admin
-  const { data: admins, isLoading } = useQuery({
+  const { data: admins = [], isLoading } = useQuery<AdminUser[]>({
     queryKey: ["/api/superadmin/admins"],
     enabled: open,
   });
@@ -215,14 +215,14 @@ export default function AdminManagementModal({ open, onOpenChange }: AdminManage
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
                   <p className="text-muted-foreground mt-2">Caricamento...</p>
                 </div>
-              ) : !admins || admins.length === 0 ? (
+              ) : !admins || (Array.isArray(admins) && admins.length === 0) ? (
                 <div className="text-center py-8">
                   <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Nessun amministratore trovato</p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {admins.map((admin: AdminUser) => (
+                  {Array.isArray(admins) && admins.map((admin: AdminUser) => (
                     <div 
                       key={admin.id} 
                       className="flex items-center justify-between p-3 border rounded-lg"

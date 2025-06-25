@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/reservations"],
   });
 
-  const { data: quotasData = [], isLoading: quotasLoading } = useQuery({
+  const { data: quotasData = [], isLoading: quotasLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/quotas"],
   });
 
@@ -96,6 +96,7 @@ export default function AdminDashboard() {
 
   const handleQuotaCancel = () => {
     setEditingQuota(null);
+    setEditingType(null);
     setQuotaValues({});
   };
 
