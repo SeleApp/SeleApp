@@ -54,7 +54,7 @@ class AuthService {
 
   logout(): void {
     this.clearAuth();
-    window.location.href = "/";
+    window.location.href = "/app";
   }
 
   getToken(): string | null {
@@ -75,6 +75,10 @@ class AuthService {
 
   isHunter(): boolean {
     return this.user?.role === "HUNTER";
+  }
+
+  isSuperAdmin(): boolean {
+    return this.user?.role === "SUPERADMIN";
   }
 
   getAuthHeaders(): Record<string, string> {

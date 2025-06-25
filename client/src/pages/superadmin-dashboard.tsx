@@ -11,6 +11,7 @@ import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
 import { Plus, Users, MapPin, Target, Calendar, Building2, LogOut } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { authService } from "@/lib/auth";
 
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
 
@@ -33,9 +34,7 @@ export default function SuperAdminDashboard() {
   const queryClient = useQueryClient();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/app";
+    authService.logout();
   };
 
   const { data: reserves, isLoading } = useQuery<Reserve[]>({
