@@ -316,6 +316,11 @@ Changelog:
   - **Complete Integration**: All emails automatically triggered by corresponding system actions
   - **Professional Design**: Each email type has unique color scheme and professional HTML/text templates
   - **Error Handling**: Email failures don't interrupt core system operations, only logged for debugging
+- June 26, 2025. **SUPERADMIN CREDENTIALS UPDATE**: Updated superadmin account with real user credentials
+  - **Email Updated**: Changed from superadmin@seleapp.info to favero.a97@gmail.com
+  - **Password Updated**: Set secure password Monfenera.1. with proper bcrypt hashing
+  - **Profile Updated**: Name changed to Alessandro Favero
+  - **Email Flow Confirmed**: Hunters and admins receive emails at their registration addresses, system sends via seleapp.info@gmail.com
 
 # User Preferences
 
