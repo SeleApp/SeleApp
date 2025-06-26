@@ -812,27 +812,7 @@
                 setTimeout(showCookieBanner, 1500); // Show after 1.5 seconds
             }
 
-            // Add smooth scrolling for anchor links
-            document.querySelectorAll('a').forEach(anchor => {
-                const href = anchor.getAttribute('href');
-                if (href && href.startsWith('#') && href.length > 1) {
-                    anchor.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        try {
-                            const targetId = href.substring(1);
-                            const target = document.getElementById(targetId);
-                            if (target) {
-                                target.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'start'
-                                });
-                            }
-                        } catch (error) {
-                            console.warn('Smooth scroll error:', error);
-                        }
-                    });
-                }
-            });
+            // Smooth scrolling removed to prevent selector errors
         });
     </script>
 </body>
