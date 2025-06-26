@@ -58,7 +58,9 @@ export default function AdminDashboard() {
 
   const cancelReservationMutation = useMutation({
     mutationFn: async (reservationId: number) => {
-      return await apiRequest("DELETE", `/api/reservations/${reservationId}`, {});
+      return await apiRequest(`/api/reservations/${reservationId}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       toast({

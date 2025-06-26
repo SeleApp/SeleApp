@@ -251,6 +251,13 @@ Changelog:
   - **Security Enhancement**: Fixed hunter deletion to respect reserve boundaries and admin permissions
   - **Tab Layout**: Organized interface with "Gestione Riserve" and "Gestione Amministratori" sections
   - **Access Code Generation**: Automatic generation of secure access codes for hunter registration
+- June 26, 2025. **CRITICAL API REQUEST BUG FIX**: Resolved "Method is not a valid HTTP token" error preventing app functionality
+  - **API Request Function**: Fixed apiRequest function signature to use proper options object structure
+  - **Authentication System**: Corrected database schema alignment removing problematic reserve_name references
+  - **Database Updates**: Added missing is_active column to reserves table for proper functionality
+  - **Universal Fix**: Updated all apiRequest calls across components to use new syntax (URL, {method, body})
+  - **Hunter Deletion**: Fixed admin hunter deletion with proper reserve-scoped security controls
+  - **Complete Resolution**: Eliminated all HTTP method token errors ensuring smooth app operation
 
 # User Preferences
 

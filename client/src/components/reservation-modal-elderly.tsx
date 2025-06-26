@@ -46,7 +46,10 @@ export default function ReservationModalElderly({ open, onOpenChange, zones }: R
     mutationFn: async (data: ReservationData) => {
       console.log("Sending reservation data:", data);
       try {
-        const response = await apiRequest("POST", "/api/reservations", data);
+        const response = await apiRequest("/api/reservations", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
         console.log("Reservation response:", response);
         return response.json();
       } catch (error) {

@@ -46,7 +46,10 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
   const createReport = useMutation({
     mutationFn: async (data: CreateHuntReportRequest) => {
-      const response = await apiRequest("POST", "/api/reports", data);
+      const response = await apiRequest("/api/reports", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
       return response.json();
     },
     onSuccess: () => {
