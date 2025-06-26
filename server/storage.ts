@@ -12,6 +12,7 @@ export interface IStorage {
   getAllReserves(): Promise<Reserve[]>;
   getReserve(id: string): Promise<Reserve | undefined>;
   createReserve(reserve: InsertReserve): Promise<Reserve>;
+  updateReserveAccessCode(reserveId: string, data: { accessCode?: string; codeActive?: boolean }): Promise<Reserve | undefined>;
   getReserveStats(reserveId: string): Promise<{
     totalUsers: number;
     totalZones: number;
@@ -89,6 +90,15 @@ export class DatabaseStorage implements IStorage {
   async createReserve(reserve: InsertReserve): Promise<Reserve> {
     const [newReserve] = await db.insert(reserves).values(reserve).returning();
     return newReserve;
+  }
+
+  async updateReserveAccessCode(reserveId: string, data: { accessCode?: string; codeActive?: boolean }): Promise<Reserve | undefined> {
+    const [updatedReserve] = await db
+      .update(reserves)
+      .set(data)
+      .where(eq(reserves.id, reserveId))
+      .returning();
+    return updatedReserve || undefined;
   }
 
   async getReserveStats(reserveId: string): Promise<{

@@ -26,6 +26,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin hunters routes
   const adminHuntersRoutes = await import("./routes/admin-hunters");
   app.use("/api/admin/hunters", adminHuntersRoutes.default);
+  
+  // Access codes routes (SUPERADMIN only)
+  const accessCodesRoutes = await import("./routes/access-codes");
+  app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
 
   // Endpoint per validazione riserve attive durante registrazione
   app.get("/api/validate-reserve/:name", async (req: Request, res: Response) => {

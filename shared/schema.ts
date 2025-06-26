@@ -22,6 +22,7 @@ export const reserves = pgTable("reserves", {
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
   accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
+  codeActive: boolean("code_active").notNull().default(true), // Se false, il codice non permette registrazioni
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
