@@ -1,3 +1,7 @@
+// © 2025 Alessandro Favero - Tutti i diritti riservati
+// Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
+// Vietata la riproduzione, distribuzione o modifica non autorizzata
+
 const CACHE_NAME = 'seleapp-v2';
 const urlsToCache = [
   '/',
