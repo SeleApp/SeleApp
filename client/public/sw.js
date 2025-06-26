@@ -1,8 +1,11 @@
-const CACHE_NAME = 'seleapp-v1';
+const CACHE_NAME = 'seleapp-v2';
 const urlsToCache = [
   '/',
+  '/app',
   '/manifest.json',
-  // Add other static assets here
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png'
 ];
 
 // Install event
