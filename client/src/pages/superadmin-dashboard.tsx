@@ -391,12 +391,10 @@ export default function SuperAdminDashboard() {
                     <TableRow>
                       <TableHead>Nome</TableHead>
                       <TableHead>Comune</TableHead>
-                      <TableHead>Email</TableHead>
                       <TableHead>Codice</TableHead>
                       <TableHead>Utenti</TableHead>
                       <TableHead>Stato</TableHead>
                       <TableHead>Creata</TableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -404,7 +402,6 @@ export default function SuperAdminDashboard() {
                       <TableRow key={reserve.id}>
                         <TableCell className="font-medium">{reserve.name}</TableCell>
                         <TableCell>{reserve.comune}</TableCell>
-                        <TableCell>{reserve.emailContatto}</TableCell>
                         <TableCell>
                           <AccessCodeManager reserve={reserve} />
                         </TableCell>
@@ -421,16 +418,6 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell>
                           {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
