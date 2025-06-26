@@ -132,10 +132,20 @@ export default function SuperAdminDashboard() {
   // Mutation per creare admin
   const createAdminMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/superadmin/create-admin", {
+      const response = await fetch("/api/superadmin/create-admin", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error("Errore nella creazione dell'admin");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/superadmin/admins"] });
@@ -158,10 +168,20 @@ export default function SuperAdminDashboard() {
   // Mutation per modificare admin
   const updateAdminMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: any }) => {
-      return apiRequest(`/api/superadmin/admins/${id}`, {
+      const response = await fetch(`/api/superadmin/admins/${id}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error("Errore nell'aggiornamento dell'admin");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/superadmin/admins"] });
@@ -324,7 +344,7 @@ export default function SuperAdminDashboard() {
                         <Button
                           type="button"
                           variant="outline"
-                          size="xs"
+                          size="sm"
                           onClick={generateAccessCode}
                         >
                           Genera
