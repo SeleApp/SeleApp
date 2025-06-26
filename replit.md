@@ -268,6 +268,12 @@ Changelog:
   - **Navigation Enhancement**: Added "FAQ" link between "Funzionalità" and "Contatti" in header
   - **User Experience**: Direct access to frequently asked questions section from main navigation
   - **Consistent Design**: Maintains existing styling and hover effects for seamless integration
+- June 26, 2025. **REGISTRATION SYSTEM VALIDATION FIX**: Resolved critical "Required" error preventing hunter registrations
+  - **Schema Separation**: Created dedicated `registerHunterBackendSchema` without confirmPassword requirement
+  - **Frontend-Backend Sync**: Fixed mismatch where frontend removes confirmPassword but backend expected it
+  - **Validation Flow**: Frontend validates password confirmation, backend validates core registration fields only
+  - **Complete Resolution**: New hunters can successfully register using valid access codes (current: 1FP2CU)
+  - **Testing Verified**: Successful registration of test user with ID 10 in "cison-valmarino" reserve
 
 # User Preferences
 
