@@ -31,6 +31,78 @@ export const reserves = pgTable("reserves", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Reserve Settings table (personalizzazioni per riserva)
+export const reserveSettings = pgTable("reserve_settings", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  logoUrl: text("logo_url"), // URL del logo personalizzato
+  silenceDays: text("silence_days").notNull().default("[]"), // JSON array dei giorni di silenzio [2,5] = martedì, venerdì
+  emailTemplateCustomizations: text("email_template_customizations").notNull().default("{}"), // JSON personalizzazioni email
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Contracts table (contratti riserve)
+export const contracts = pgTable("contracts", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  status: text("status").notNull().default("attivo"), // 'attivo', 'in_scadenza', 'scaduto'
+  fileUrl: text("file_url"), // URL del file PDF del contratto
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Support Tickets table (assistenza)
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  adminId: integer("admin_id").references(() => users.id),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("open"), // 'open', 'resolved'
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high'
+  response: text("response"), // Risposta del superadmin
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+// Billing table (fatturazione e abbonamenti)
+export const billing = pgTable("billing", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  plan: text("plan").notNull().default("basic"), // 'basic', 'premium', 'enterprise'
+  paymentStatus: text("payment_status").notNull().default("active"), // 'active', 'overdue', 'cancelled'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  currency: text("currency").notNull().default("EUR"),
+  renewalDate: timestamp("renewal_date").notNull(),
+  lastPaymentDate: timestamp("last_payment_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Materials table (materiali formativi)
+export const materials = pgTable("materials", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  url: text("url").notNull(), // URL del file PDF o video
+  type: text("type").notNull(), // 'pdf', 'video', 'document'
+  assignedTo: text("assigned_to").notNull(), // 'admin', 'hunter', 'both'
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Material Access Log (tracciamento accessi materiali)
+export const materialAccessLog = pgTable("material_access_log", {
+  id: serial("id").primaryKey(),
+  materialId: integer("material_id").notNull().references(() => materials.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  accessedAt: timestamp("accessed_at").notNull().defaultNow(),
+});
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -117,12 +189,63 @@ export const huntReports = pgTable("hunt_reports", {
 });
 
 // Relations
-export const reservesRelations = relations(reserves, ({ many }) => ({
+export const reservesRelations = relations(reserves, ({ many, one }) => ({
   users: many(users),
   zones: many(zones),
   regionalQuotas: many(regionalQuotas),
   reservations: many(reservations),
   huntReports: many(huntReports),
+  settings: one(reserveSettings),
+  contracts: many(contracts),
+  supportTickets: many(supportTickets),
+  billing: one(billing),
+}));
+
+export const reserveSettingsRelations = relations(reserveSettings, ({ one }) => ({
+  reserve: one(reserves, {
+    fields: [reserveSettings.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+export const contractsRelations = relations(contracts, ({ one }) => ({
+  reserve: one(reserves, {
+    fields: [contracts.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+export const supportTicketsRelations = relations(supportTickets, ({ one }) => ({
+  reserve: one(reserves, {
+    fields: [supportTickets.reserveId],
+    references: [reserves.id],
+  }),
+  admin: one(users, {
+    fields: [supportTickets.adminId],
+    references: [users.id],
+  }),
+}));
+
+export const billingRelations = relations(billing, ({ one }) => ({
+  reserve: one(reserves, {
+    fields: [billing.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+export const materialsRelations = relations(materials, ({ many }) => ({
+  accessLogs: many(materialAccessLog),
+}));
+
+export const materialAccessLogRelations = relations(materialAccessLog, ({ one }) => ({
+  material: one(materials, {
+    fields: [materialAccessLog.materialId],
+    references: [materials.id],
+  }),
+  user: one(users, {
+    fields: [materialAccessLog.userId],
+    references: [users.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ many, one }) => ({
@@ -268,6 +391,61 @@ export type InsertReservation = z.infer<typeof insertReservationSchema>;
 
 export type HuntReport = typeof huntReports.$inferSelect;
 export type InsertHuntReport = z.infer<typeof insertHuntReportSchema>;
+
+// Nuovi schema per le tabelle superadmin
+export const insertReserveSettingsSchema = createInsertSchema(reserveSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContractSchema = createInsertSchema(contracts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  resolvedAt: true,
+});
+
+export const insertBillingSchema = createInsertSchema(billing).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMaterialSchema = createInsertSchema(materials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMaterialAccessLogSchema = createInsertSchema(materialAccessLog).omit({
+  id: true,
+  accessedAt: true,
+});
+
+// Nuovi tipi per SuperAdmin
+export type ReserveSettings = typeof reserveSettings.$inferSelect;
+export type InsertReserveSettings = z.infer<typeof insertReserveSettingsSchema>;
+
+export type Contract = typeof contracts.$inferSelect;
+export type InsertContract = z.infer<typeof insertContractSchema>;
+
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+
+export type Billing = typeof billing.$inferSelect;
+export type InsertBilling = z.infer<typeof insertBillingSchema>;
+
+export type Material = typeof materials.$inferSelect;
+export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
+
+export type MaterialAccessLog = typeof materialAccessLog.$inferSelect;
+export type InsertMaterialAccessLog = z.infer<typeof insertMaterialAccessLogSchema>;
 
 // Login schema
 export const loginSchema = z.object({
