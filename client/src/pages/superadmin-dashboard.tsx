@@ -16,6 +16,7 @@ import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus } f
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import AccessCodeManager from "@/components/access-code-manager";
 
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
 
@@ -24,7 +25,8 @@ interface Reserve {
   name: string;
   comune: string;
   emailContatto: string;
-  accessCode?: string;
+  accessCode: string;
+  codeActive: boolean;
   isActive: boolean;
   createdAt: string;
   stats: {
@@ -398,6 +400,7 @@ export default function SuperAdminDashboard() {
                       <TableHead>Nome</TableHead>
                       <TableHead>Comune</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead>Codice</TableHead>
                       <TableHead>Utenti</TableHead>
                       <TableHead>Stato</TableHead>
                       <TableHead>Creata</TableHead>
@@ -410,6 +413,9 @@ export default function SuperAdminDashboard() {
                         <TableCell className="font-medium">{reserve.name}</TableCell>
                         <TableCell>{reserve.comune}</TableCell>
                         <TableCell>{reserve.emailContatto}</TableCell>
+                        <TableCell>
+                          <AccessCodeManager reserve={reserve} />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center">
                             <Users className="w-4 h-4 mr-1 text-blue-600" />
