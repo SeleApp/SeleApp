@@ -1,3 +1,7 @@
+// © 2025 Alessandro Favero - Tutti i diritti riservati
+// Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
+// Vietata la riproduzione, distribuzione o modifica non autorizzata
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, X } from 'lucide-react';
