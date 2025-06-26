@@ -6,6 +6,7 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 import { insertHuntReportSchema } from "@shared/schema";
+import { EmailService } from "../services/emailService.js";
 
 const router = Router();
 
@@ -63,6 +64,39 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     }
 
     const report = await storage.createHuntReport(reportData);
+
+    // Invia email di conferma al cacciatore
+    try {
+      await EmailService.sendReportSubmissionConfirmation({
+        hunterEmail: req.user.email,
+        hunterName: `${req.user.firstName} ${req.user.lastName}`,
+        zoneName: reservation.zone.name,
+        huntDate: reservation.huntDate.toLocaleDateString('it-IT')
+      });
+    } catch (emailError) {
+      console.error("Errore invio email conferma report:", emailError);
+    }
+
+    // Invia notifica all'admin della riserva
+    try {
+      const admins = await storage.getAllAdmins();
+      const reserveAdmin = admins.find(admin => 
+        admin.reserveId === req.user.reserveId && admin.role === 'ADMIN'
+      );
+
+      if (reserveAdmin) {
+        await EmailService.sendAdminReportSubmittedAlert({
+          adminEmail: reserveAdmin.email,
+          hunterName: `${req.user.firstName} ${req.user.lastName}`,
+          zoneName: reservation.zone.name,
+          huntDate: reservation.huntDate.toLocaleDateString('it-IT'),
+          outcome: reportData.outcome
+        });
+      }
+    } catch (emailError) {
+      console.error("Errore invio notifica admin report:", emailError);
+    }
+
     res.status(201).json(report);
   } catch (error) {
     console.error("Error creating report:", error);

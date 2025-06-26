@@ -534,7 +534,7 @@ SeleApp Team
     `;
 
     try {
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
           user: process.env.GMAIL_USER,
@@ -622,7 +622,7 @@ SeleApp
     `;
 
     try {
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
           user: process.env.GMAIL_USER,
@@ -705,12 +705,30 @@ Per qualsiasi dubbio o assistenza, contatta il supporto SeleApp.
 © 2025 SeleApp - Gestione Professionale della Caccia di Selezione
     `;
 
-    return this.sendEmail(
-      userEmail,
-      '🛠️ Modifica Dati Account – SeleApp',
-      htmlContent,
-      textContent
-    );
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: userEmail,
+        subject: '🛠️ Modifica Dati Account – SeleApp',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email modifica account inviata a ${userEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email modifica account:', error);
+      return false;
+    }
   }
 
   // 📅 Avviso admin per nuove prenotazioni
@@ -779,12 +797,30 @@ SeleApp Admin
 © 2025 SeleApp - Gestione Professionale della Caccia di Selezione
     `;
 
-    return this.sendEmail(
-      adminEmail,
-      '📅 Nuova Prenotazione nella tua Riserva',
-      htmlContent,
-      textContent
-    );
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: adminEmail,
+        subject: '📅 Nuova Prenotazione nella tua Riserva',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email notifica prenotazione inviata a ${adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email notifica prenotazione:', error);
+      return false;
+    }
   }
 
   // 📨 Avviso admin per nuovi report
@@ -847,12 +883,30 @@ SeleApp Admin
 © 2025 SeleApp - Gestione Professionale della Caccia di Selezione
     `;
 
-    return this.sendEmail(
-      adminEmail,
-      '📨 Nuovo Report da Verificare – SeleApp',
-      htmlContent,
-      textContent
-    );
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: adminEmail,
+        subject: '📨 Nuovo Report da Verificare – SeleApp',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email notifica report inviata a ${adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email notifica report:', error);
+      return false;
+    }
   }
 
   // ⚠️ Avviso quote in esaurimento
@@ -924,11 +978,29 @@ SeleApp Admin
 © 2025 SeleApp - Gestione Professionale della Caccia di Selezione
     `;
 
-    return this.sendEmail(
-      adminEmail,
-      '⚠️ Quote in esaurimento – SeleApp',
-      htmlContent,
-      textContent
-    );
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: adminEmail,
+        subject: '⚠️ Quote in esaurimento – SeleApp',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email avviso quote inviata a ${adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email avviso quote:', error);
+      return false;
+    }
   }
 }
