@@ -262,14 +262,16 @@ export default function SuperAdminDashboard() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="reserves" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="reserves">Riserve</TabsTrigger>
-            <TabsTrigger value="admins">Amministratori</TabsTrigger>
-            <TabsTrigger value="settings">Impostazioni</TabsTrigger>
-            <TabsTrigger value="support">Supporto</TabsTrigger>
-            <TabsTrigger value="billing">Fatturazione</TabsTrigger>
-            <TabsTrigger value="materials">Formazione</TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto px-4 sm:px-0">
+            <TabsList className="flex w-full min-w-max flex-row gap-2 sm:grid sm:grid-cols-6 sm:gap-0">
+              <TabsTrigger value="reserves" className="whitespace-nowrap px-4 py-2">Riserve</TabsTrigger>
+              <TabsTrigger value="admins" className="whitespace-nowrap px-4 py-2">Amministratori</TabsTrigger>
+              <TabsTrigger value="settings" className="whitespace-nowrap px-4 py-2">Impostazioni</TabsTrigger>
+              <TabsTrigger value="support" className="whitespace-nowrap px-4 py-2">Supporto</TabsTrigger>
+              <TabsTrigger value="billing" className="whitespace-nowrap px-4 py-2">Fatturazione</TabsTrigger>
+              <TabsTrigger value="materials" className="whitespace-nowrap px-4 py-2">Formazione</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Tab Riserve */}
           <TabsContent value="reserves" className="space-y-6">
