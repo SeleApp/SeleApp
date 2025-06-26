@@ -11,6 +11,7 @@ export interface AuthRequest extends Request {
     role: string;
     firstName: string;
     lastName: string;
+    reserveId?: string;
   };
 }
 
@@ -36,6 +37,7 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
+      reserveId: user.reserveId,
     };
     
     next();

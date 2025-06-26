@@ -714,8 +714,8 @@ export class DatabaseStorage implements IStorage {
     return hunter;
   }
 
-  async deleteHunter(id: number): Promise<void> {
-    await db.delete(users).where(eq(users.id, id));
+  async deleteHunter(id: number, reserveId: string): Promise<void> {
+    await db.delete(users).where(and(eq(users.id, id), eq(users.reserveId, reserveId)));
   }
 
   /**

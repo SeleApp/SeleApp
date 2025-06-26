@@ -67,7 +67,13 @@ router.post("/", authenticateToken, requireRole('ADMIN'), async (req: AuthReques
 router.delete("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    await storage.deleteHunter(parseInt(id));
+    const adminUser = req.user;
+    
+    if (!adminUser?.reserveId) {
+      return res.status(400).json({ message: "Admin non associato a nessuna riserva" });
+    }
+    
+    await storage.deleteHunter(parseInt(id), adminUser.reserveId);
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting hunter:", error);

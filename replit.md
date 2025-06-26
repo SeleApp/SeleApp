@@ -244,6 +244,13 @@ Changelog:
   - **Database Alignment**: Fixed mismatch between schema definition and actual database structure
   - **Login Restoration**: All user roles (superadmin, admin, hunter) can now authenticate successfully
   - **Error Resolution**: Eliminated error 42703 "column reserve_name does not exist" during login attempts
+- June 26, 2025. **SUPERADMIN DASHBOARD OVERHAUL**: Complete redesign with enhanced functionality and security improvements
+  - **Professional Design**: Clean layout with header, tabs, and modern gradient styling
+  - **Reserve Management**: Simplified table showing essential data (name, comune, email, users, status)
+  - **Admin Management**: Detailed interface for creating/editing administrator accounts with password changes
+  - **Security Enhancement**: Fixed hunter deletion to respect reserve boundaries and admin permissions
+  - **Tab Layout**: Organized interface with "Gestione Riserve" and "Gestione Amministratori" sections
+  - **Access Code Generation**: Automatic generation of secure access codes for hunter registration
 
 # User Preferences
 
