@@ -321,6 +321,13 @@ Changelog:
   - **Password Updated**: Set secure password Monfenera.1. with proper bcrypt hashing
   - **Profile Updated**: Name changed to Alessandro Favero
   - **Email Flow Confirmed**: Hunters and admins receive emails at their registration addresses, system sends via seleapp.info@gmail.com
+- June 26, 2025. **COMPREHENSIVE USER MANUAL**: Created complete user manual documentation system
+  - **MANUALE_UTENTE.md**: 200+ section comprehensive guide covering all system functionality
+  - **Multi-Role Coverage**: Detailed instructions for SuperAdmin, Admin, and Hunter roles
+  - **Mobile PWA Guide**: Installation and usage instructions for mobile devices
+  - **Technical Support**: FAQ, troubleshooting, and support contact procedures
+  - **Complete Workflows**: Step-by-step procedures for all major system functions
+  - **Professional Documentation**: Ready-to-distribute manual for training and reference
 
 # User Preferences
 
