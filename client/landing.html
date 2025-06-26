@@ -695,59 +695,39 @@
     </div>
 
     <script>
-        // Safe element selector helper
-        function safeGetElement(id) {
-            try {
-                return document.getElementById(id);
-            } catch (e) {
-                console.warn('Element not found:', id);
-                return null;
-            }
-        }
-
-        // FAQ Toggle Function
+        // FAQ Toggle
         function toggleFaq(button) {
-            try {
-                const content = button.nextElementSibling;
-                const icon = button.querySelector('svg');
-                
-                if (content && icon) {
-                    if (content.classList.contains('hidden')) {
-                        content.classList.remove('hidden');
-                        icon.style.transform = 'rotate(180deg)';
-                    } else {
-                        content.classList.add('hidden');
-                        icon.style.transform = 'rotate(0deg)';
-                    }
-                }
-            } catch (e) {
-                console.warn('FAQ toggle error:', e);
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('svg');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
             }
         }
 
-        // Cookie Banner Functions
+        // Cookie Functions
         function showCookieBanner() {
-            const banner = safeGetElement('cookieBanner');
-            if (banner) banner.classList.remove('hidden');
+            document.getElementById('cookieBanner').classList.remove('hidden');
         }
 
         function closeCookieBanner() {
-            const banner = safeGetElement('cookieBanner');
-            if (banner) banner.classList.add('hidden');
+            document.getElementById('cookieBanner').classList.add('hidden');
         }
 
         function toggleCookieDetails() {
-            const details = safeGetElement('cookieDetails');
-            const text = safeGetElement('detailsText');
+            const details = document.getElementById('cookieDetails');
+            const text = document.getElementById('detailsText');
             
-            if (details && text) {
-                if (details.classList.contains('hidden')) {
-                    details.classList.remove('hidden');
-                    text.textContent = 'Nascondi';
-                } else {
-                    details.classList.add('hidden');
-                    text.textContent = 'Personalizza';
-                }
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                text.textContent = 'Nascondi';
+            } else {
+                details.classList.add('hidden');
+                text.textContent = 'Personalizza';
             }
         }
 
@@ -766,65 +746,61 @@
             closeCookieBanner();
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize contact form safely
-            const contactForm = safeGetElement('contactForm');
-            if (contactForm) {
-                contactForm.addEventListener('submit', async function(e) {
+        // Page Load
+        window.addEventListener('load', function() {
+            // Contact Form
+            const form = document.getElementById('contactForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    const submitBtn = safeGetElement('submitBtn');
-                    const submitText = safeGetElement('submitText');
-                    const loadingText = safeGetElement('loadingText');
-                    const successMessage = safeGetElement('successMessage');
-                    const errorMessage = safeGetElement('errorMessage');
-                    const errorText = safeGetElement('errorText');
+                    const submitBtn = document.getElementById('submitBtn');
+                    const submitText = document.getElementById('submitText');
+                    const loadingText = document.getElementById('loadingText');
+                    const successMessage = document.getElementById('successMessage');
+                    const errorMessage = document.getElementById('errorMessage');
+                    const errorText = document.getElementById('errorText');
                     
-                    if (successMessage) successMessage.classList.add('hidden');
-                    if (errorMessage) errorMessage.classList.add('hidden');
-                    
-                    if (submitText) submitText.classList.add('hidden');
-                    if (loadingText) loadingText.classList.remove('hidden');
-                    if (submitBtn) submitBtn.disabled = true;
+                    successMessage.classList.add('hidden');
+                    errorMessage.classList.add('hidden');
+                    submitText.classList.add('hidden');
+                    loadingText.classList.remove('hidden');
+                    submitBtn.disabled = true;
                     
                     try {
                         const formData = new FormData(this);
-                        const data = {
-                            firstName: formData.get('firstName'),
-                            lastName: formData.get('lastName'),
-                            email: formData.get('email'),
-                            organization: formData.get('organization'),
-                            phone: formData.get('phone'),
-                            message: formData.get('message')
-                        };
-                        
                         const response = await fetch('/api/contact', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
+                            body: JSON.stringify({
+                                firstName: formData.get('firstName'),
+                                lastName: formData.get('lastName'),
+                                email: formData.get('email'),
+                                organization: formData.get('organization'),
+                                phone: formData.get('phone'),
+                                message: formData.get('message')
+                            })
                         });
                         
                         if (response.ok) {
-                            if (successMessage) successMessage.classList.remove('hidden');
+                            successMessage.classList.remove('hidden');
                             this.reset();
                         } else {
-                            throw new Error('Errore nel server');
+                            throw new Error('Server error');
                         }
                     } catch (error) {
-                        if (errorText) errorText.textContent = 'Errore nell\'invio. Riprova o contattaci a seleapp.info@gmail.com';
-                        if (errorMessage) errorMessage.classList.remove('hidden');
+                        errorText.textContent = 'Errore invio. Contatta seleapp.info@gmail.com';
+                        errorMessage.classList.remove('hidden');
                     } finally {
-                        if (submitText) submitText.classList.remove('hidden');
-                        if (loadingText) loadingText.classList.add('hidden');
-                        if (submitBtn) submitBtn.disabled = false;
+                        submitText.classList.remove('hidden');
+                        loadingText.classList.add('hidden');
+                        submitBtn.disabled = false;
                     }
                 });
             }
 
-            // Check cookie preferences
-            const cookieConsent = localStorage.getItem('cookieConsent');
-            if (!cookieConsent) {
+            // Cookie Banner
+            if (!localStorage.getItem('cookieConsent')) {
                 setTimeout(showCookieBanner, 1500);
             }
         });
