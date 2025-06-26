@@ -4,9 +4,13 @@
 
 import { 
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves,
+  reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
-  type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport
+  type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
+  type ReserveSettings, type InsertReserveSettings, type Contract, type InsertContract,
+  type SupportTicket, type InsertSupportTicket, type Billing, type InsertBilling,
+  type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -23,6 +27,40 @@ export interface IStorage {
     totalQuotas: number;
     activeReservations: number;
   }>;
+
+  // Reserve Settings Management (SUPERADMIN only)
+  getReserveSettings(reserveId: string): Promise<ReserveSettings | undefined>;
+  createReserveSettings(settings: InsertReserveSettings): Promise<ReserveSettings>;
+  updateReserveSettings(reserveId: string, data: Partial<ReserveSettings>): Promise<ReserveSettings | undefined>;
+
+  // Contracts Management (SUPERADMIN only)
+  getAllContracts(): Promise<(Contract & { reserve: Reserve })[]>;
+  getContractByReserve(reserveId: string): Promise<Contract | undefined>;
+  createContract(contract: InsertContract): Promise<Contract>;
+  updateContract(id: number, data: Partial<Contract>): Promise<Contract | undefined>;
+  deleteContract(id: number): Promise<void>;
+
+  // Support Tickets Management (SUPERADMIN only)
+  getAllSupportTickets(filters?: { status?: string; priority?: string; reserveId?: string }): Promise<(SupportTicket & { reserve: Reserve; admin?: User })[]>;
+  getSupportTicket(id: number): Promise<(SupportTicket & { reserve: Reserve; admin?: User }) | undefined>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  respondToSupportTicket(id: number, response: string, status?: string): Promise<SupportTicket | undefined>;
+  updateSupportTicketStatus(id: number, status: string): Promise<SupportTicket | undefined>;
+
+  // Billing Management (SUPERADMIN only)
+  getAllBilling(): Promise<(Billing & { reserve: Reserve })[]>;
+  getBillingByReserve(reserveId: string): Promise<Billing | undefined>;
+  createBilling(billing: InsertBilling): Promise<Billing>;
+  updateBilling(id: number, data: Partial<Billing>): Promise<Billing | undefined>;
+
+  // Materials Management (SUPERADMIN only)
+  getAllMaterials(): Promise<Material[]>;
+  getMaterial(id: number): Promise<Material | undefined>;
+  createMaterial(material: InsertMaterial): Promise<Material>;
+  updateMaterial(id: number, data: Partial<Material>): Promise<Material | undefined>;
+  deleteMaterial(id: number): Promise<void>;
+  logMaterialAccess(materialId: number, userId: number): Promise<MaterialAccessLog>;
+  getMaterialAccessLogs(materialId?: number, userId?: number): Promise<(MaterialAccessLog & { material: Material; user: User })[]>;
   
   // Users (filtered by reserveId for non-SUPERADMIN)
   getUser(id: number, reserveId?: string): Promise<User | undefined>;
