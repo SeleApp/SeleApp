@@ -96,7 +96,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
     console.log("Reservation created successfully:", reservation);
 
-    // Invia email di conferma
+    // Invia email di conferma al cacciatore
     try {
       const timeSlotText = reservation.timeSlot === 'morning' 
         ? 'morning' 
@@ -114,6 +114,28 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     } catch (emailError) {
       console.error("Errore invio email conferma:", emailError);
+      // Non fallire la prenotazione se l'email non viene inviata
+    }
+
+    // Invia notifica all'admin della riserva
+    try {
+      // Trova l'admin della riserva
+      const admins = await storage.getAllAdmins();
+      const reserveAdmin = admins.find(admin => 
+        admin.reserveId === req.user.reserveId && admin.role === 'ADMIN'
+      );
+
+      if (reserveAdmin) {
+        await EmailService.sendAdminNewReservationAlert({
+          adminEmail: reserveAdmin.email,
+          hunterName: `${req.user.firstName} ${req.user.lastName}`,
+          zoneName: zone.name,
+          huntDate: reservation.huntDate.toLocaleDateString('it-IT'),
+          timeSlot: reservation.timeSlot
+        });
+      }
+    } catch (emailError) {
+      console.error("Errore invio notifica admin:", emailError);
       // Non fallire la prenotazione se l'email non viene inviata
     }
 

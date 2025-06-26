@@ -474,4 +474,461 @@ export class EmailService {
       return false;
     }
   }
+
+  // 📄 Email conferma invio report di caccia
+  static async sendReportSubmissionConfirmation(data: {
+    hunterEmail: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+  }) {
+    const { hunterEmail, hunterName, zoneName, huntDate } = data;
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #2c5530 0%, #1a3a1e 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">📄 Report Caccia Ricevuto</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #2c5530; margin-bottom: 20px;">Report Confermato</h2>
+          
+          <p>Caro <strong>${hunterName}</strong>,</p>
+          
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p>Abbiamo ricevuto correttamente il tuo report post-caccia per:</p>
+            <ul style="line-height: 1.6;">
+              <li><strong>Zona:</strong> ${zoneName}</li>
+              <li><strong>Data:</strong> ${huntDate}</li>
+            </ul>
+          </div>
+          
+          <p>Grazie per aver completato la documentazione richiesta. Il tuo contributo è essenziale per la gestione sostenibile della fauna selvatica.</p>
+          
+          <p>Buona giornata,<br><strong>SeleApp Team</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Report Caccia Ricevuto - SeleApp
+
+Caro ${hunterName},
+
+Abbiamo ricevuto correttamente il tuo report post-caccia per:
+- Zona: ${zoneName}
+- Data: ${huntDate}
+
+Grazie per aver completato la documentazione richiesta. Il tuo contributo è essenziale per la gestione sostenibile della fauna selvatica.
+
+Buona giornata,
+SeleApp Team
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    try {
+      const transporter = nodemailer.createTransporter({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: hunterEmail,
+        subject: '📄 Report Caccia Ricevuto – SeleApp',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email conferma report inviata a ${hunterEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email conferma report:', error);
+      return false;
+    }
+  }
+
+  // 🔔 Promemoria report mancante dopo 24h
+  static async sendMissingReportReminder(data: {
+    hunterEmail: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+  }) {
+    const { hunterEmail, hunterName, zoneName, huntDate } = data;
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">🔔 Promemoria Report Mancante</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #d97706; margin-bottom: 20px;">Report Mancante</h2>
+          
+          <p>Caro <strong>${hunterName}</strong>,</p>
+          
+          <div style="background: #fef3c7; border-left: 4px solid #d97706; padding: 20px; margin: 20px 0;">
+            <p><strong>Non risulta ancora compilato il report relativo alla prenotazione:</strong></p>
+            <ul style="line-height: 1.6; margin: 10px 0;">
+              <li><strong>Zona:</strong> ${zoneName}</li>
+              <li><strong>Data:</strong> ${huntDate}</li>
+            </ul>
+          </div>
+          
+          <p>Ti chiediamo di completarlo al più presto per mantenere aggiornati i dati della riserva e rispettare le normative vigenti.</p>
+          
+          <p>Accedi a SeleApp per compilare il report.</p>
+          
+          <p>Grazie per la collaborazione,<br><strong>SeleApp</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Promemoria Report Mancante - SeleApp
+
+Caro ${hunterName},
+
+Non risulta ancora compilato il report relativo alla prenotazione:
+- Zona: ${zoneName}
+- Data: ${huntDate}
+
+Ti chiediamo di completarlo al più presto per mantenere aggiornati i dati della riserva e rispettare le normative vigenti.
+
+Accedi a SeleApp per compilare il report.
+
+Grazie per la collaborazione,
+SeleApp
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    try {
+      const transporter = nodemailer.createTransporter({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: hunterEmail,
+        subject: '🔔 Promemoria – Report di Caccia Mancante',
+        html: htmlContent,
+        text: textContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email promemoria report inviata a ${hunterEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email promemoria report:', error);
+      return false;
+    }
+  }
+
+  // 🛠️ Notifica modifica dati account
+  static async sendAccountChangeNotification(data: {
+    userEmail: string;
+    userName: string;
+    fieldChanged: string;
+  }) {
+    const { userEmail, userName, fieldChanged } = data;
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">🛠️ Modifica Dati Account</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #1e40af; margin-bottom: 20px;">Modifica Account Rilevata</h2>
+          
+          <p>Ciao <strong>${userName}</strong>,</p>
+          
+          <div style="background: #dbeafe; border-left: 4px solid #1e40af; padding: 20px; margin: 20px 0;">
+            <p>I seguenti dati del tuo account sono stati aggiornati:</p>
+            <p><strong>📝 ${fieldChanged}</strong></p>
+          </div>
+          
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; margin: 20px 0;">
+            <p><strong>🔒 Sicurezza:</strong> Se non sei stato tu a effettuare questa modifica, contatta subito l'amministrazione della riserva.</p>
+          </div>
+          
+          <p>Per qualsiasi dubbio o assistenza, contatta il supporto SeleApp.</p>
+          
+          <p>– <strong>SeleApp Team</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Modifica Dati Account - SeleApp
+
+Ciao ${userName},
+
+I seguenti dati del tuo account sono stati aggiornati:
+📝 ${fieldChanged}
+
+🔒 SICUREZZA: Se non sei stato tu a effettuare questa modifica, contatta subito l'amministrazione della riserva.
+
+Per qualsiasi dubbio o assistenza, contatta il supporto SeleApp.
+
+– SeleApp Team
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    return this.sendEmail(
+      userEmail,
+      '🛠️ Modifica Dati Account – SeleApp',
+      htmlContent,
+      textContent
+    );
+  }
+
+  // 📅 Avviso admin per nuove prenotazioni
+  static async sendAdminNewReservationAlert(data: {
+    adminEmail: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+    timeSlot: string;
+  }) {
+    const { adminEmail, hunterName, zoneName, huntDate, timeSlot } = data;
+    
+    const timeSlotText = timeSlot === 'morning' 
+      ? 'Alba-12:00' 
+      : timeSlot === 'afternoon' 
+      ? '12:00-Tramonto' 
+      : 'Alba-Tramonto';
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">📅 Nuova Prenotazione</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp - Notifica Admin</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #059669; margin-bottom: 20px;">Nuova Prenotazione Ricevuta</h2>
+          
+          <p>Un cacciatore ha effettuato una prenotazione nella tua riserva:</p>
+          
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <ul style="line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Cacciatore:</strong> ${hunterName}</li>
+              <li><strong>Zona:</strong> ${zoneName}</li>
+              <li><strong>Data:</strong> ${huntDate}</li>
+              <li><strong>Orario:</strong> ${timeSlotText}</li>
+            </ul>
+          </div>
+          
+          <p>Controlla la dashboard amministratore per visualizzare i dettagli completi e gestire la prenotazione.</p>
+          
+          <p><strong>SeleApp Admin</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Nuova Prenotazione - SeleApp Admin
+
+Un cacciatore ha effettuato una prenotazione nella tua riserva:
+
+- Cacciatore: ${hunterName}
+- Data: ${huntDate}
+- Zona: ${zoneName}
+- Orario: ${timeSlotText}
+
+Controlla la dashboard amministratore per visualizzare i dettagli completi e gestire la prenotazione.
+
+SeleApp Admin
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    return this.sendEmail(
+      adminEmail,
+      '📅 Nuova Prenotazione nella tua Riserva',
+      htmlContent,
+      textContent
+    );
+  }
+
+  // 📨 Avviso admin per nuovi report
+  static async sendAdminReportSubmittedAlert(data: {
+    adminEmail: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+    outcome: string;
+  }) {
+    const { adminEmail, hunterName, zoneName, huntDate, outcome } = data;
+    
+    const outcomeText = outcome === 'harvest' ? 'Prelievo Effettuato' : 'Nessun Prelievo';
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">📨 Nuovo Report da Verificare</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp - Notifica Admin</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #7c3aed; margin-bottom: 20px;">Report Inviato</h2>
+          
+          <p>Il cacciatore <strong>${hunterName}</strong> ha appena inviato il report relativo a:</p>
+          
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
+            <ul style="line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Zona:</strong> ${zoneName}</li>
+              <li><strong>Data:</strong> ${huntDate}</li>
+              <li><strong>Esito:</strong> ${outcomeText}</li>
+            </ul>
+          </div>
+          
+          <p>Accedi alla dashboard amministratore per verificare il report, approvarlo o effettuare eventuali modifiche necessarie.</p>
+          
+          <p><strong>SeleApp Admin</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Nuovo Report da Verificare - SeleApp Admin
+
+Il cacciatore ${hunterName} ha appena inviato il report relativo a:
+
+- Zona: ${zoneName}
+- Data: ${huntDate}
+- Esito: ${outcomeText}
+
+Accedi alla dashboard amministratore per verificare il report, approvarlo o effettuare eventuali modifiche necessarie.
+
+SeleApp Admin
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    return this.sendEmail(
+      adminEmail,
+      '📨 Nuovo Report da Verificare – SeleApp',
+      htmlContent,
+      textContent
+    );
+  }
+
+  // ⚠️ Avviso quote in esaurimento
+  static async sendQuotaWarningEmail(data: {
+    adminEmail: string;
+    species: string;
+    category: string;
+    remaining: number;
+    reserveName: string;
+  }) {
+    const { adminEmail, species, category, remaining, reserveName } = data;
+    
+    if (remaining > 2) return false; // Invia solo se rimanenti <= 2
+    
+    const speciesText = species === 'roe_deer' ? 'Capriolo' : 'Cervo';
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">⚠️ Quote in Esaurimento</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">SeleApp - Allarme Quote</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #dc2626; margin-bottom: 20px;">Attenzione: Quote di Abbattimento in Esaurimento</h2>
+          
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; margin: 20px 0;">
+            <p><strong>🚨 ALLARME QUOTE BASSE</strong></p>
+            <p>Per la tua riserva <strong>${reserveName}</strong>, le quote disponibili per:</p>
+            <ul style="line-height: 1.8; margin: 10px 0; padding-left: 20px;">
+              <li><strong>Specie:</strong> ${speciesText}</li>
+              <li><strong>Categoria:</strong> ${category}</li>
+              <li><strong>Rimaste:</strong> <span style="color: #dc2626; font-weight: bold;">${remaining}</span></li>
+            </ul>
+          </div>
+          
+          <div style="background: #fbbf24; color: #92400e; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>⚡ Azione Richiesta:</strong> Ti consigliamo di verificare e aggiornare il piano di prelievo se necessario per evitare il superamento delle quote assegnate.</p>
+          </div>
+          
+          <p>Monitora attentamente le prenotazioni e i report per questa categoria.</p>
+          
+          <p><strong>SeleApp Admin</strong></p>
+        </div>
+        
+        <div style="background: #2c5530; padding: 20px; text-align: center; color: white;">
+          <p style="margin: 0; font-size: 14px;">© 2025 SeleApp - Gestione Professionale della Caccia di Selezione</p>
+        </div>
+      </div>
+    `;
+
+    const textContent = `
+Quote in Esaurimento - SeleApp Allarme
+
+⚠️ ATTENZIONE: Quote di abbattimento in esaurimento
+
+Per la tua riserva ${reserveName}, le quote disponibili per:
+- Specie: ${speciesText}
+- Categoria: ${category}
+- Rimaste: ${remaining}
+
+⚡ AZIONE RICHIESTA: Ti consigliamo di verificare e aggiornare il piano di prelievo se necessario per evitare il superamento delle quote assegnate.
+
+Monitora attentamente le prenotazioni e i report per questa categoria.
+
+SeleApp Admin
+
+---
+© 2025 SeleApp - Gestione Professionale della Caccia di Selezione
+    `;
+
+    return this.sendEmail(
+      adminEmail,
+      '⚠️ Quote in esaurimento – SeleApp',
+      htmlContent,
+      textContent
+    );
+  }
 }
