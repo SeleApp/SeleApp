@@ -48,6 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint per registrazione cacciatori con validazione codice d'accesso
   app.post("/api/auth/register-hunter", async (req: Request, res: Response) => {
     try {
+      console.log("Dati ricevuti dal server:", req.body);
       const data = registerHunterSchema.parse(req.body);
       
       // Verifica riserva, stato attivo e codice d'accesso
@@ -89,7 +90,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+        console.error("Errori validazione Zod:", error.errors);
+        return res.status(400).json({ 
+          error: "Required",
+          details: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+        });
       }
       console.error("Registration error:", error);
       res.status(500).json({ error: "Errore durante la registrazione" });

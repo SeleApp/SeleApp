@@ -203,6 +203,12 @@ export const registerHunterSchema = insertUserSchema.extend({
   path: ["confirmPassword"],
 });
 
+export const registerHunterBackendSchema = insertUserSchema.extend({
+  password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
+  reserveId: z.string().min(1, "La selezione della riserva è obbligatoria"),
+  accessCode: z.string().min(1, "Il codice d'accesso è obbligatorio"),
+});
+
 export const createAdminSchema = insertUserSchema.extend({
   password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
   role: z.literal("ADMIN"),
