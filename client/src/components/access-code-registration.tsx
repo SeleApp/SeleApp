@@ -71,6 +71,9 @@ export default function AccessCodeRegistration({ onSuccess, onCancel }: AccessCo
       setIsLoading(true);
       const { confirmPassword, ...registrationData } = data;
       
+      // Debug: log dei dati inviati
+      console.log("Dati registrazione:", registrationData);
+      
       const response = await fetch("/api/auth/register-hunter", {
         method: "POST",
         headers: {
@@ -175,7 +178,11 @@ export default function AccessCodeRegistration({ onSuccess, onCancel }: AccessCo
                 <span className="text-sm text-gray-600">Caricamento riserve...</span>
               </div>
             ) : (
-              <Select onValueChange={(value) => form.setValue("reserveId", value)} disabled={isLoading}>
+              <Select 
+                onValueChange={(value) => form.setValue("reserveId", value, { shouldValidate: true })} 
+                disabled={isLoading}
+                value={form.watch("reserveId")}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleziona la tua riserva" />
                 </SelectTrigger>
