@@ -34,7 +34,6 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   role: userRoleEnum("role").notNull().default('HUNTER'),
-  reserveName: text("reserve_name"), // Nome della riserva per validazione registrazione cacciatori
   isActive: boolean("is_active").notNull().default(true),
   reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
   createdAt: timestamp("created_at").notNull().defaultNow(),

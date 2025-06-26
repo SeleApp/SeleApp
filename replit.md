@@ -239,6 +239,11 @@ Changelog:
   - **TypeScript Errors**: Fixed query type definitions and component prop validations
   - **App Startup**: Successfully restored application functionality with server running on port 5000
   - **SUPERADMIN Access**: Confirmed credentials: superadmin@seleapp.info / admin123
+- June 26, 2025. **LOGIN AUTHENTICATION FIX**: Resolved persistent database column error preventing all user logins
+  - **Schema Cleanup**: Removed problematic "reserve_name" column from users table schema definition
+  - **Database Alignment**: Fixed mismatch between schema definition and actual database structure
+  - **Login Restoration**: All user roles (superadmin, admin, hunter) can now authenticate successfully
+  - **Error Resolution**: Eliminated error 42703 "column reserve_name does not exist" during login attempts
 
 # User Preferences
 
