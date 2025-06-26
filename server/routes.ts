@@ -43,16 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active reserves for registration
-  app.get("/api/reserves/active", async (req: Request, res: Response) => {
-    try {
-      const activeReserves = await storage.getActiveReserves();
-      res.json(activeReserves);
-    } catch (error) {
-      console.error("Error fetching active reserves:", error);
-      res.status(500).json({ error: "Errore nel recupero delle riserve attive" });
-    }
-  });
+
 
   // Endpoint per registrazione cacciatori con validazione codice d'accesso
   app.post("/api/auth/register-hunter", async (req: Request, res: Response) => {

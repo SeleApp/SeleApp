@@ -7,6 +7,17 @@ import { nanoid } from "nanoid";
 
 const router = Router();
 
+// Get active reserves for public registration (NO AUTH REQUIRED)
+router.get("/active", async (req, res) => {
+  try {
+    const activeReserves = await storage.getActiveReserves();
+    res.json(activeReserves);
+  } catch (error) {
+    console.error("Error fetching active reserves:", error);
+    res.status(500).json({ message: "Errore nel recupero delle riserve attive" });
+  }
+});
+
 // Get all reserves (SUPERADMIN only)
 router.get("/", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {
