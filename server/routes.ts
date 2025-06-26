@@ -35,6 +35,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Access codes routes (SUPERADMIN only)
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
+  
+  // SuperAdmin advanced features routes
+  const reserveSettingsRoutes = await import("./routes/superadmin/reserveSettings");
+  app.use("/api/superadmin/reserve-settings", reserveSettingsRoutes.default);
+  
+  const contractsRoutes = await import("./routes/superadmin/contracts");
+  app.use("/api/superadmin/contracts", contractsRoutes.default);
+  
+  const supportRoutes = await import("./routes/superadmin/support");
+  app.use("/api/superadmin/support", supportRoutes.default);
+  
+  const billingRoutes = await import("./routes/superadmin/billing");
+  app.use("/api/superadmin/billing", billingRoutes.default);
+  
+  const materialsRoutes = await import("./routes/superadmin/materials");
+  app.use("/api/superadmin/materials", materialsRoutes.default);
 
   // Endpoint per validazione riserve attive durante registrazione
   app.get("/api/validate-reserve/:name", async (req: Request, res: Response) => {

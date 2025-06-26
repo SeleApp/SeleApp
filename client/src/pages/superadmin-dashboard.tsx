@@ -262,9 +262,13 @@ export default function SuperAdminDashboard() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="reserves" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="reserves">Gestione Riserve</TabsTrigger>
-            <TabsTrigger value="admins">Gestione Amministratori</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="reserves">Riserve</TabsTrigger>
+            <TabsTrigger value="admins">Amministratori</TabsTrigger>
+            <TabsTrigger value="settings">Impostazioni</TabsTrigger>
+            <TabsTrigger value="support">Supporto</TabsTrigger>
+            <TabsTrigger value="billing">Fatturazione</TabsTrigger>
+            <TabsTrigger value="materials">Formazione</TabsTrigger>
           </TabsList>
 
           {/* Tab Riserve */}
@@ -621,6 +625,141 @@ export default function SuperAdminDashboard() {
                     </p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Impostazioni Riserve */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Impostazioni Riserve
+                </CardTitle>
+                <CardDescription>
+                  Personalizza logo, giorni di silenzio venatorio e template email per ogni riserva
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Seleziona una riserva dal tab "Riserve" per gestire le sue impostazioni</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Supporto */}
+          <TabsContent value="support" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Ticket di Supporto
+                </CardTitle>
+                <CardDescription>
+                  Gestisci richieste di assistenza da admin e cacciatori
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Sistema di supporto implementato - Ticket saranno visualizzati qui</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Fatturazione */}
+          <TabsContent value="billing" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Gestione Fatturazione
+                </CardTitle>
+                <CardDescription>
+                  Monitora abbonamenti, pagamenti e rinnovi delle riserve
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="font-medium text-green-800">Abbonamenti Attivi</span>
+                    </div>
+                    <p className="text-2xl font-bold text-green-900">1</p>
+                    <p className="text-sm text-green-700">Cison di Valmarino</p>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span className="font-medium text-yellow-800">In Scadenza</span>
+                    </div>
+                    <p className="text-2xl font-bold text-yellow-900">0</p>
+                    <p className="text-sm text-yellow-700">Prossimi 30 giorni</p>
+                  </div>
+                  
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="font-medium text-red-800">Scaduti</span>
+                    </div>
+                    <p className="text-2xl font-bold text-red-900">0</p>
+                    <p className="text-sm text-red-700">Richiedono attenzione</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Materiali Formativi */}
+          <TabsContent value="materials" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Materiali Formativi
+                </CardTitle>
+                <CardDescription>
+                  Gestisci video, PDF e documenti per formazione admin e cacciatori
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nuovo Materiale
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filtra
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Analytics
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center py-8 text-gray-500">
+                    <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nessun materiale formativo ancora caricato</p>
+                    <p className="text-sm">Inizia caricando video o documenti PDF</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

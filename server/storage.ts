@@ -844,6 +844,263 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedAdmin;
   }
+
+  // Reserve Settings Management (SUPERADMIN only)
+  async getReserveSettings(reserveId: string): Promise<ReserveSettings | undefined> {
+    const [settings] = await db
+      .select()
+      .from(reserveSettings)
+      .where(eq(reserveSettings.reserveId, reserveId));
+    return settings || undefined;
+  }
+
+  async createReserveSettings(settings: InsertReserveSettings): Promise<ReserveSettings> {
+    const [newSettings] = await db
+      .insert(reserveSettings)
+      .values(settings)
+      .returning();
+    return newSettings;
+  }
+
+  async updateReserveSettings(reserveId: string, data: Partial<ReserveSettings>): Promise<ReserveSettings | undefined> {
+    const [updatedSettings] = await db
+      .update(reserveSettings)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(reserveSettings.reserveId, reserveId))
+      .returning();
+    return updatedSettings || undefined;
+  }
+
+  // Contracts Management (SUPERADMIN only)
+  async getAllContracts(): Promise<(Contract & { reserve: Reserve })[]> {
+    const result = await db
+      .select()
+      .from(contracts)
+      .leftJoin(reserves, eq(contracts.reserveId, reserves.id));
+    return result.map(row => ({ ...row.contracts, reserve: row.reserves! }));
+  }
+
+  async getContractByReserve(reserveId: string): Promise<Contract | undefined> {
+    const [contract] = await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.reserveId, reserveId));
+    return contract || undefined;
+  }
+
+  async createContract(contract: InsertContract): Promise<Contract> {
+    const [newContract] = await db
+      .insert(contracts)
+      .values(contract)
+      .returning();
+    return newContract;
+  }
+
+  async updateContract(id: number, data: Partial<Contract>): Promise<Contract | undefined> {
+    const [updatedContract] = await db
+      .update(contracts)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(contracts.id, id))
+      .returning();
+    return updatedContract || undefined;
+  }
+
+  async deleteContract(id: number): Promise<void> {
+    await db.delete(contracts).where(eq(contracts.id, id));
+  }
+
+  // Support Tickets Management (SUPERADMIN only)
+  async getAllSupportTickets(filters?: { status?: string; priority?: string; reserveId?: string }): Promise<(SupportTicket & { reserve: Reserve; admin?: User })[]> {
+    let query = db
+      .select()
+      .from(supportTickets)
+      .leftJoin(reserves, eq(supportTickets.reserveId, reserves.id))
+      .leftJoin(users, eq(supportTickets.adminId, users.id));
+
+    const whereConditions = [];
+    if (filters?.status) {
+      whereConditions.push(eq(supportTickets.status, filters.status));
+    }
+    if (filters?.priority) {
+      whereConditions.push(eq(supportTickets.priority, filters.priority));
+    }
+    if (filters?.reserveId) {
+      whereConditions.push(eq(supportTickets.reserveId, filters.reserveId));
+    }
+
+    if (whereConditions.length > 0) {
+      query = query.where(and(...whereConditions));
+    }
+
+    const result = await query;
+    return result.map(row => ({ 
+      ...row.support_tickets, 
+      reserve: row.reserves!, 
+      admin: row.users || undefined 
+    }));
+  }
+
+  async getSupportTicket(id: number): Promise<(SupportTicket & { reserve: Reserve; admin?: User }) | undefined> {
+    const [result] = await db
+      .select()
+      .from(supportTickets)
+      .leftJoin(reserves, eq(supportTickets.reserveId, reserves.id))
+      .leftJoin(users, eq(supportTickets.adminId, users.id))
+      .where(eq(supportTickets.id, id));
+    
+    if (!result) return undefined;
+    
+    return {
+      ...result.support_tickets,
+      reserve: result.reserves!,
+      admin: result.users || undefined
+    };
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [newTicket] = await db
+      .insert(supportTickets)
+      .values(ticket)
+      .returning();
+    return newTicket;
+  }
+
+  async respondToSupportTicket(id: number, response: string, status?: string): Promise<SupportTicket | undefined> {
+    const updateData: any = { response };
+    if (status) {
+      updateData.status = status;
+      if (status === 'resolved') {
+        updateData.resolvedAt = new Date();
+      }
+    }
+
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set(updateData)
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return updatedTicket || undefined;
+  }
+
+  async updateSupportTicketStatus(id: number, status: string): Promise<SupportTicket | undefined> {
+    const updateData: any = { status };
+    if (status === 'resolved') {
+      updateData.resolvedAt = new Date();
+    }
+
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set(updateData)
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return updatedTicket || undefined;
+  }
+
+  // Billing Management (SUPERADMIN only)
+  async getAllBilling(): Promise<(Billing & { reserve: Reserve })[]> {
+    const result = await db
+      .select()
+      .from(billing)
+      .leftJoin(reserves, eq(billing.reserveId, reserves.id));
+    return result.map(row => ({ ...row.billing, reserve: row.reserves! }));
+  }
+
+  async getBillingByReserve(reserveId: string): Promise<Billing | undefined> {
+    const [billingRecord] = await db
+      .select()
+      .from(billing)
+      .where(eq(billing.reserveId, reserveId));
+    return billingRecord || undefined;
+  }
+
+  async createBilling(billingData: InsertBilling): Promise<Billing> {
+    const [newBilling] = await db
+      .insert(billing)
+      .values(billingData)
+      .returning();
+    return newBilling;
+  }
+
+  async updateBilling(id: number, data: Partial<Billing>): Promise<Billing | undefined> {
+    const [updatedBilling] = await db
+      .update(billing)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(billing.id, id))
+      .returning();
+    return updatedBilling || undefined;
+  }
+
+  // Materials Management (SUPERADMIN only)
+  async getAllMaterials(): Promise<Material[]> {
+    return await db.select().from(materials).where(eq(materials.isActive, true));
+  }
+
+  async getMaterial(id: number): Promise<Material | undefined> {
+    const [material] = await db
+      .select()
+      .from(materials)
+      .where(and(eq(materials.id, id), eq(materials.isActive, true)));
+    return material || undefined;
+  }
+
+  async createMaterial(material: InsertMaterial): Promise<Material> {
+    const [newMaterial] = await db
+      .insert(materials)
+      .values(material)
+      .returning();
+    return newMaterial;
+  }
+
+  async updateMaterial(id: number, data: Partial<Material>): Promise<Material | undefined> {
+    const [updatedMaterial] = await db
+      .update(materials)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(materials.id, id))
+      .returning();
+    return updatedMaterial || undefined;
+  }
+
+  async deleteMaterial(id: number): Promise<void> {
+    await db
+      .update(materials)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(materials.id, id));
+  }
+
+  async logMaterialAccess(materialId: number, userId: number): Promise<MaterialAccessLog> {
+    const [accessLog] = await db
+      .insert(materialAccessLog)
+      .values({ materialId, userId })
+      .returning();
+    return accessLog;
+  }
+
+  async getMaterialAccessLogs(materialId?: number, userId?: number): Promise<(MaterialAccessLog & { material: Material; user: User })[]> {
+    let query = db
+      .select()
+      .from(materialAccessLog)
+      .leftJoin(materials, eq(materialAccessLog.materialId, materials.id))
+      .leftJoin(users, eq(materialAccessLog.userId, users.id));
+
+    const whereConditions = [];
+    if (materialId) {
+      whereConditions.push(eq(materialAccessLog.materialId, materialId));
+    }
+    if (userId) {
+      whereConditions.push(eq(materialAccessLog.userId, userId));
+    }
+
+    if (whereConditions.length > 0) {
+      query = query.where(and(...whereConditions));
+    }
+
+    const result = await query;
+    return result.map(row => ({
+      ...row.material_access_log,
+      material: row.materials!,
+      user: row.users!
+    }));
+  }
 }
 
 export const storage = new DatabaseStorage();
