@@ -72,6 +72,7 @@ export interface IStorage {
   validateReserveAccess(reserveId: string, accessCode: string): Promise<Reserve | null>;
   createAdminAccount(data: InsertUser): Promise<User>;
   getAllAdmins(): Promise<User[]>;
+  updateAdmin(id: number, data: Partial<User>): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -778,6 +779,18 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.role, 'ADMIN'))
       .orderBy(users.firstName, users.lastName);
+  }
+
+  /**
+   * Aggiorna un account admin (solo SUPERADMIN)
+   */
+  async updateAdmin(id: number, data: Partial<User>): Promise<User | undefined> {
+    const [updatedAdmin] = await db
+      .update(users)
+      .set(data)
+      .where(and(eq(users.id, id), eq(users.role, 'ADMIN')))
+      .returning();
+    return updatedAdmin;
   }
 }
 

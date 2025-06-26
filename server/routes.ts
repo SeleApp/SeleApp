@@ -149,11 +149,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: admin.firstName,
         lastName: admin.lastName,
         isActive: admin.isActive,
+        reserveId: admin.reserveId,
         createdAt: admin.createdAt
       })));
     } catch (error) {
       console.error("Error fetching admins:", error);
       res.status(500).json({ error: "Errore nel recupero degli admin" });
+    }
+  });
+
+  // Endpoint per modificare un admin (solo SUPERADMIN)
+  app.patch("/api/superadmin/admins/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res: Response) => {
+    try {
+      const adminId = parseInt(req.params.id);
+      const updateData = req.body;
+
+      // Se viene fornita una password, la hashiamo
+      if (updateData.password) {
+        updateData.password = await bcrypt.hash(updateData.password, 12);
+      }
+
+      const updatedAdmin = await storage.updateAdmin(adminId, updateData);
+      
+      if (!updatedAdmin) {
+        return res.status(404).json({ error: "Admin non trovato" });
+      }
+
+      res.json({
+        message: "Admin aggiornato con successo",
+        admin: {
+          id: updatedAdmin.id,
+          email: updatedAdmin.email,
+          firstName: updatedAdmin.firstName,
+          lastName: updatedAdmin.lastName,
+          isActive: updatedAdmin.isActive,
+          reserveId: updatedAdmin.reserveId
+        }
+      });
+    } catch (error) {
+      console.error("Error updating admin:", error);
+      res.status(500).json({ error: "Errore nell'aggiornamento dell'admin" });
     }
   });
 

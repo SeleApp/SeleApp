@@ -5,14 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, MapPin, Target, Calendar, Building2, LogOut, Shield } from "lucide-react";
+import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
-import AdminManagementModal from "@/components/admin-management-modal";
+import { useToast } from "@/hooks/use-toast";
 
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
 
@@ -21,30 +24,78 @@ interface Reserve {
   name: string;
   comune: string;
   emailContatto: string;
+  accessCode?: string;
+  isActive: boolean;
   createdAt: string;
   stats: {
     totalUsers: number;
-    totalZones: number;
-    totalQuotas: number;
-    activeReservations: number;
   };
 }
 
+interface Admin {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+  createdAt: string;
+  reserveId: string | null;
+}
+
 export default function SuperAdminDashboard() {
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [createReserveOpen, setCreateReserveOpen] = useState(false);
+  const [createAdminOpen, setCreateAdminOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleLogout = () => {
     authService.logout();
   };
 
-  const { data: reserves, isLoading } = useQuery<Reserve[]>({
+  // Query per le riserve
+  const { data: reserves = [], isLoading: reservesLoading } = useQuery<Reserve[]>({
     queryKey: ["/api/reserves"],
   });
 
+  // Query per gli admin
+  const { data: admins = [], isLoading: adminsLoading } = useQuery<Admin[]>({
+    queryKey: ["/api/superadmin/admins"],
+  });
+
+  // Form per creare riserve
+  const reserveForm = useForm<CreateReserveData>({
+    resolver: zodResolver(insertReserveSchema.omit({ id: true })),
+    defaultValues: {
+      name: "",
+      comune: "",
+      emailContatto: "",
+      accessCode: "",
+      isActive: true,
+    },
+  });
+
+  // Form per creare/modificare admin
+  const adminForm = useForm({
+    resolver: zodResolver(z.object({
+      email: z.string().email("Email non valida"),
+      firstName: z.string().min(2, "Nome minimo 2 caratteri"),
+      lastName: z.string().min(2, "Cognome minimo 2 caratteri"),
+      password: z.string().min(6, "Password minimo 6 caratteri").optional(),
+      reserveId: z.string().optional(),
+    })),
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      reserveId: "",
+    },
+  });
+
+  // Mutation per creare riserve
   const createReserveMutation = useMutation({
-    mutationFn: async (data: Omit<CreateReserveData, 'id'>) => {
+    mutationFn: async (data: CreateReserveData) => {
       const response = await fetch("/api/reserves", {
         method: "POST",
         headers: {
@@ -62,268 +113,513 @@ export default function SuperAdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
-      setCreateModalOpen(false);
-      form.reset();
+      setCreateReserveOpen(false);
+      reserveForm.reset();
+      toast({
+        title: "Successo",
+        description: "Riserva creata con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nella creazione della riserva",
+      });
     },
   });
 
-  const form = useForm<Omit<CreateReserveData, 'id'>>({
-    resolver: zodResolver(insertReserveSchema.omit({ id: true })),
-    defaultValues: {
-      name: "",
-      comune: "",
-      emailContatto: "",
+  // Mutation per creare admin
+  const createAdminMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("/api/superadmin/create-admin", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/superadmin/admins"] });
+      setCreateAdminOpen(false);
+      adminForm.reset();
+      toast({
+        title: "Successo",
+        description: "Admin creato con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nella creazione dell'admin",
+      });
     },
   });
 
-  const onSubmit = (data: Omit<CreateReserveData, 'id'>) => {
+  // Mutation per modificare admin
+  const updateAdminMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number, data: any }) => {
+      return apiRequest(`/api/superadmin/admins/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/superadmin/admins"] });
+      setEditingAdmin(null);
+      adminForm.reset();
+      toast({
+        title: "Successo",
+        description: "Admin aggiornato con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nell'aggiornamento dell'admin",
+      });
+    },
+  });
+
+  const onCreateReserve = (data: CreateReserveData) => {
     createReserveMutation.mutate(data);
   };
 
-  if (isLoading) {
+  const onCreateAdmin = (data: any) => {
+    if (editingAdmin) {
+      updateAdminMutation.mutate({ id: editingAdmin.id, data });
+    } else {
+      createAdminMutation.mutate(data);
+    }
+  };
+
+  const startEditingAdmin = (admin: Admin) => {
+    setEditingAdmin(admin);
+    adminForm.reset({
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      reserveId: admin.reserveId || "",
+    });
+    setCreateAdminOpen(true);
+  };
+
+  const generateAccessCode = () => {
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+    reserveForm.setValue("accessCode", code);
+  };
+
+  if (reservesLoading || adminsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Caricamento dashboard...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Caricamento dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Dashboard Super Amministratore
-              </h1>
-              <p className="text-gray-600">
-                Gestisci tutte le riserve di caccia sulla piattaforma SeleApp
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Shield className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard SuperAdmin</h1>
+                <p className="text-sm text-gray-600">Gestione completa del sistema SeleApp</p>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Esci
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs defaultValue="reserves" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="reserves">Gestione Riserve</TabsTrigger>
+            <TabsTrigger value="admins">Gestione Amministratori</TabsTrigger>
+          </TabsList>
+
+          {/* Tab Riserve */}
+          <TabsContent value="reserves" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Riserve di Caccia</h2>
+                <p className="text-gray-600">Gestisci tutte le riserve del sistema</p>
+              </div>
+              <Dialog open={createReserveOpen} onOpenChange={setCreateReserveOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-green-600 hover:bg-green-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Nuova Riserva
                   </Button>
                 </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Crea Nuova Riserva</DialogTitle>
-                  <DialogDescription>
-                    Aggiungi una nuova riserva di caccia al sistema
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Nome Riserva</Label>
-                    <Input
-                      id="name"
-                      {...form.register("name")}
-                      placeholder="es. Riserva di Valstagna"
-                    />
-                    {form.formState.errors.name && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {form.formState.errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="comune">Comune</Label>
-                    <Input
-                      id="comune"
-                      {...form.register("comune")}
-                      placeholder="es. Valstagna"
-                    />
-                    {form.formState.errors.comune && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {form.formState.errors.comune.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="emailContatto">Email di Contatto</Label>
-                    <Input
-                      id="emailContatto"
-                      type="email"
-                      {...form.register("emailContatto")}
-                      placeholder="es. admin@riservavalstagna.it"
-                    />
-                    {form.formState.errors.emailContatto && (
-                      <p className="text-sm text-red-600 mt-1">
-                        {form.formState.errors.emailContatto.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex justify-end space-x-2 pt-4">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setCreateModalOpen(false)}
-                    >
-                      Annulla
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={createReserveMutation.isPending}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      {createReserveMutation.isPending ? "Creazione..." : "Crea Riserva"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-              <Button 
-                onClick={() => setAdminModalOpen(true)}
-                variant="outline"
-                className="border-blue-200 text-blue-600 hover:bg-blue-50"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Gestisci Admin
-              </Button>
-              
-              <Button 
-                onClick={handleLogout}
-                variant="outline" 
-                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Crea Nuova Riserva</DialogTitle>
+                    <DialogDescription>
+                      Inserisci i dati della nuova riserva di caccia
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={reserveForm.handleSubmit(onCreateReserve)} className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Nome Riserva</Label>
+                      <Input
+                        id="name"
+                        {...reserveForm.register("name")}
+                        placeholder="Es. Riserva Monte Verde"
+                      />
+                      {reserveForm.formState.errors.name && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.name.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="comune">Comune</Label>
+                      <Input
+                        id="comune"
+                        {...reserveForm.register("comune")}
+                        placeholder="Es. Treviso"
+                      />
+                      {reserveForm.formState.errors.comune && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.comune.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="emailContatto">Email Contatto</Label>
+                      <Input
+                        id="emailContatto"
+                        type="email"
+                        {...reserveForm.register("emailContatto")}
+                        placeholder="admin@riserva.it"
+                      />
+                      {reserveForm.formState.errors.emailContatto && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.emailContatto.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="accessCode">Codice d'Accesso</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          onClick={generateAccessCode}
+                        >
+                          Genera
+                        </Button>
+                      </div>
+                      <Input
+                        id="accessCode"
+                        {...reserveForm.register("accessCode")}
+                        placeholder="Codice per registrazione cacciatori"
+                      />
+                      {reserveForm.formState.errors.accessCode && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.accessCode.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCreateReserveOpen(false)}
+                      >
+                        Annulla
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createReserveMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {createReserveMutation.isPending ? "Creazione..." : "Crea Riserva"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
-          </div>
-        </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Riserve Totali</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{reserves?.length || 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Utenti Totali</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {reserves?.reduce((sum, reserve) => sum + reserve.stats.totalUsers, 0) || 0}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Zone Totali</CardTitle>
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {reserves?.reduce((sum, reserve) => sum + reserve.stats.totalZones, 0) || 0}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Prenotazioni Attive</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {reserves?.reduce((sum, reserve) => sum + reserve.stats.activeReservations, 0) || 0}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Reserves List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reserves?.map((reserve) => (
-            <Card key={reserve.id} className="hover:shadow-lg transition-shadow">
+            {/* Tabella Riserve */}
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{reserve.name}</CardTitle>
+                <CardTitle>Elenco Riserve</CardTitle>
                 <CardDescription>
-                  {reserve.comune} • {reserve.emailContatto}
+                  {reserves.length} riserve totali nel sistema
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-2 text-blue-600" />
-                    <span>{reserve.stats.totalUsers} utenti</span>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Comune</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Utenti</TableHead>
+                      <TableHead>Stato</TableHead>
+                      <TableHead>Creata</TableHead>
+                      <TableHead className="text-right">Azioni</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reserves.map((reserve) => (
+                      <TableRow key={reserve.id}>
+                        <TableCell className="font-medium">{reserve.name}</TableCell>
+                        <TableCell>{reserve.comune}</TableCell>
+                        <TableCell>{reserve.emailContatto}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 mr-1 text-blue-600" />
+                            {reserve.stats.totalUsers}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={reserve.isActive ? "default" : "secondary"}>
+                            {reserve.isActive ? "Attiva" : "Inattiva"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                {reserves.length === 0 && (
+                  <div className="text-center py-12">
+                    <Building2 className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">Nessuna riserva</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Inizia creando la prima riserva di caccia.
+                    </p>
                   </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-2 text-green-600" />
-                    <span>{reserve.stats.totalZones} zone</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Target className="w-4 h-4 mr-2 text-orange-600" />
-                    <span>{reserve.stats.totalQuotas} quote</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2 text-purple-600" />
-                    <span>{reserve.stats.activeReservations} attive</span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => {
-                      // TODO: Implement reserve switching/impersonation
-                      console.log("Switch to reserve:", reserve.id);
-                    }}
-                  >
-                    Accedi alla Riserva
-                  </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
+          </TabsContent>
 
-        {/* Empty State */}
-        {reserves?.length === 0 && (
-          <div className="text-center py-12">
-            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Nessuna riserva</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Inizia creando la prima riserva di caccia.
-            </p>
-            <div className="mt-6">
-              <Button 
-                onClick={() => setCreateModalOpen(true)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Crea Prima Riserva
-              </Button>
+          {/* Tab Amministratori */}
+          <TabsContent value="admins" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Amministratori</h2>
+                <p className="text-gray-600">Gestisci gli account amministratore</p>
+              </div>
+              <Dialog open={createAdminOpen} onOpenChange={setCreateAdminOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Nuovo Admin
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingAdmin ? "Modifica Amministratore" : "Crea Nuovo Amministratore"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {editingAdmin 
+                        ? "Modifica i dati dell'amministratore"
+                        : "Inserisci i dati del nuovo amministratore"
+                      }
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={adminForm.handleSubmit(onCreateAdmin)} className="space-y-4">
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        {...adminForm.register("email")}
+                        placeholder="admin@example.com"
+                      />
+                      {adminForm.formState.errors.email && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {adminForm.formState.errors.email.message}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">Nome</Label>
+                        <Input
+                          id="firstName"
+                          {...adminForm.register("firstName")}
+                          placeholder="Mario"
+                        />
+                        {adminForm.formState.errors.firstName && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {adminForm.formState.errors.firstName.message}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="lastName">Cognome</Label>
+                        <Input
+                          id="lastName"
+                          {...adminForm.register("lastName")}
+                          placeholder="Rossi"
+                        />
+                        {adminForm.formState.errors.lastName && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {adminForm.formState.errors.lastName.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="password">
+                        Password {editingAdmin && "(lascia vuoto per non modificare)"}
+                      </Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        {...adminForm.register("password")}
+                        placeholder="Minimo 6 caratteri"
+                      />
+                      {adminForm.formState.errors.password && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {adminForm.formState.errors.password.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setCreateAdminOpen(false);
+                          setEditingAdmin(null);
+                          adminForm.reset();
+                        }}
+                      >
+                        Annulla
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createAdminMutation.isPending || updateAdminMutation.isPending}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {(createAdminMutation.isPending || updateAdminMutation.isPending)
+                          ? "Salvando..."
+                          : editingAdmin
+                          ? "Aggiorna"
+                          : "Crea Admin"
+                        }
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
-          </div>
-        )}
 
-        {/* Admin Management Modal */}
-        <AdminManagementModal 
-          open={adminModalOpen} 
-          onOpenChange={setAdminModalOpen} 
-        />
+            {/* Tabella Amministratori */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Elenco Amministratori</CardTitle>
+                <CardDescription>
+                  {admins.length} amministratori nel sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Riserva</TableHead>
+                      <TableHead>Stato</TableHead>
+                      <TableHead>Creato</TableHead>
+                      <TableHead className="text-right">Azioni</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {admins.map((admin) => (
+                      <TableRow key={admin.id}>
+                        <TableCell className="font-medium">
+                          {admin.firstName} {admin.lastName}
+                        </TableCell>
+                        <TableCell>{admin.email}</TableCell>
+                        <TableCell>
+                          {admin.reserveId || (
+                            <span className="text-gray-500 italic">Non assegnata</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={admin.isActive ? "default" : "secondary"}>
+                            {admin.isActive ? "Attivo" : "Inattivo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(admin.createdAt).toLocaleDateString("it-IT")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditingAdmin(admin)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                {admins.length === 0 && (
+                  <div className="text-center py-12">
+                    <Shield className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">Nessun amministratore</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Crea il primo account amministratore.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
