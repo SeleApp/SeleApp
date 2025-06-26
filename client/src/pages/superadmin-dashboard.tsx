@@ -732,24 +732,24 @@ export default function SuperAdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
                         <Plus className="h-4 w-4 mr-2" />
                         Nuovo Materiale
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="whitespace-nowrap">
                         <Upload className="h-4 w-4 mr-2" />
                         Upload
                       </Button>
                     </div>
                     
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" className="whitespace-nowrap">
                         <Filter className="h-4 w-4 mr-2" />
                         Filtra
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="whitespace-nowrap">
                         <BarChart3 className="h-4 w-4 mr-2" />
                         Analytics
                       </Button>
@@ -758,8 +758,8 @@ export default function SuperAdminDashboard() {
                   
                   <div className="text-center py-8 text-gray-500">
                     <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Nessun materiale formativo ancora caricato</p>
-                    <p className="text-sm">Inizia caricando video o documenti PDF</p>
+                    <p className="text-base sm:text-lg">Nessun materiale formativo ancora caricato</p>
+                    <p className="text-sm text-gray-400 mt-2">Inizia caricando video o documenti PDF</p>
                   </div>
                 </div>
               </CardContent>
