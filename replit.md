@@ -282,6 +282,12 @@ Changelog:
   - **Logo System**: Implemented SeleApp deer logo across all platforms (192px, 512px, Apple touch icon)
   - **Installation Guide**: Users can "Add to Home Screen" on mobile devices for native app experience
   - **Offline Support**: Basic offline functionality with cached resources and fallback strategies
+- June 26, 2025. **LANDING PAGE LEGAL COMPLIANCE**: Completed footer cleanup and legal documentation
+  - **Support Section**: Simplified to show only seleapp.info@gmail.com contact
+  - **Privacy Policy**: Created comprehensive GDPR-compliant privacy policy at /privacy-policy.html
+  - **Terms of Service**: Created detailed terms with proprietary license protection at /termini-servizio.html
+  - **Footer Navigation**: Updated links to connect properly to legal documents
+  - **Professional Layout**: Consistent design with home button and proper navigation structure
 
 # User Preferences
 
