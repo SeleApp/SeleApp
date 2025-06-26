@@ -170,18 +170,10 @@ export default function SuperAdminDashboard() {
   // Mutation per modificare admin
   const updateAdminMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: any }) => {
-      const response = await fetch(`/api/superadmin/admins/${id}`, {
+      const response = await apiRequest(`/api/superadmin/admins/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: JSON.stringify(data),
       });
-      
-      if (!response.ok) {
-        throw new Error("Errore nell'aggiornamento dell'admin");
-      }
       
       return response.json();
     },
