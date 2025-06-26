@@ -294,6 +294,12 @@ Changelog:
   - **Landing Page Finalized**: Title centered, support section simplified, all legal links functional
   - **GitHub Preparation**: Project ready for push to https://github.com/SeleApp/SeleApp.git
   - **Production Ready**: All systems operational with proprietary protection in place
+- June 26, 2025. **GMAIL EMAIL SYSTEM**: Migrated from MailerSend to Gmail for email notifications
+  - **Service Migration**: Replaced MailerSend with Nodemailer + Gmail SMTP for better reliability
+  - **Authentication**: Configured Gmail App Password authentication for secure email sending
+  - **Email Templates**: Maintained all existing email functionality (reservation confirmations, cancellations, contact forms)
+  - **Environment Variables**: Added GMAIL_USER and GMAIL_APP_PASSWORD secrets for Gmail integration
+  - **Production Ready**: Email system fully operational and tested successfully
 
 # User Preferences
 

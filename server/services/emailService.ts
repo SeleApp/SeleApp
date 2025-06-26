@@ -2,15 +2,16 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
+import nodemailer from 'nodemailer';
 
-const mailerSend = new MailerSend({
-  apiKey: process.env.MAILERSEND_API_KEY || "",
+// Configurazione Gmail con Nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
 });
-
-// Email del mittente (dovrai verificare questo dominio su MailerSend)
-const fromEmail = "noreply@seleapp.com"; // Sostituisci con il tuo dominio verificato
-const fromName = "SeleApp Cison di Val Marino";
 
 interface ReservationEmailData {
   hunterEmail: string;
@@ -43,14 +44,11 @@ export class EmailService {
         ? '12:00-Tramonto' 
         : 'Alba-Tramonto';
 
-      const sentFrom = new Sender(fromEmail, fromName);
-      const recipients = [new Recipient(data.hunterEmail, data.hunterName)];
-
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setSubject("✅ Prenotazione Confermata - SeleApp")
-        .setHtml(`
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.hunterEmail,
+        subject: "✅ Prenotazione Confermata - SeleApp",
+        html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #2d5016; text-align: center;">🦌 Prenotazione Confermata</h2>
             
@@ -80,11 +78,11 @@ export class EmailService {
 
             <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
               Questa è una email automatica del sistema SeleApp<br>
-              Cison di Val Marino - Gestione Attività Venatoria
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
             </p>
           </div>
-        `)
-        .setText(`
+        `,
+        text: `
           PRENOTAZIONE CONFERMATA - SeleApp
           
           Caro ${data.hunterName},
@@ -104,10 +102,11 @@ export class EmailService {
           
           Buona caccia!
           
-          SeleApp - Cison di Val Marino
-        `);
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
 
-      await mailerSend.email.send(emailParams);
+      await transporter.sendMail(mailOptions);
       console.log(`Email di conferma prenotazione inviata a ${data.hunterEmail}`);
       return true;
     } catch (error) {
@@ -131,14 +130,11 @@ export class EmailService {
         ? 'da te' 
         : 'dall\'amministratore del sistema';
 
-      const sentFrom = new Sender(fromEmail, fromName);
-      const recipients = [new Recipient(data.hunterEmail, data.hunterName)];
-
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setSubject("❌ Prenotazione Annullata - SeleApp")
-        .setHtml(`
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.hunterEmail,
+        subject: "❌ Prenotazione Annullata - SeleApp",
+        html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #dc2626; text-align: center;">❌ Prenotazione Annullata</h2>
             
@@ -177,11 +173,11 @@ export class EmailService {
 
             <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
               Questa è una email automatica del sistema SeleApp<br>
-              Cison di Val Marino - Gestione Attività Venatoria
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
             </p>
           </div>
-        `)
-        .setText(`
+        `,
+        text: `
           PRENOTAZIONE ANNULLATA - SeleApp
           
           Caro ${data.hunterName},
@@ -200,10 +196,11 @@ export class EmailService {
           
           Puoi effettuare una nuova prenotazione accedendo al sistema SeleApp.
           
-          SeleApp - Cison di Val Marino
-        `);
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
 
-      await mailerSend.email.send(emailParams);
+      await transporter.sendMail(mailOptions);
       console.log(`Email di cancellazione prenotazione inviata a ${data.hunterEmail}`);
       return true;
     } catch (error) {
@@ -217,15 +214,12 @@ export class EmailService {
    */
   static async sendContactRequest(data: ContactRequestData): Promise<boolean> {
     try {
-      const emailParams = new EmailParams()
-        .setFrom(fromEmail)
-        .setFromName("SeleApp Contact Form")
-        .setRecipients([
-          new Recipient("seleapp.info@gmail.com", "SeleApp Support")
-        ])
-        .setReplyTo(data.email, `${data.firstName} ${data.lastName}`)
-        .setSubject(`Nuova Richiesta di Informazioni - ${data.firstName} ${data.lastName}`)
-        .setHtml(`
+      const mailOptions = {
+        from: `"${data.firstName} ${data.lastName}" <${process.env.GMAIL_USER}>`,
+        to: 'seleapp.info@gmail.com',
+        replyTo: data.email,
+        subject: `Nuova Richiesta di Informazioni - ${data.firstName} ${data.lastName}`,
+        html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
             <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <h2 style="color: #28a745; text-align: center; margin-bottom: 30px;">
@@ -251,8 +245,8 @@ export class EmailService {
               </p>
             </div>
           </div>
-        `)
-        .setText(`
+        `,
+        text: `
           NUOVA RICHIESTA DI INFORMAZIONI - SeleApp
           
           Dati del Richiedente:
@@ -266,9 +260,10 @@ export class EmailService {
           
           Ricevuto tramite il form di contatto di SeleApp
           Data: ${new Date().toLocaleString('it-IT')}
-        `);
+        `
+      };
 
-      await mailerSend.email.send(emailParams);
+      await transporter.sendMail(mailOptions);
       console.log(`Richiesta di contatto inviata da ${data.email}`);
       return true;
     } catch (error) {
