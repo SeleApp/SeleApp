@@ -12,4 +12,4 @@ Benvenuto in SeleApp. Il presente software è riservato esclusivamente agli uten
 - L'autore non è responsabile per l'uso improprio o la perdita di dati
 
 ## Contatti
-Per supporto, licenze aggiuntive o segnalazioni: seleapp@dominio.it
+Per supporto, licenze aggiuntive o segnalazioni: seleapp.info@gmail.com
