@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw } from "lucide-react";
+import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -247,15 +247,26 @@ export default function SuperAdminDashboard() {
                 <p className="text-sm text-gray-600">Gestione completa del sistema SeleApp</p>
               </div>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Esci
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => window.open('/api/download/manual', '_blank')}
+                variant="outline"
+                size="sm"
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Manuale Utente
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Esci
+              </Button>
+            </div>
           </div>
         </div>
       </div>

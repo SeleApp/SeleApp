@@ -283,6 +283,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Download user manual
+  app.get("/api/download/manual", async (req: Request, res: Response) => {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      const manualPath = path.join(process.cwd(), 'MANUALE_UTENTE.md');
+      
+      if (!fs.existsSync(manualPath)) {
+        return res.status(404).send(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>File non trovato</title></head>
+          <body><h1>Manuale utente non trovato</h1><p>Il file MANUALE_UTENTE.md non esiste.</p></body>
+          </html>
+        `);
+      }
+
+      const manualContent = fs.readFileSync(manualPath, 'utf8');
+      
+      // Set proper headers for file download
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', 'attachment; filename="SeleApp_Manuale_Utente.md"');
+      res.setHeader('Content-Length', Buffer.byteLength(manualContent, 'utf8'));
+      
+      res.send(manualContent);
+    } catch (error) {
+      console.error('Error downloading manual:', error);
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Errore</title></head>
+        <body><h1>Errore nel download</h1><p>Si è verificato un errore durante il download del manuale.</p></body>
+        </html>
+      `);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
