@@ -16,6 +16,7 @@ import reservesRoutes from "./routes/reserves";
 import { authenticateToken, requireRole, type AuthRequest } from "./middleware/auth";
 import { storage } from "./storage";
 import { registerHunterBackendSchema, createAdminSchema } from "@shared/schema";
+import { EmailService } from "./services/emailService.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -81,6 +82,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: true,
       }, data.reserveId);
 
+      // Invia email di benvenuto
+      try {
+        const reserve = await storage.getReserve(data.reserveId);
+        if (reserve) {
+          await EmailService.sendHunterWelcome({
+            hunterEmail: user.email,
+            hunterName: `${user.firstName} ${user.lastName}`,
+            reserveName: reserve.name
+          });
+        }
+      } catch (emailError) {
+        console.error("Errore invio email benvenuto:", emailError);
+        // Non bloccare la registrazione per errori email
+      }
+
       res.status(201).json({ 
         message: "Cacciatore registrato con successo",
         user: { 
@@ -121,6 +137,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...data,
         password: hashedPassword,
       });
+
+      // Invia email di conferma account admin
+      try {
+        const reserve = await storage.getReserve(data.reserveId);
+        if (reserve) {
+          await EmailService.sendAdminCreated({
+            adminEmail: admin.email,
+            adminName: `${admin.firstName} ${admin.lastName}`,
+            reserveName: reserve.name,
+            temporaryPassword: data.password // Password originale prima dell'hash
+          });
+        }
+      } catch (emailError) {
+        console.error("Errore invio email admin creato:", emailError);
+        // Non bloccare la creazione per errori email
+      }
 
       res.status(201).json({ 
         message: "Account admin creato con successo",

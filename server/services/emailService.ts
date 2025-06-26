@@ -31,6 +31,19 @@ interface ContactRequestData {
   message: string;
 }
 
+interface WelcomeEmailData {
+  hunterEmail: string;
+  hunterName: string;
+  reserveName: string;
+}
+
+interface AdminCreatedEmailData {
+  adminEmail: string;
+  adminName: string;
+  reserveName: string;
+  temporaryPassword: string;
+}
+
 export class EmailService {
   
   /**
@@ -205,6 +218,196 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Errore invio email cancellazione prenotazione:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Invia email di benvenuto per nuovo cacciatore registrato
+   */
+  static async sendHunterWelcome(data: WelcomeEmailData): Promise<boolean> {
+    try {
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.hunterEmail,
+        subject: "🎯 Benvenuto in SeleApp - Account Creato con Successo",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #2d5016; text-align: center;">🦌 Benvenuto in SeleApp!</h2>
+            
+            <div style="background-color: #f8fdf4; border: 2px solid #4ade80; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #2d5016; margin-top: 0;">Account Creato con Successo</h3>
+              <p><strong>Nome:</strong> ${data.hunterName}</p>
+              <p><strong>Email:</strong> ${data.hunterEmail}</p>
+              <p><strong>Riserva:</strong> ${data.reserveName}</p>
+              <p style="color: #16a34a;"><strong>✅ Il tuo account è ora attivo e pronto all'uso!</strong></p>
+            </div>
+
+            <div style="background-color: #e0f2fe; border-left: 4px solid #0288d1; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #01579b; margin-top: 0;">🚀 Cosa puoi fare ora:</h4>
+              <ul style="color: #01579b; margin: 0;">
+                <li>Accedere al sistema con le tue credenziali</li>
+                <li>Visualizzare le zone di caccia disponibili</li>
+                <li>Prenotare le tue uscite di caccia</li>
+                <li>Consultare le quote regionali in tempo reale</li>
+                <li>Compilare i report post-caccia</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #92400e; margin-top: 0;">📋 Informazioni Importanti:</h4>
+              <ul style="color: #92400e; margin: 0;">
+                <li>Conserva le tue credenziali di accesso in luogo sicuro</li>
+                <li>Rispetta sempre i regolamenti di caccia della riserva</li>
+                <li>Completa sempre i report dopo ogni uscita</li>
+                <li>Per assistenza contatta: seleapp.info@gmail.com</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <p style="font-size: 18px; color: #2d5016;"><strong>Buona caccia e benvenuto nella famiglia SeleApp!</strong></p>
+            </div>
+
+            <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Questa è una email automatica del sistema SeleApp<br>
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
+            </p>
+          </div>
+        `,
+        text: `
+          BENVENUTO IN SELEAPP - Account Creato con Successo
+          
+          Caro ${data.hunterName},
+          
+          Il tuo account SeleApp è stato creato con successo!
+          
+          DETTAGLI ACCOUNT:
+          - Nome: ${data.hunterName}
+          - Email: ${data.hunterEmail}
+          - Riserva: ${data.reserveName}
+          
+          COSA PUOI FARE ORA:
+          - Accedere al sistema con le tue credenziali
+          - Visualizzare le zone di caccia disponibili
+          - Prenotare le tue uscite di caccia
+          - Consultare le quote regionali in tempo reale
+          - Compilare i report post-caccia
+          
+          INFORMAZIONI IMPORTANTI:
+          - Conserva le tue credenziali di accesso in luogo sicuro
+          - Rispetta sempre i regolamenti di caccia della riserva
+          - Completa sempre i report dopo ogni uscita
+          - Per assistenza contatta: seleapp.info@gmail.com
+          
+          Buona caccia e benvenuto nella famiglia SeleApp!
+          
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email di benvenuto inviata a ${data.hunterEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email benvenuto cacciatore:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Invia email di conferma per nuovo account amministratore
+   */
+  static async sendAdminCreated(data: AdminCreatedEmailData): Promise<boolean> {
+    try {
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.adminEmail,
+        subject: "🔑 Account Amministratore Creato - SeleApp",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #7c2d12; text-align: center;">🛡️ Account Amministratore Creato</h2>
+            
+            <div style="background-color: #fef7ff; border: 2px solid #a855f7; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #7c2d12; margin-top: 0;">Credenziali di Accesso</h3>
+              <p><strong>Nome:</strong> ${data.adminName}</p>
+              <p><strong>Email:</strong> ${data.adminEmail}</p>
+              <p><strong>Riserva:</strong> ${data.reserveName}</p>
+              <p><strong>Password Temporanea:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${data.temporaryPassword}</code></p>
+            </div>
+
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #dc2626; margin-top: 0;">🔒 Sicurezza - Azione Richiesta:</h4>
+              <ul style="color: #dc2626; margin: 0;">
+                <li><strong>Cambia immediatamente la password</strong> al primo accesso</li>
+                <li>Non condividere mai le credenziali con terzi</li>
+                <li>Usa una password forte (almeno 8 caratteri, maiuscole, numeri, simboli)</li>
+                <li>Accedi solo da dispositivi sicuri e personali</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #e0f2fe; border-left: 4px solid #0288d1; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #01579b; margin-top: 0;">🛠️ Funzionalità Amministratore:</h4>
+              <ul style="color: #01579b; margin: 0;">
+                <li>Gestione cacciatori della riserva</li>
+                <li>Controllo quote regionali</li>
+                <li>Supervisione prenotazioni</li>
+                <li>Gestione report di caccia</li>
+                <li>Statistiche e monitoraggio attività</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #92400e; margin-top: 0;">📞 Supporto Tecnico:</h4>
+              <p style="color: #92400e; margin: 0;">
+                Per qualsiasi problema tecnico o domande sul sistema, 
+                contatta il supporto SeleApp: seleapp.info@gmail.com
+              </p>
+            </div>
+
+            <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Questa è una email automatica del sistema SeleApp<br>
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
+            </p>
+          </div>
+        `,
+        text: `
+          ACCOUNT AMMINISTRATORE CREATO - SeleApp
+          
+          Caro ${data.adminName},
+          
+          È stato creato un account amministratore SeleApp per te.
+          
+          CREDENZIALI DI ACCESSO:
+          - Email: ${data.adminEmail}
+          - Password Temporanea: ${data.temporaryPassword}
+          - Riserva: ${data.reserveName}
+          
+          SICUREZZA - AZIONE RICHIESTA:
+          - Cambia immediatamente la password al primo accesso
+          - Non condividere mai le credenziali con terzi
+          - Usa una password forte (almeno 8 caratteri, maiuscole, numeri, simboli)
+          - Accedi solo da dispositivi sicuri e personali
+          
+          FUNZIONALITÀ AMMINISTRATORE:
+          - Gestione cacciatori della riserva
+          - Controllo quote regionali
+          - Supervisione prenotazioni
+          - Gestione report di caccia
+          - Statistiche e monitoraggio attività
+          
+          SUPPORTO TECNICO:
+          Per qualsiasi problema tecnico o domande sul sistema, 
+          contatta il supporto SeleApp: seleapp.info@gmail.com
+          
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email account amministratore creato inviata a ${data.adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email admin creato:', error);
       return false;
     }
   }
