@@ -1,3 +1,7 @@
+// © 2025 Alessandro Favero - Tutti i diritti riservati
+// Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
+// Vietata la riproduzione, distribuzione o modifica non autorizzata
+
 import { pgTable, text, serial, integer, boolean, timestamp, varchar, decimal, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";

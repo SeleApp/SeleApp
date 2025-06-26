@@ -1,3 +1,7 @@
+// © 2025 Alessandro Favero - Tutti i diritti riservati
+// Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
+// Vietata la riproduzione, distribuzione o modifica non autorizzata
+
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcrypt";
