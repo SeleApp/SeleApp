@@ -258,6 +258,16 @@ Changelog:
   - **Universal Fix**: Updated all apiRequest calls across components to use new syntax (URL, {method, body})
   - **Hunter Deletion**: Fixed admin hunter deletion with proper reserve-scoped security controls
   - **Complete Resolution**: Eliminated all HTTP method token errors ensuring smooth app operation
+- June 26, 2025. **ACCESS CODE MANAGEMENT SYSTEM**: Implemented comprehensive access code management for reserves (SUPERADMIN only)
+  - **Backend API**: Created `/api/superadmin/access-codes` routes for code generation, modification, and activation
+  - **AccessCodeManager Component**: Professional interface with view/hide, copy, generate, and edit functionality
+  - **Dashboard Integration**: Added "Codice" column to reserves table in superadmin dashboard
+  - **Security Features**: Masked code display, manual/automatic generation, activation controls
+  - **Complete Workflow**: Generate → Activate/Deactivate → Copy → Share with reserve admins for hunter registration
+- June 26, 2025. **LANDING PAGE NAVIGATION UPDATE**: Added FAQ link to main navigation menu
+  - **Navigation Enhancement**: Added "FAQ" link between "Funzionalità" and "Contatti" in header
+  - **User Experience**: Direct access to frequently asked questions section from main navigation
+  - **Consistent Design**: Maintains existing styling and hover effects for seamless integration
 
 # User Preferences
 
