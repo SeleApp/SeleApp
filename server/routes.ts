@@ -11,7 +11,7 @@ import regionalQuotasRoutes from "./routes/regional-quotas";
 import reservesRoutes from "./routes/reserves";
 import { authenticateToken, requireRole, type AuthRequest } from "./middleware/auth";
 import { storage } from "./storage";
-import { registerHunterSchema, createAdminSchema } from "@shared/schema";
+import { registerHunterBackendSchema, createAdminSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
@@ -48,8 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint per registrazione cacciatori con validazione codice d'accesso
   app.post("/api/auth/register-hunter", async (req: Request, res: Response) => {
     try {
-      console.log("Dati ricevuti dal server:", req.body);
-      const data = registerHunterSchema.parse(req.body);
+      const data = registerHunterBackendSchema.parse(req.body);
       
       // Verifica riserva, stato attivo e codice d'accesso
       const reserve = await storage.validateReserveAccess(data.reserveId, data.accessCode);
@@ -90,7 +89,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error("Errori validazione Zod:", error.errors);
         return res.status(400).json({ 
           error: "Required",
           details: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
