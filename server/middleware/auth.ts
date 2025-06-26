@@ -11,7 +11,7 @@ export interface AuthRequest extends Request {
     role: string;
     firstName: string;
     lastName: string;
-    reserveId?: string;
+    reserveId?: string | null;
   };
 }
 

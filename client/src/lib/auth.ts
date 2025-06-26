@@ -32,7 +32,10 @@ class AuthService {
   }
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiRequest("POST", "/api/auth/login", credentials);
+    const response = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials)
+    });
     const data: AuthResponse = await response.json();
     
     this.setAuth(data.token, data.user);
@@ -45,7 +48,10 @@ class AuthService {
     firstName: string;
     lastName: string;
   }): Promise<AuthResponse> {
-    const response = await apiRequest("POST", "/api/auth/register", userData);
+    const response = await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(userData)
+    });
     const data: AuthResponse = await response.json();
     
     this.setAuth(data.token, data.user);

@@ -20,19 +20,24 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: unknown | undefined,
+  options?: {
+    method?: string;
+    body?: string;
+    headers?: Record<string, string>;
+  },
 ): Promise<Response> {
+  const method = options?.method || "GET";
   const headers = {
     ...getAuthHeaders(),
-    ...(data ? { "Content-Type": "application/json" } : {}),
+    ...options?.headers,
+    ...(options?.body ? { "Content-Type": "application/json" } : {}),
   };
 
   const res = await fetch(url, {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    body: options?.body,
     credentials: "include",
   });
 
