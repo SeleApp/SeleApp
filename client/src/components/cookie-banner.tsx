@@ -1,36 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, Cookie, Settings } from "lucide-react";
+import { useCookieConsent } from "@/hooks/use-cookie-consent";
 
 export default function CookieBanner() {
-  const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const { 
+    showBanner, 
+    acceptAll, 
+    acceptNecessary, 
+    rejectAll, 
+    setShowBanner 
+  } = useCookieConsent();
 
-  useEffect(() => {
-    // Controlla se l'utente ha già accettato i cookie
-    const cookieConsent = localStorage.getItem('cookieConsent');
-    if (!cookieConsent) {
-      setIsVisible(true);
-    }
-  }, []);
-
-  const acceptAll = () => {
-    localStorage.setItem('cookieConsent', 'all');
-    setIsVisible(false);
-  };
-
-  const acceptNecessary = () => {
-    localStorage.setItem('cookieConsent', 'necessary');
-    setIsVisible(false);
-  };
-
-  const rejectAll = () => {
-    localStorage.setItem('cookieConsent', 'rejected');
-    setIsVisible(false);
-  };
-
-  if (!isVisible) return null;
+  if (!showBanner) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end justify-center p-4 z-50">
@@ -44,7 +28,7 @@ export default function CookieBanner() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsVisible(false)}
+              onClick={() => setShowBanner(false)}
               className="p-1 h-auto"
             >
               <X className="h-4 w-4" />

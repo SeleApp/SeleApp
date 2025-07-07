@@ -483,6 +483,7 @@
                 <div class="flex space-x-4 mt-4 md:mt-0">
                     <a href="privacy-policy.html" class="text-sm hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Privacy Policy</a>
                     <a href="termini-servizio.html" class="text-sm hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Termini di Servizio</a>
+                    <button onclick="manageCookiePreferences()" class="text-sm hover:text-green-600 transition-colors underline" style="color: var(--text-secondary);">Gestisci Cookie</button>
                 </div>
             </div>
         </div>
@@ -731,18 +732,69 @@
             }
         }
 
+        // Funzione per gestire le preferenze cookie già salvate
+        function manageCookiePreferences() {
+            const consent = localStorage.getItem('cookieConsent');
+            if (consent) {
+                try {
+                    const data = JSON.parse(consent);
+                    alert(`Preferenze Cookie Attuali:\n
+• Cookie Necessari: ${data.necessary ? 'Accettati' : 'Rifiutati'}
+• Cookie Analitici: ${data.analytics ? 'Accettati' : 'Rifiutati'}  
+• Cookie Marketing: ${data.marketing ? 'Accettati' : 'Rifiutati'}
+• Data consenso: ${new Date(data.timestamp).toLocaleDateString('it-IT')}
+
+Per modificare le preferenze, rimuoverò il consenso attuale e riaprirò il banner.`);
+                    
+                    // Rimuovi consenso esistente e riapri banner
+                    localStorage.removeItem('cookieConsent');
+                    showCookieBanner();
+                } catch (error) {
+                    alert('Errore nel recupero delle preferenze. Riapro il banner per configurare nuovamente.');
+                    localStorage.removeItem('cookieConsent');
+                    showCookieBanner();
+                }
+            } else {
+                showCookieBanner();
+            }
+        }
+
         function acceptAllCookies() {
-            localStorage.setItem('cookieConsent', 'all');
+            const consentData = {
+                necessary: true,
+                analytics: true,
+                marketing: true,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+            console.log('Cookie consent: Tutti i cookie accettati');
             closeCookieBanner();
         }
 
         function acceptNecessaryCookies() {
-            localStorage.setItem('cookieConsent', 'necessary');
+            const consentData = {
+                necessary: true,
+                analytics: false,
+                marketing: false,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+            console.log('Cookie consent: Solo cookie necessari accettati');
             closeCookieBanner();
         }
 
         function rejectAllCookies() {
-            localStorage.setItem('cookieConsent', 'rejected');
+            const consentData = {
+                necessary: true, // Sempre necessari per il funzionamento base
+                analytics: false,
+                marketing: false,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+            console.log('Cookie consent: Tutti i cookie opzionali rifiutati');
             closeCookieBanner();
         }
 
@@ -799,9 +851,44 @@
                 });
             }
 
-            // Cookie Banner
-            if (!localStorage.getItem('cookieConsent')) {
+            // Cookie Banner - Controlla se l'utente ha già fornito il consenso
+            const cookieConsent = localStorage.getItem('cookieConsent');
+            
+            if (!cookieConsent) {
+                // Nessun consenso salvato, mostra il banner dopo 1.5 secondi
                 setTimeout(showCookieBanner, 1500);
+            } else {
+                try {
+                    // Verifica che il consenso sia valido (formato JSON)
+                    const consentData = JSON.parse(cookieConsent);
+                    
+                    // Verifica che contenga i campi necessari
+                    if (!consentData.timestamp || !consentData.version) {
+                        // Consenso non valido, richiedi nuovamente
+                        localStorage.removeItem('cookieConsent');
+                        setTimeout(showCookieBanner, 1500);
+                    } else {
+                        // Consenso valido trovato
+                        console.log('Cookie consent già fornito:', consentData);
+                        
+                        // Verifica se è passato più di 1 anno (rinnovo consenso)
+                        const consentDate = new Date(consentData.timestamp);
+                        const oneYearAgo = new Date();
+                        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+                        
+                        if (consentDate < oneYearAgo) {
+                            // Consenso scaduto, richiedi nuovamente
+                            localStorage.removeItem('cookieConsent');
+                            setTimeout(showCookieBanner, 1500);
+                            console.log('Cookie consent scaduto, richiesta nuova approvazione');
+                        }
+                    }
+                } catch (error) {
+                    // Errore nel parsing JSON, rimuovi e richiedi consenso
+                    localStorage.removeItem('cookieConsent');
+                    setTimeout(showCookieBanner, 1500);
+                    console.error('Errore parsing cookie consent:', error);
+                }
             }
         });
     </script>
