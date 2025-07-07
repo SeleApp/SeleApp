@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw, Download } from "lucide-react";
+import { Plus, Users, Building2, LogOut, Shield, Edit, Edit2, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";

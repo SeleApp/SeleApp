@@ -113,6 +113,28 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default('HUNTER'),
   isActive: boolean("is_active").notNull().default(true),
   reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
+  // Campi specifici CA17 per riserva di Pederobba
+  isSelezionatore: boolean("is_selezionatore").default(false),
+  isEsperto: boolean("is_esperto").default(false),
+  partecipatoCensimenti: boolean("partecipato_censimenti").default(false),
+  isOspite: boolean("is_ospite").default(false),
+  accompagnato: boolean("accompagnato").default(true),
+  usciteSettimana: text("uscite_settimana").default("[]"), // JSON array delle uscite settimanali
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Prelievi table - sistema CA17 per gestione prelievi e colpi a vuoto
+export const prelievi = pgTable("prelievi", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  specie: text("specie").notNull(), // "Capriolo", "Cervo"
+  classe: text("classe").notNull(), // "M0", "F0", "FA", "M1", "MA", "M2", "M2/3", "M4", ecc.
+  data: timestamp("data").notNull(),
+  zona: text("zona").notNull(),
+  colpoVano: boolean("colpo_vano").default(false),
+  fascetta: text("fascetta"), // numero fascetta per prelievi effettivi
+  fotoUrl: text("foto_url"), // URL foto del prelievo
+  reserveId: text("reserve_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -320,6 +342,11 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+export const insertPrelievoSchema = createInsertSchema(prelievi).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const registerHunterSchema = insertUserSchema.extend({
   password: z.string().min(6, "Password deve essere almeno 6 caratteri"),
   confirmPassword: z.string(),
@@ -376,6 +403,9 @@ export type InsertReserve = z.infer<typeof insertReserveSchema>;
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type Prelievo = typeof prelievi.$inferSelect;
+export type InsertPrelievo = z.infer<typeof insertPrelievoSchema>;
 
 export type Zone = typeof zones.$inferSelect;
 export type InsertZone = z.infer<typeof insertZoneSchema>;
