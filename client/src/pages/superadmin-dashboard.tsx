@@ -187,7 +187,11 @@ export default function SuperAdminDashboard() {
     if (editingAdmin) {
       updateAdminMutation.mutate({ id: editingAdmin.id, data });
     } else {
-      createAdminMutation.mutate(data);
+      // Aggiungi il campo role richiesto dal backend
+      createAdminMutation.mutate({
+        ...data,
+        role: "ADMIN"
+      });
     }
   };
 
