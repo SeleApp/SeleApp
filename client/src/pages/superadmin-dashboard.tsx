@@ -48,6 +48,7 @@ export default function SuperAdminDashboard() {
   const [createReserveOpen, setCreateReserveOpen] = useState(false);
   const [createAdminOpen, setCreateAdminOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
+  const [editingReserve, setEditingReserve] = useState<Reserve | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -179,8 +180,41 @@ export default function SuperAdminDashboard() {
     },
   });
 
+  // Mutation per modificare riserva
+  const updateReserveMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiRequest(`/api/superadmin/reserves/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
+      setCreateReserveOpen(false);
+      setEditingReserve(null);
+      reserveForm.reset();
+      toast({
+        title: "Successo",
+        description: "Riserva aggiornata con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nell'aggiornamento della riserva",
+      });
+    },
+  });
+
   const onCreateReserve = (data: CreateReserveData) => {
-    createReserveMutation.mutate(data);
+    if (editingReserve) {
+      updateReserveMutation.mutate({ id: editingReserve.id, data });
+    } else {
+      createReserveMutation.mutate(data);
+    }
   };
 
   const onCreateAdmin = (data: any) => {
@@ -204,6 +238,18 @@ export default function SuperAdminDashboard() {
       reserveId: admin.reserveId || "",
     });
     setCreateAdminOpen(true);
+  };
+
+  const startEditingReserve = (reserve: Reserve) => {
+    setEditingReserve(reserve);
+    reserveForm.reset({
+      name: reserve.name,
+      comune: reserve.comune,
+      emailContatto: reserve.emailContatto,
+      accessCode: reserve.accessCode,
+      isActive: reserve.isActive,
+    });
+    setCreateReserveOpen(true);
   };
 
   const generateAccessCode = () => {
@@ -279,7 +325,13 @@ export default function SuperAdminDashboard() {
                 <h2 className="text-xl font-semibold text-gray-900">Riserve di Caccia</h2>
                 <p className="text-gray-600">Gestisci tutte le riserve del sistema</p>
               </div>
-              <Dialog open={createReserveOpen} onOpenChange={setCreateReserveOpen}>
+              <Dialog open={createReserveOpen} onOpenChange={(open) => {
+                setCreateReserveOpen(open);
+                if (!open) {
+                  setEditingReserve(null);
+                  reserveForm.reset();
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button className="bg-green-600 hover:bg-green-700">
                     <Plus className="w-4 h-4 mr-2" />
@@ -288,9 +340,15 @@ export default function SuperAdminDashboard() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Crea Nuova Riserva</DialogTitle>
+                    <DialogTitle>
+                      {editingReserve && editingReserve.comune === "Pederobba" 
+                        ? "Modifica CA17 Pederobba" 
+                        : "Crea Nuova Riserva"}
+                    </DialogTitle>
                     <DialogDescription>
-                      Inserisci i dati della nuova riserva di caccia
+                      {editingReserve && editingReserve.comune === "Pederobba"
+                        ? "Modifica i dettagli della riserva CA17 di Pederobba"
+                        : "Inserisci i dati della nuova riserva di caccia"}
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={reserveForm.handleSubmit(onCreateReserve)} className="space-y-4">
@@ -371,10 +429,14 @@ export default function SuperAdminDashboard() {
                       </Button>
                       <Button
                         type="submit"
-                        disabled={createReserveMutation.isPending}
+                        disabled={createReserveMutation.isPending || updateReserveMutation.isPending}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        {createReserveMutation.isPending ? "Creazione..." : "Crea Riserva"}
+                        {(createReserveMutation.isPending || updateReserveMutation.isPending) 
+                          ? "Salvando..." 
+                          : editingReserve && editingReserve.comune === "Pederobba"
+                          ? "Aggiorna CA17"
+                          : "Crea Riserva"}
                       </Button>
                     </div>
                   </form>
@@ -426,15 +488,17 @@ export default function SuperAdminDashboard() {
                           {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => startEditingReserve(reserve)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <Edit2 className="w-4 h-4 mr-1" />
-                            Modifica
-                          </Button>
+                          {reserve.comune === "Pederobba" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditingReserve(reserve)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <Edit2 className="w-4 h-4 mr-1" />
+                              Modifica CA17
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

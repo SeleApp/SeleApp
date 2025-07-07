@@ -242,6 +242,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint per modificare una riserva (solo SUPERADMIN, solo Pederobba)
+  app.patch("/api/superadmin/reserves/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res: Response) => {
+    try {
+      const reserveId = req.params.id;
+      const updateData = req.body;
+
+      // Verifica che la riserva esista
+      const existingReserve = await storage.getReserve(reserveId);
+      if (!existingReserve) {
+        return res.status(404).json({ error: "Riserva non trovata" });
+      }
+
+      // Permetti modifica solo per Pederobba
+      if (existingReserve.comune !== "Pederobba") {
+        return res.status(403).json({ error: "Modifica consentita solo per la riserva di Pederobba" });
+      }
+
+      // Aggiorna la riserva
+      const updatedReserve = await storage.updateReserve(reserveId, updateData);
+      
+      if (!updatedReserve) {
+        return res.status(404).json({ error: "Errore nell'aggiornamento della riserva" });
+      }
+
+      res.json({
+        message: "Riserva CA17 Pederobba aggiornata con successo",
+        reserve: updatedReserve
+      });
+    } catch (error) {
+      console.error("Error updating reserve:", error);
+      res.status(500).json({ error: "Errore nell'aggiornamento della riserva" });
+    }
+  });
+
   // Contact form endpoint
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {
