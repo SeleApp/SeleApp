@@ -98,18 +98,10 @@ export default function SuperAdminDashboard() {
   // Mutation per creare riserve
   const createReserveMutation = useMutation({
     mutationFn: async (data: CreateReserveData) => {
-      const response = await fetch("/api/reserves", {
+      const response = await apiRequest("/api/reserves", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: JSON.stringify(data),
       });
-      
-      if (!response.ok) {
-        throw new Error("Errore nella creazione della riserva");
-      }
       
       return response.json();
     },
@@ -134,18 +126,10 @@ export default function SuperAdminDashboard() {
   // Mutation per creare admin
   const createAdminMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/superadmin/create-admin", {
+      const response = await apiRequest("/api/superadmin/create-admin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: JSON.stringify(data),
       });
-      
-      if (!response.ok) {
-        throw new Error("Errore nella creazione dell'admin");
-      }
       
       return response.json();
     },
