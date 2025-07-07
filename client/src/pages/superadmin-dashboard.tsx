@@ -489,20 +489,9 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell className="text-right">
                           {reserve.comune === "Pederobba" && (
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                                CA17
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => startEditingReserve(reserve)}
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                <Edit2 className="w-4 h-4 mr-1" />
-                                Modifica CA17
-                              </Button>
-                            </div>
+                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                              CA17
+                            </Badge>
                           )}
                         </TableCell>
                       </TableRow>
