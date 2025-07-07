@@ -531,6 +531,27 @@ export default function SuperAdminDashboard() {
                       )}
                     </div>
 
+                    <div>
+                      <Label htmlFor="reserveId">Riserva Assegnata</Label>
+                      <select
+                        id="reserveId"
+                        {...adminForm.register("reserveId")}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Seleziona una riserva (opzionale)</option>
+                        {reserves?.map((reserve) => (
+                          <option key={reserve.id} value={reserve.id}>
+                            {reserve.name} - {reserve.comune}
+                          </option>
+                        ))}
+                      </select>
+                      {adminForm.formState.errors.reserveId && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {adminForm.formState.errors.reserveId.message}
+                        </p>
+                      )}
+                    </div>
+
                     <div className="flex justify-end space-x-2 pt-4">
                       <Button
                         type="button"
@@ -589,7 +610,12 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell>{admin.email}</TableCell>
                         <TableCell>
-                          {admin.reserveId || (
+                          {admin.reserveId ? (
+                            (() => {
+                              const reserve = reserves?.find(r => r.id === admin.reserveId);
+                              return reserve ? `${reserve.name} - ${reserve.comune}` : admin.reserveId;
+                            })()
+                          ) : (
                             <span className="text-gray-500 italic">Non assegnata</span>
                           )}
                         </TableCell>
