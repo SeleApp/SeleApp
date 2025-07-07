@@ -400,6 +400,7 @@ export default function SuperAdminDashboard() {
                       <TableHead>Utenti</TableHead>
                       <TableHead>Stato</TableHead>
                       <TableHead>Creata</TableHead>
+                      <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -423,6 +424,17 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell>
                           {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditingReserve(reserve)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            <Edit2 className="w-4 h-4 mr-1" />
+                            Modifica
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
