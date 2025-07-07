@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
 import { z } from "zod";
-import { Plus, Users, Building2, LogOut, Shield, Edit, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw, Download } from "lucide-react";
+import { Plus, Users, Building2, LogOut, Shield, Edit, Edit2, Trash2, Eye, UserPlus, Settings, MessageSquare, CreditCard, BookOpen, Upload, Filter, BarChart3, EyeOff, Copy, RefreshCw, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -489,15 +489,20 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell className="text-right">
                           {reserve.comune === "Pederobba" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => startEditingReserve(reserve)}
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              <Edit2 className="w-4 h-4 mr-1" />
-                              Modifica CA17
-                            </Button>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                                CA17
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => startEditingReserve(reserve)}
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <Edit2 className="w-4 h-4 mr-1" />
+                                Modifica CA17
+                              </Button>
+                            </div>
                           )}
                         </TableCell>
                       </TableRow>

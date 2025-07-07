@@ -25,6 +25,7 @@ export const reserves = pgTable("reserves", {
   name: text("name").notNull(),
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
+  systemType: text("system_type").notNull().default("standard"), // 'standard', 'ca17'
   accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
   codeActive: boolean("code_active").notNull().default(true), // Se false, il codice non permette registrazioni
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
@@ -113,6 +114,12 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default('HUNTER'),
   isActive: boolean("is_active").notNull().default(true),
   reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
+  // Campi specifici per sistema CA17
+  isSelezionatore: boolean("is_selezionatore").notNull().default(false),
+  isEsperto: boolean("is_esperto").notNull().default(false),
+  partecipatoCensimenti: boolean("partecipato_censimenti").notNull().default(false),
+  isOspite: boolean("is_ospite").notNull().default(false),
+  accompagnato: boolean("accompagnato").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -468,3 +475,69 @@ export type CreateReservationRequest = z.infer<typeof createReservationSchema>;
 
 export type RegisterHunterRequest = z.infer<typeof registerHunterSchema>;
 export type CreateAdminRequest = z.infer<typeof createAdminSchema>;
+
+// CA17 System Tables - Sistema specifico per riserve CA17 (Pederobba)
+
+// CA17 Prelievi table - Tracciamento prelievi con fascette e foto
+export const ca17Prelievi = pgTable("ca17_prelievi", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  specie: text("specie").notNull(), // 'Capriolo', 'Cervo'
+  classe: text("classe").notNull(), // 'M0', 'F0', 'FA', 'M1', 'MA', 'CL0', 'FF', 'MM', 'MCL1'
+  zona: text("zona").notNull(),
+  data: timestamp("data").notNull(),
+  fascetta: text("fascetta"), // Numero fascetta
+  fotoUrl: text("foto_url"), // URL foto prelievo
+  colpoVano: boolean("colpo_vano").notNull().default(false),
+  note: text("note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// CA17 Uscite table - Tracciamento uscite settimanali
+export const ca17Uscite = pgTable("ca17_uscite", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  data: timestamp("data").notNull(),
+  zona: text("zona").notNull(),
+  orario: text("orario").notNull(), // 'mattina', 'sera'
+  status: text("status").notNull().default("prenotata"), // 'prenotata', 'completata', 'annullata'
+  esito: text("esito"), // 'prelievo', 'colpo_vano', 'nulla'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// CA17 Blocchi table - Sistema di blocchi e divieti
+export const ca17Blocchi = pgTable("ca17_blocchi", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  tipoBlocco: text("tipo_blocco").notNull(), // 'M2_CAPRIOLO_CERVO', 'M2_CAPRIOLO', 'CERVO_MASCHI'
+  dataInizio: timestamp("data_inizio").notNull(),
+  dataFine: timestamp("data_fine"),
+  attivo: boolean("attivo").notNull().default(true),
+  motivazione: text("motivazione").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Schema di inserimento per CA17
+export const insertCa17PrelievoSchema = createInsertSchema(ca17Prelievi).omit({
+  id: true,
+});
+
+export const insertCa17UscitaSchema = createInsertSchema(ca17Uscite).omit({
+  id: true,
+});
+
+export const insertCa17BloccoSchema = createInsertSchema(ca17Blocchi).omit({
+  id: true,
+});
+
+export type Ca17Prelievo = typeof ca17Prelievi.$inferSelect;
+export type InsertCa17Prelievo = z.infer<typeof insertCa17PrelievoSchema>;
+
+export type Ca17Uscita = typeof ca17Uscite.$inferSelect;
+export type InsertCa17Uscita = z.infer<typeof insertCa17UscitaSchema>;
+
+export type Ca17Blocco = typeof ca17Blocchi.$inferSelect;
+export type InsertCa17Blocco = z.infer<typeof insertCa17BloccoSchema>;
