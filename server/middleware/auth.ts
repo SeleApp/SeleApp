@@ -29,6 +29,8 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    
+    // Non passiamo reserveId per permettere l'accesso a tutti gli utenti durante l'autenticazione
     const user = await storage.getUser(decoded.userId);
     
     if (!user || !user.isActive) {

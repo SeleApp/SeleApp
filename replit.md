@@ -306,6 +306,17 @@ Changelog:
   - **Automated Integration**: Email sending integrated into registration and admin creation endpoints with error handling
   - **5 Email Types Total**: Welcome, Admin creation, Reservation confirmation, Cancellation notification, Contact form
   - **Professional Templates**: All emails use consistent SeleApp branding with HTML and plain text versions
+- July 7, 2025. **COOKIE POLICY ENHANCEMENT**: Complete cookie management system with persistent preferences
+  - **Persistent Storage**: Cookie preferences saved in structured JSON format with timestamp and version
+  - **Automatic Expiration**: Consent expires after 1 year requiring user to renew preferences
+  - **Management Interface**: "Gestisci Cookie" button in footer allows users to modify preferences anytime
+  - **Professional Modal**: React component with category details, export functionality, and preference reset
+  - **Custom Hook**: useCookieConsent hook for consistent cookie management across the application
+- July 7, 2025. **SUPERADMIN AUTHENTICATION FIX**: Resolved reserve creation authentication error
+  - **JWT Authentication**: Fixed middleware to properly handle SuperAdmin authentication without reserve filtering
+  - **Token Validation**: Corrected user lookup in authentication process for all user roles
+  - **Reserve Creation**: Confirmed working endpoint with proper validation of required fields
+  - **Debug Resolution**: Removed temporary logging and restored clean authentication flow
 - June 26, 2025. **ADVANCED EMAIL AUTOMATION SYSTEM**: Expanded to 11 comprehensive email types with full workflow integration
   - **Report Confirmation Email**: Automatic confirmation sent when hunters submit hunt reports with hunt details
   - **Missing Report Reminder**: 24-hour reminder system for uncompleted hunt reports (ready for scheduled implementation)
