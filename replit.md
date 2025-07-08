@@ -372,6 +372,12 @@ Changelog:
   - **Zone Exclusivity**: Each hunting zone can only be reserved by one hunter per time slot per day
   - **Flexible Alternatives**: Hunters can still book different time slots or different zones on same day
   - **Enhanced User Experience**: Clear error messages guide hunters to available alternatives
+- July 8, 2025. **FULL-DAY vs PARTIAL SLOT CONFLICT PREVENTION**: Enhanced reservation system to prevent hunter conflicts
+  - **Cross-Slot Validation**: "Todo el día" bookings block all other time slots on same zone/date
+  - **Smart Conflict Detection**: System prevents morning/afternoon bookings when full-day reservation exists
+  - **Clear Error Messages**: "Questa zona è già prenotata per tutto il giorno" informs users of conflicts
+  - **Inverse Protection**: Cannot book full-day when specific time slots already exist
+  - **Zone-Level Enforcement**: Conflict rules apply at zone level, preventing hunters from meeting inadvertently
 
 # User Preferences
 

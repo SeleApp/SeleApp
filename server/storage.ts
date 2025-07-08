@@ -424,21 +424,34 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Verifica che non ci sia già una prenotazione per zona/data/slot (solo 1 cacciatore per slot)
-      const slotReservations = await db
-        .select({ id: reservations.id })
+      // Verifica conflitti per zona/data considerando "tutto il giorno" vs slot specifici
+      const zoneReservations = await db
+        .select({ id: reservations.id, timeSlot: reservations.timeSlot })
         .from(reservations)
         .where(
           and(
             eq(reservations.zoneId, reservation.zoneId),
             eq(reservations.huntDate, reservation.huntDate),
-            eq(reservations.timeSlot, reservation.timeSlot),
             eq(reservations.status, 'active')
           )
         );
 
-      if (slotReservations.length >= 1) {
-        throw new Error('Questa zona è già prenotata per questo orario');
+      // Controlla conflitti specifici per la zona
+      for (const existing of zoneReservations) {
+        // Se esiste già una prenotazione "tutto il giorno", non permettere altri slot
+        if (existing.timeSlot === 'full_day') {
+          throw new Error('Questa zona è già prenotata per tutto il giorno');
+        }
+        
+        // Se sto prenotando "tutto il giorno" ma esistono già slot specifici
+        if (reservation.timeSlot === 'full_day') {
+          throw new Error('Non puoi prenotare tutto il giorno: zona già occupata in altri orari');
+        }
+        
+        // Se sto prenotando lo stesso slot specifico
+        if (existing.timeSlot === reservation.timeSlot) {
+          throw new Error('Questa zona è già prenotata per questo orario');
+        }
       }
 
       const [newReservation] = await db
