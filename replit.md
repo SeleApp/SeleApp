@@ -366,6 +366,12 @@ Changelog:
   - **Mobile Camera Support**: Added capture="environment" for direct camera access on mobile
   - **Visual Feedback**: Enhanced preview with validation indicators and remove functionality
   - **Better User Experience**: Loading states, progress feedback, and clear instructions
+- July 8, 2025. **EXCLUSIVE ZONE BOOKING SYSTEM**: Implemented strict one-hunter-per-slot reservation policy
+  - **Single Occupancy**: Changed from 4 hunters per slot to maximum 1 hunter per zone/date/time combination
+  - **Clear Conflict Messages**: "Questa zona è già prenotata per questo orario" shown when slot is occupied
+  - **Zone Exclusivity**: Each hunting zone can only be reserved by one hunter per time slot per day
+  - **Flexible Alternatives**: Hunters can still book different time slots or different zones on same day
+  - **Enhanced User Experience**: Clear error messages guide hunters to available alternatives
 
 # User Preferences
 

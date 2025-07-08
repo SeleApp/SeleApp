@@ -424,7 +424,7 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Verifica che non ci siano più di 4 prenotazioni per zona/data/slot
+      // Verifica che non ci sia già una prenotazione per zona/data/slot (solo 1 cacciatore per slot)
       const slotReservations = await db
         .select({ id: reservations.id })
         .from(reservations)
@@ -437,8 +437,8 @@ export class DatabaseStorage implements IStorage {
           )
         );
 
-      if (slotReservations.length >= 4) {
-        throw new Error('Slot di caccia pieno per questa zona, data e orario');
+      if (slotReservations.length >= 1) {
+        throw new Error('Questa zona è già prenotata per questo orario');
       }
 
       const [newReservation] = await db
