@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import ReservationModal from "@/components/reservation-modal";
+import ReservationModalNew from "@/components/reservation-modal-new";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { authService } from "@/lib/auth";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
@@ -67,34 +67,37 @@ export default function HunterDashboard() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Cacciatore</h1>
-          <p className="text-gray-600">Benvenuto, {authService.getUser()?.firstName}</p>
+      <main className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard Cacciatore</h1>
+          <p className="text-sm sm:text-base text-gray-600">Benvenuto, {authService.getUser()?.firstName}</p>
         </div>
 
         <Tabs defaultValue="quotas" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="quotas" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Piani di Abbattimento
+          <TabsList className="w-full grid grid-cols-3 overflow-x-auto">
+            <TabsTrigger value="quotas" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Piani di Abbattimento</span>
+              <span className="sm:hidden">Quote</span>
             </TabsTrigger>
-            <TabsTrigger value="reservations" className="flex items-center gap-2">
-              <CalendarCheck className="h-4 w-4" />
-              Le Mie Prenotazioni
+            <TabsTrigger value="reservations" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+              <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Le Mie Prenotazioni</span>
+              <span className="sm:hidden">Prenotazioni</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              I Miei Report
+            <TabsTrigger value="reports" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+              <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">I Miei Report</span>
+              <span className="sm:hidden">Report</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="quotas" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
+          <TabsContent value="quotas" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <h3 className="text-lg sm:text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
               <Button
                 onClick={() => setShowReservationModal(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4" />
                 Nuova Prenotazione
@@ -102,39 +105,27 @@ export default function HunterDashboard() {
             </div>
 
             <Card>
-              <CardContent className="p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Specie</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Quota</TableHead>
-                      <TableHead>Prelevati</TableHead>
-                      <TableHead>Disponibili</TableHead>
-                      <TableHead>Periodo</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <CardContent className="p-2 sm:p-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs sm:text-sm">Specie</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Categoria</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Quota</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Prelevati</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Disponibili</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Periodo</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {regionalQuotas.map((quota: any) => {
                       const available = quota.totalQuota - quota.harvested;
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
-                          const labels: Record<string, string> = {
-                            'M0': 'Maschio 0 anni',
-                            'F0': 'Femmina 0 anni', 
-                            'FA': 'Femmina Adulta',
-                            'M1': 'Maschio 1 anno',
-                            'MA': 'Maschio Adulto'
-                          };
-                          return labels[q.roeDeerCategory] || q.roeDeerCategory;
+                          return q.roeDeerCategory; // Mostra il codice esatto: M0, F0, FA, M1, MA
                         } else {
-                          const labels: Record<string, string> = {
-                            'CL0': 'Cerbiatto 0 anni',
-                            'FF': 'Femmina Fertile',
-                            'MM': 'Maschio Maturo',
-                            'MCL1': 'Maschio 1 anno'
-                          };
-                          return labels[q.redDeerCategory] || q.redDeerCategory;
+                          return q.redDeerCategory; // Mostra il codice esatto: CL0, FF, MM, MCL1
                         }
                       };
 
@@ -150,47 +141,49 @@ export default function HunterDashboard() {
 
                       return (
                         <TableRow key={quota.id}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-xs sm:text-sm">
                             {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{getCategoryLabel(quota)}</Badge>
+                          <TableCell className="text-xs sm:text-sm">
+                            <Badge variant="outline" className="text-xs px-1 py-0">{getCategoryLabel(quota)}</Badge>
                           </TableCell>
-                          <TableCell className="text-center font-semibold">{quota.totalQuota}</TableCell>
-                          <TableCell className="text-center text-red-600 font-semibold">{quota.harvested}</TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center font-semibold text-xs sm:text-sm">{quota.totalQuota}</TableCell>
+                          <TableCell className="text-center text-red-600 font-semibold text-xs sm:text-sm">{quota.harvested}</TableCell>
+                          <TableCell className="text-center text-xs sm:text-sm">
                             <span className={`font-bold ${available <= 0 ? 'text-red-600' : 'text-green-600'}`}>
                               {available}
                             </span>
                           </TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">
                             {formatPeriod(quota.huntingStartDate, quota.huntingEndDate, quota.notes)}
                           </TableCell>
                         </TableRow>
                       );
                     })}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="reservations" className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Le Mie Prenotazioni</h3>
+          <TabsContent value="reservations" className="space-y-4 sm:space-y-6">
+            <h3 className="text-lg sm:text-2xl font-bold text-gray-900">Le Mie Prenotazioni</h3>
             <div className="space-y-4">
               {reservations.length > 0 ? (
                 reservations.map((reservation) => (
                   <Card key={reservation.id} className="border-l-4 border-l-available">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900">{reservation.zone.name}</h3>
-                          <p className="text-gray-600">
+                    <CardContent className="p-3 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-900">{reservation.zone.name}</h3>
+                          <p className="text-sm sm:text-base text-gray-600">
                             {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
-                            {reservation.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
+                            {reservation.timeSlot === "morning" ? "Mattina" : 
+                             reservation.timeSlot === "afternoon" ? "Pomeriggio" : "Tutto il Giorno"}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-between sm:justify-end space-x-3">
                           <Badge
                             variant={
                               reservation.status === "active"
@@ -199,11 +192,11 @@ export default function HunterDashboard() {
                                 ? "secondary"
                                 : "destructive"
                             }
-                            className={
+                            className={`text-xs sm:text-sm ${
                               reservation.status === "active"
                                 ? "status-available text-white"
                                 : ""
-                            }
+                            }`}
                           >
                             {reservation.status === "active"
                               ? "Attiva"
@@ -235,8 +228,8 @@ export default function HunterDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">I Miei Report di Caccia</h3>
+          <TabsContent value="reports" className="space-y-4 sm:space-y-6">
+            <h3 className="text-lg sm:text-2xl font-bold text-gray-900">I Miei Report di Caccia</h3>
             <div className="space-y-4">
               {completedReservations.length > 0 ? (
                 completedReservations.map((reservation) => (
@@ -304,7 +297,7 @@ export default function HunterDashboard() {
       </main>
 
       {/* Modals */}
-      <ReservationModal
+      <ReservationModalNew
         open={showReservationModal}
         onOpenChange={setShowReservationModal}
         zones={zones}

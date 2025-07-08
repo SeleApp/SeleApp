@@ -116,12 +116,12 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
               <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span>
               Seleziona la Zona di Caccia
             </h3>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
               {zones.slice(0, 16).map((zone) => (
                 <Button
                   key={zone.id}
                   variant={selectedZone === zone.id ? "default" : "outline"}
-                  className="h-16 text-lg font-medium"
+                  className="h-12 sm:h-16 text-sm sm:text-lg font-medium"
                   onClick={() => setSelectedZone(zone.id)}
                 >
                   {zone.name}
@@ -137,21 +137,21 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                 <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
                 Seleziona la Data
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                 {availableDates.map((date, index) => (
                   <Button
                     key={index}
                     variant={selectedDate && isSameDay(selectedDate, date) ? "default" : "outline"}
-                    className="h-20 flex flex-col items-center justify-center text-center"
+                    className="h-16 sm:h-20 flex flex-col items-center justify-center text-center"
                     onClick={() => setSelectedDate(date)}
                   >
-                    <div className="text-sm font-medium">
+                    <div className="text-xs sm:text-sm font-medium">
                       {format(date, "EEE", { locale: it })}
                     </div>
-                    <div className="text-lg font-bold">
+                    <div className="text-sm sm:text-lg font-bold">
                       {format(date, "dd", { locale: it })}
                     </div>
-                    <div className="text-xs">
+                    <div className="text-xs text-gray-500">
                       {format(date, "MMM", { locale: it })}
                     </div>
                   </Button>
@@ -167,18 +167,18 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                 <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">3</span>
                 Seleziona l'Orario
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <Card 
                   className={`cursor-pointer transition-all hover:shadow-md ${
                     selectedTimeSlot === "morning" ? "ring-2 ring-green-600 bg-green-50" : ""
                   }`}
                   onClick={() => setSelectedTimeSlot("morning")}
                 >
-                  <CardContent className="p-6 text-center">
-                    <div className="text-2xl font-bold text-gray-900 mb-2">
+                  <CardContent className="p-4 sm:p-6 text-center">
+                    <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-2">
                       Mattina
                     </div>
-                    <div className="text-lg text-gray-600">
+                    <div className="text-sm sm:text-lg text-gray-600">
                       Alba - 12:00
                     </div>
                   </CardContent>
@@ -190,11 +190,11 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                   }`}
                   onClick={() => setSelectedTimeSlot("afternoon")}
                 >
-                  <CardContent className="p-6 text-center">
-                    <div className="text-2xl font-bold text-gray-900 mb-2">
+                  <CardContent className="p-4 sm:p-6 text-center">
+                    <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-2">
                       Pomeriggio
                     </div>
-                    <div className="text-lg text-gray-600">
+                    <div className="text-sm sm:text-lg text-gray-600">
                       12:00 - Tramonto
                     </div>
                   </CardContent>
