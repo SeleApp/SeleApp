@@ -10,7 +10,6 @@
 export type ManagementType = 
   | 'standard_zones'      // Standard con prenotazione zone (es. Cison)
   | 'standard_random'     // Standard con assegnazione random capi (es. Pederobba)
-  | 'ca17_system'         // Sistema CA17 avanzato
   | 'quota_only'          // Solo gestione quote senza zone
   | 'custom';             // Personalizzato per esigenze specifiche
 
@@ -23,12 +22,12 @@ export interface ManagementTypeConfig {
     hasReservations: boolean;    // Sistema prenotazioni
     hasQuotas: boolean;          // Gestione quote regionali
     hasRandomAssignment: boolean; // Assegnazione casuale capi
-    hasCA17Features: boolean;    // Funzionalità CA17 specifiche
+
     hasAdvancedReporting: boolean; // Report avanzati
     hasCustomWorkflows: boolean;  // Flussi personalizzati
   };
   modules: string[];             // Moduli abilitati
-  dashboardLayout: 'hunter_standard' | 'hunter_ca17' | 'admin_standard' | 'admin_ca17' | 'custom';
+  dashboardLayout: 'hunter_standard' | 'admin_standard' | 'custom';
 }
 
 export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfig> = {
@@ -41,7 +40,6 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
       hasReservations: true,
       hasQuotas: true,
       hasRandomAssignment: false,
-      hasCA17Features: false,
       hasAdvancedReporting: false,
       hasCustomWorkflows: false,
     },
@@ -58,7 +56,6 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
       hasReservations: false,
       hasQuotas: true,
       hasRandomAssignment: true,
-      hasCA17Features: false,
       hasAdvancedReporting: true,
       hasCustomWorkflows: false,
     },
@@ -66,22 +63,7 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
     dashboardLayout: 'hunter_standard',
   },
 
-  ca17_system: {
-    id: 'ca17_system',
-    name: 'Sistema CA17',
-    description: 'Sistema avanzato CA17 con funzionalità complete per riserve specializzate',
-    features: {
-      hasZones: true,
-      hasReservations: true,
-      hasQuotas: true,
-      hasRandomAssignment: true,
-      hasCA17Features: true,
-      hasAdvancedReporting: true,
-      hasCustomWorkflows: true,
-    },
-    modules: ['zones', 'reservations', 'regional_quotas', 'ca17_features', 'advanced_reports', 'photo_management', 'tag_system'],
-    dashboardLayout: 'hunter_ca17',
-  },
+
 
   quota_only: {
     id: 'quota_only',
@@ -92,7 +74,6 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
       hasReservations: false,
       hasQuotas: true,
       hasRandomAssignment: false,
-      hasCA17Features: false,
       hasAdvancedReporting: false,
       hasCustomWorkflows: false,
     },
@@ -109,7 +90,6 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
       hasReservations: true,
       hasQuotas: true,
       hasRandomAssignment: true,
-      hasCA17Features: true,
       hasAdvancedReporting: true,
       hasCustomWorkflows: true,
     },
@@ -161,8 +141,7 @@ export class ManagementTypeManager {
         return config.features.hasQuotas;
       case 'random_assignment':
         return config.features.hasRandomAssignment;
-      case 'ca17_features':
-        return config.features.hasCA17Features;
+
       case 'advanced_reporting':
         return config.features.hasAdvancedReporting;
       default:
@@ -206,11 +185,7 @@ export class ManagementTypeManager {
         label: 'Report',
         enabled: true, // Sempre abilitato
       },
-      {
-        id: 'ca17',
-        label: 'CA17',
-        enabled: config.features.hasCA17Features,
-      },
+
     ].filter(tab => tab.enabled);
   }
 
@@ -255,11 +230,7 @@ export class ManagementTypeManager {
         label: 'Report Avanzati',
         enabled: config.features.hasAdvancedReporting,
       },
-      {
-        id: 'ca17_management',
-        label: 'Gestione CA17',
-        enabled: config.features.hasCA17Features,
-      },
+
     ].filter(feature => feature.enabled);
   }
 }

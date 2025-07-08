@@ -22,7 +22,6 @@ export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest'])
 export const managementTypeEnum = pgEnum('management_type', [
   'standard_zones', // Standard con prenotazione zone (es. Cison)
   'standard_random', // Standard con assegnazione random capi (es. Pederobba)
-  'ca17_system', // Sistema CA17 avanzato
   'quota_only', // Solo gestione quote senza zone
   'custom' // Personalizzato per esigenze specifiche
 ]);

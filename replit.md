@@ -340,13 +340,19 @@ Changelog:
   - **Complete Workflows**: Step-by-step procedures for all major system functions
   - **Professional Documentation**: Ready-to-distribute manual for training and reference
 - July 8, 2025. **MODULAR MANAGEMENT SYSTEM**: Implemented comprehensive modular architecture for different reserve management types
-  - **Management Types**: Added 5 distinct management types (standard_zones, standard_random, ca17_system, quota_only, custom)
+  - **Management Types**: Added 4 distinct management types (standard_zones, standard_random, quota_only, custom)
   - **Database Schema**: Added management_type enum and column to reserves table with proper defaults
   - **SuperAdmin Interface**: Replaced "Azioni" column with "Tipologia" showing colored badges for each management type
   - **Form Enhancement**: Added management type selector in reserve creation form with clear descriptions
   - **Modular Architecture**: Created management-types.ts with comprehensive configuration system for features and modules
   - **Future-Ready**: System designed to support different dashboard layouts and feature sets per reserve type
   - **Examples Set**: Cison configured as "Zone Standard", Pederobba as "Random Standard" for real-world reference
+- July 8, 2025. **CA17 MODULE REMOVAL**: Eliminated CA17 system module as requested by user
+  - **Management Types**: Removed ca17_system from available management types
+  - **Database Update**: Updated management_type enum to exclude ca17_system option
+  - **Code Cleanup**: Removed all CA17-related features and interface elements
+  - **Schema Migration**: Converted existing ca17_system reserves to custom type
+  - **Interface Simplification**: Cleaned up dashboard tabs and admin features removing CA17 references
 
 # User Preferences
 
