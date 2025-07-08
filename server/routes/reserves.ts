@@ -77,4 +77,49 @@ router.get("/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: Aut
   }
 });
 
+// PATCH /api/superadmin/reserves/:id - Aggiorna stato riserva (solo SUPERADMIN)
+router.patch('/superadmin/reserves/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const updatedReserve = await storage.updateReserve(id, { isActive });
+    
+    if (!updatedReserve) {
+      return res.status(404).json({ message: "Riserva non trovata" });
+    }
+
+    res.json({
+      message: "Stato della riserva aggiornato con successo",
+      reserve: updatedReserve
+    });
+  } catch (error) {
+    console.error("Error updating reserve status:", error);
+    res.status(500).json({ message: "Errore nell'aggiornamento dello stato della riserva" });
+  }
+});
+
+// DELETE /api/superadmin/reserves/:id - Elimina riserva (solo SUPERADMIN)
+router.delete('/superadmin/reserves/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verifica se la riserva esiste
+    const reserve = await storage.getReserve(id);
+    if (!reserve) {
+      return res.status(404).json({ message: "Riserva non trovata" });
+    }
+
+    // Elimina la riserva e tutti i dati associati
+    await storage.deleteReserve(id);
+
+    res.json({
+      message: "Riserva eliminata con successo"
+    });
+  } catch (error) {
+    console.error("Error deleting reserve:", error);
+    res.status(500).json({ message: "Errore nell'eliminazione della riserva" });
+  }
+});
+
 export default router;

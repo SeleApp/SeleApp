@@ -21,6 +21,7 @@ export interface IStorage {
   getReserve(id: string): Promise<Reserve | undefined>;
   createReserve(reserve: InsertReserve): Promise<Reserve>;
   updateReserve(id: string, data: Partial<Reserve>): Promise<Reserve | undefined>;
+  deleteReserve(id: string): Promise<void>;
   updateReserveAccessCode(reserveId: string, data: { accessCode?: string; codeActive?: boolean }): Promise<Reserve | undefined>;
   getReserveStats(reserveId: string): Promise<{
     totalUsers: number;
@@ -141,6 +142,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(reserves.id, id))
       .returning();
     return updatedReserve || undefined;
+  }
+
+  async deleteReserve(id: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Elimina tutti i record associati alla riserva
+      await tx.delete(huntReports).where(eq(huntReports.reserveId, id));
+      await tx.delete(reservations).where(eq(reservations.reserveId, id));
+      await tx.delete(regionalQuotas).where(eq(regionalQuotas.reserveId, id));
+      await tx.delete(wildlifeQuotas).where(eq(wildlifeQuotas.reserveId, id));
+      await tx.delete(zones).where(eq(zones.reserveId, id));
+      await tx.delete(users).where(eq(users.reserveId, id));
+      
+      // Elimina i record superadmin associati
+      await tx.delete(supportTickets).where(eq(supportTickets.reserveId, id));
+      await tx.delete(billing).where(eq(billing.reserveId, id));
+      await tx.delete(contracts).where(eq(contracts.reserveId, id));
+      await tx.delete(reserveSettings).where(eq(reserveSettings.reserveId, id));
+      
+      // Infine elimina la riserva
+      await tx.delete(reserves).where(eq(reserves.id, id));
+    });
   }
 
   async updateReserveAccessCode(reserveId: string, data: { accessCode?: string; codeActive?: boolean }): Promise<Reserve | undefined> {

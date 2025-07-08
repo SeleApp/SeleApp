@@ -260,6 +260,68 @@ export default function SuperAdminDashboard() {
     reserveForm.setValue("accessCode", code);
   };
 
+  // Mutation per sospendere/attivare riserva
+  const toggleReserveStatusMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const response = await apiRequest(`/api/superadmin/reserves/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive }),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
+      toast({
+        title: "Successo",
+        description: "Stato della riserva aggiornato con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nell'aggiornamento dello stato",
+      });
+    },
+  });
+
+  // Mutation per eliminare riserva
+  const deleteReserveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest(`/api/superadmin/reserves/${id}`, {
+        method: "DELETE",
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
+      toast({
+        title: "Successo",
+        description: "Riserva eliminata con successo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nell'eliminazione della riserva",
+      });
+    },
+  });
+
+  const toggleReserveStatus = (id: string, isActive: boolean) => {
+    const action = isActive ? "attivare" : "sospendere";
+    if (confirm(`Sei sicuro di voler ${action} questa riserva?`)) {
+      toggleReserveStatusMutation.mutate({ id, isActive });
+    }
+  };
+
+  const deleteReserve = (id: string) => {
+    if (confirm("Sei sicuro di voler eliminare questa riserva? Questa azione non può essere annullata e rimuoverà tutti i dati associati.")) {
+      deleteReserveMutation.mutate(id);
+    }
+  };
+
   if (reservesLoading || adminsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
@@ -489,6 +551,7 @@ export default function SuperAdminDashboard() {
                       <TableHead>Stato</TableHead>
                       <TableHead>Tipologia</TableHead>
                       <TableHead>Creata</TableHead>
+                      <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -530,6 +593,34 @@ export default function SuperAdminDashboard() {
                         </TableCell>
                         <TableCell>
                           {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditingReserve(reserve)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleReserveStatus(reserve.id, !reserve.isActive)}
+                              className={reserve.isActive ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                            >
+                              {reserve.isActive ? "Sospendi" : "Attiva"}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteReserve(reserve.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
