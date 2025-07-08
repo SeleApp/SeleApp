@@ -28,6 +28,7 @@ interface Reserve {
   accessCode: string;
   codeActive: boolean;
   isActive: boolean;
+  managementType: 'standard_zones' | 'standard_random' | 'ca17_system' | 'quota_only' | 'custom';
   createdAt: string;
   stats: {
     totalUsers: number;
@@ -74,6 +75,7 @@ export default function SuperAdminDashboard() {
       comune: "",
       emailContatto: "",
       accessCode: "",
+      managementType: "standard_zones",
       isActive: true,
     },
   });
@@ -247,6 +249,7 @@ export default function SuperAdminDashboard() {
       comune: reserve.comune,
       emailContatto: reserve.emailContatto,
       accessCode: reserve.accessCode,
+      managementType: reserve.managementType || "standard_zones",
       isActive: reserve.isActive,
     });
     setCreateReserveOpen(true);
@@ -419,6 +422,29 @@ export default function SuperAdminDashboard() {
                       )}
                     </div>
 
+                    <div>
+                      <Label htmlFor="managementType">Tipologia di Gestione</Label>
+                      <select
+                        id="managementType"
+                        {...reserveForm.register("managementType")}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="standard_zones">Standard con Zone (es. Cison)</option>
+                        <option value="standard_random">Standard Random (es. Pederobba)</option>
+                        <option value="ca17_system">Sistema CA17 Avanzato</option>
+                        <option value="quota_only">Solo Gestione Quote</option>
+                        <option value="custom">Personalizzato</option>
+                      </select>
+                      {reserveForm.formState.errors.managementType && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.managementType.message}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        Seleziona il tipo di gestione per questa riserva
+                      </p>
+                    </div>
+
                     <div className="flex justify-end space-x-2 pt-4">
                       <Button
                         type="button"
@@ -461,8 +487,8 @@ export default function SuperAdminDashboard() {
                       <TableHead>Codice</TableHead>
                       <TableHead>Utenti</TableHead>
                       <TableHead>Stato</TableHead>
+                      <TableHead>Tipologia</TableHead>
                       <TableHead>Creata</TableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -485,14 +511,25 @@ export default function SuperAdminDashboard() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
+                          <Badge 
+                            variant="outline" 
+                            className={
+                              reserve.managementType === 'standard_zones' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                              reserve.managementType === 'standard_random' ? 'bg-green-50 text-green-700 border-green-200' :
+                              reserve.managementType === 'ca17_system' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                              reserve.managementType === 'quota_only' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                              'bg-gray-50 text-gray-700 border-gray-200'
+                            }
+                          >
+                            {reserve.managementType === 'standard_zones' ? 'Zone Standard' :
+                             reserve.managementType === 'standard_random' ? 'Random Standard' :
+                             reserve.managementType === 'ca17_system' ? 'Sistema CA17' :
+                             reserve.managementType === 'quota_only' ? 'Solo Quote' :
+                             'Personalizzato'}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          {reserve.comune === "Pederobba" && (
-                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                              CA17
-                            </Badge>
-                          )}
+                        <TableCell>
+                          {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
                         </TableCell>
                       </TableRow>
                     ))}

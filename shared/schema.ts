@@ -18,6 +18,14 @@ export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA'
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
 export const reservationStatusEnum = pgEnum('reservation_status', ['active', 'completed', 'cancelled']);
 export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest']);
+// Tipologie di gestione delle riserve
+export const managementTypeEnum = pgEnum('management_type', [
+  'standard_zones', // Standard con prenotazione zone (es. Cison)
+  'standard_random', // Standard con assegnazione random capi (es. Pederobba)
+  'ca17_system', // Sistema CA17 avanzato
+  'quota_only', // Solo gestione quote senza zone
+  'custom' // Personalizzato per esigenze specifiche
+]);
 
 // Reserves table (multi-tenant support)
 export const reserves = pgTable("reserves", {
@@ -26,6 +34,7 @@ export const reserves = pgTable("reserves", {
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
   systemType: text("system_type").notNull().default("standard"), // 'standard', 'ca17'
+  managementType: managementTypeEnum("management_type").notNull().default("standard_zones"), // Tipologia di gestione
   accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
   codeActive: boolean("code_active").notNull().default(true), // Se false, il codice non permette registrazioni
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
@@ -320,6 +329,8 @@ export const huntReportsRelations = relations(huntReports, ({ one }) => ({
 // Insert schemas
 export const insertReserveSchema = createInsertSchema(reserves).omit({
   createdAt: true,
+}).extend({
+  managementType: z.enum(['standard_zones', 'standard_random', 'ca17_system', 'quota_only', 'custom']),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
