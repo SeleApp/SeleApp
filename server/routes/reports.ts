@@ -29,7 +29,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     const reportData = insertHuntReportSchema.parse(req.body);
 
     // Verify that the reservation belongs to the hunter
-    const reservations = await storage.getReservations(req.user.id);
+    const reservations = await storage.getReservations(req.user.reserveId, req.user.id);
     const reservation = reservations.find(r => r.id === reportData.reservationId);
     
     if (!reservation) {
@@ -42,23 +42,39 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
     // Validate harvest details if outcome is harvest
     if (reportData.outcome === 'harvest') {
-      if (!reportData.species || !reportData.sex || !reportData.ageClass) {
+      if (!reportData.species) {
         return res.status(400).json({ 
-          message: "Specie, sesso e classe sono richiesti per i prelievi" 
+          message: "Specie è richiesta per i prelievi" 
         });
       }
-
-      // Check if quota is available for this harvest
-      const quotas = await storage.getZoneQuotas(reservation.zoneId);
-      const matchingQuota = quotas.find(q => 
-        q.species === reportData.species &&
-        q.sex === reportData.sex &&
-        q.ageClass === reportData.ageClass
-      );
-
-      if (!matchingQuota || matchingQuota.harvested >= matchingQuota.totalQuota) {
+      
+      // Validate category based on species
+      if (reportData.species === 'roe_deer' && !reportData.roeDeerCategory) {
         return res.status(400).json({ 
-          message: "Quota non disponibile per questo tipo di capo" 
+          message: "Categoria capriolo è richiesta per i prelievi di capriolo" 
+        });
+      }
+      
+      if (reportData.species === 'red_deer' && !reportData.redDeerCategory) {
+        return res.status(400).json({ 
+          message: "Categoria cervo è richiesta per i prelievi di cervo" 
+        });
+      }
+      
+      // Check if regional quota is available for this harvest
+      const speciesCategory = reportData.species === 'roe_deer' 
+        ? reportData.roeDeerCategory 
+        : reportData.redDeerCategory;
+      
+      const isAvailable = await storage.isSpeciesCategoryAvailable(
+        reportData.species, 
+        speciesCategory, 
+        req.user.reserveId
+      );
+      
+      if (!isAvailable) {
+        return res.status(400).json({ 
+          message: `Quota esaurita per ${reportData.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} ${speciesCategory}` 
         });
       }
     }
@@ -83,18 +99,19 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       const reserveAdmin = admins.find(admin => 
         admin.reserveId === req.user.reserveId && admin.role === 'ADMIN'
       );
-
+      
       if (reserveAdmin) {
-        await EmailService.sendAdminReportSubmittedAlert({
+        await EmailService.sendReportNotificationToAdmin({
           adminEmail: reserveAdmin.email,
+          adminName: `${reserveAdmin.firstName} ${reserveAdmin.lastName}`,
           hunterName: `${req.user.firstName} ${req.user.lastName}`,
           zoneName: reservation.zone.name,
           huntDate: reservation.huntDate.toLocaleDateString('it-IT'),
-          outcome: reportData.outcome
+          outcome: reportData.outcome === 'harvest' ? 'prelievo' : 'nessun prelievo'
         });
       }
     } catch (emailError) {
-      console.error("Errore invio notifica admin report:", emailError);
+      console.error("Errore invio email notifica admin:", emailError);
     }
 
     res.status(201).json(report);
