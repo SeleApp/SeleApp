@@ -13,7 +13,7 @@ const router = Router();
 router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
     const hunterId = req.user?.role === 'HUNTER' ? req.user.id : undefined;
-    const reservations = await storage.getReservations(hunterId);
+    const reservations = await storage.getReservations(req.user.reserveId, hunterId);
     res.json(reservations);
   } catch (error) {
     console.error("Error fetching reservations:", error);
@@ -33,12 +33,13 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     const reservationData = createReservationSchema.parse({
       ...req.body,
       hunterId: req.user.id,
+      reserveId: req.user.reserveId,
     });
 
     console.log("Parsed reservation data:", reservationData);
 
-    // Check if zone exists and is active
-    const zone = await storage.getZone(reservationData.zoneId);
+    // Check if zone exists and is active for this reserve
+    const zone = await storage.getZone(reservationData.zoneId, req.user.reserveId);
     if (!zone || !zone.isActive) {
       return res.status(400).json({ message: "Zona non valida o non attiva" });
     }
@@ -63,7 +64,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     }
 
     // Check if hunter already has a reservation for this date and time slot
-    const existingReservations = await storage.getReservations(req.user.id);
+    const existingReservations = await storage.getReservations(req.user.reserveId, req.user.id);
     const dateStr = huntDateStr; // Use original string format
     const hasConflict = existingReservations.some(r => {
       const reservationDate = new Date(r.huntDate).toISOString().split('T')[0];
@@ -160,7 +161,7 @@ router.delete("/:id", authenticateToken, async (req: AuthRequest, res) => {
     console.log(`Admin/Hunter ${req.user?.email} attempting to cancel reservation ${reservationId}`);
 
     // Per admin: ottieni tutte le prenotazioni, per hunter: solo le proprie
-    const reservations = await storage.getReservations(req.user?.role === 'ADMIN' ? undefined : req.user?.id);
+    const reservations = await storage.getReservations(req.user.reserveId, req.user?.role === 'ADMIN' ? undefined : req.user?.id);
     const reservation = reservations.find(r => r.id === reservationId);
     
     console.log(`Found ${reservations.length} reservations, looking for ID ${reservationId}`);
@@ -182,7 +183,7 @@ router.delete("/:id", authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ message: "Impossibile cancellare una prenotazione non attiva" });
     }
 
-    await storage.cancelReservation(reservationId);
+    await storage.cancelReservation(reservationId, req.user.reserveId);
     console.log(`Successfully cancelled reservation ${reservationId}`);
 
     // Invia email di notifica cancellazione
