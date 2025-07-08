@@ -353,6 +353,19 @@ Changelog:
   - **Code Cleanup**: Removed all CA17-related features and interface elements
   - **Schema Migration**: Converted existing ca17_system reserves to custom type
   - **Interface Simplification**: Cleaned up dashboard tabs and admin features removing CA17 references
+- July 8, 2025. **MOBILE LAYOUT OPTIMIZATION**: Fixed critical mobile layout issues in hunter dashboard
+  - **Responsive Tab Navigation**: Implemented horizontal scrolling tabs with abbreviated text for mobile
+  - **Fixed Overlapping Text**: Resolved tab text overlap issue with proper flex layout and whitespace handling
+  - **Improved Card Layout**: Enhanced reservation cards with responsive flex-column design for mobile
+  - **Optimized Button Sizing**: Full-width buttons on mobile, auto-width on desktop
+  - **Mobile-First Padding**: Reduced padding and margins for small screens while maintaining desktop experience
+- July 8, 2025. **ENHANCED PHOTO UPLOAD SYSTEM**: Completely rebuilt photo upload system for hunt reports
+  - **Automatic Compression**: Large images (>5MB) are automatically compressed to optimal size
+  - **Smart Resizing**: Images resized to max 1200px while maintaining aspect ratio
+  - **Improved Error Handling**: Better validation, error messages, and user feedback
+  - **Mobile Camera Support**: Added capture="environment" for direct camera access on mobile
+  - **Visual Feedback**: Enhanced preview with validation indicators and remove functionality
+  - **Better User Experience**: Loading states, progress feedback, and clear instructions
 
 # User Preferences
 

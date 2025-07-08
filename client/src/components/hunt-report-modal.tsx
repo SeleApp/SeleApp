@@ -83,25 +83,100 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     }
   }, [outcome, form]);
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calcola dimensioni ottimali (max 1200px larghezza/altezza)
+        const maxSize = 1200;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Disegna l'immagine compressa
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Converti in base64 con qualità ridotta
+        const quality = file.size > 2 * 1024 * 1024 ? 0.6 : 0.8;
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      
+      img.onerror = () => reject(new Error('Errore nel caricamento dell\'immagine'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      // Validazione tipo file
+      if (!file.type.startsWith('image/')) {
         toast({
-          title: "File troppo grande",
-          description: "La foto deve essere inferiore a 5MB",
+          title: "Formato file non valido",
+          description: "È possibile caricare solo immagini (JPG, PNG, GIF, etc.)",
           variant: "destructive",
         });
+        event.target.value = "";
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setKillCardPhoto(base64);
-        form.setValue("killCardPhoto", base64);
-      };
-      reader.readAsDataURL(file);
+      setIsLoading(true);
+      
+      try {
+        let finalBase64: string;
+        
+        // Se il file è troppo grande, comprimi automaticamente
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: "Compressione in corso",
+            description: "File troppo grande, compressione automatica...",
+          });
+          finalBase64 = await compressImage(file);
+        } else {
+          // Carica normalmente
+          finalBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onerror = () => reject(new Error('Errore di lettura file'));
+            reader.readAsDataURL(file);
+          });
+        }
+        
+        setKillCardPhoto(finalBase64);
+        form.setValue("killCardPhoto", finalBase64);
+        toast({
+          title: "Foto caricata",
+          description: "La foto è stata caricata con successo",
+        });
+        
+      } catch (error) {
+        console.error('Errore durante il caricamento della foto:', error);
+        toast({
+          title: "Errore caricamento",
+          description: "Si è verificato un errore durante il caricamento della foto",
+          variant: "destructive",
+        });
+        event.target.value = "";
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -155,7 +230,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-lg">
+      <DialogContent className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">
             Report di Caccia
@@ -314,16 +389,42 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               accept="image/*"
               onChange={handlePhotoUpload}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 mb-4"
+              disabled={isLoading}
+              capture="environment"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Formati supportati: JPG, PNG, GIF. File grandi vengono compressi automaticamente
+            </p>
             
             {killCardPhoto && (
               <div className="mt-4">
-                <p className="text-green-700 font-medium mb-2">✓ Foto caricata con successo</p>
-                <img 
-                  src={killCardPhoto} 
-                  alt="Anteprima scheda di abbattimento" 
-                  className="max-w-full h-48 object-cover rounded-lg border border-gray-300"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-green-700 font-medium">✓ Foto caricata con successo</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setKillCardPhoto("");
+                      form.setValue("killCardPhoto", "");
+                      // Reset file input
+                      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                      if (fileInput) fileInput.value = "";
+                    }}
+                  >
+                    Rimuovi
+                  </Button>
+                </div>
+                <div className="relative">
+                  <img 
+                    src={killCardPhoto} 
+                    alt="Anteprima scheda di abbattimento" 
+                    className="max-w-full h-48 object-cover rounded-lg border border-gray-300"
+                  />
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
+                    ✓ Valida
+                  </div>
+                </div>
               </div>
             )}
             
