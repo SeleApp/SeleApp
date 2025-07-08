@@ -88,7 +88,7 @@ export default function HunterDashboard() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -106,13 +106,13 @@ export default function HunterDashboard() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard Cacciatore</h1>
+      <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard Cacciatore</h1>
             <Button
               onClick={() => setShowReservationModal(true)}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               Nuova Prenotazione
@@ -121,21 +121,26 @@ export default function HunterDashboard() {
           <p className="text-gray-600">Benvenuto, {authService.getUser()?.firstName}</p>
         </div>
 
-        <Tabs defaultValue="quotas" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="quotas" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Piani di Abbattimento
-            </TabsTrigger>
-            <TabsTrigger value="reservations" className="flex items-center gap-2">
-              <CalendarCheck className="h-4 w-4" />
-              Le Mie Prenotazioni
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              I Miei Report
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="quotas" className="space-y-4 sm:space-y-6">
+          <div className="w-full overflow-x-auto">
+            <TabsList className="flex w-full min-w-max gap-1 sm:grid sm:grid-cols-3 sm:gap-0">
+              <TabsTrigger value="quotas" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Piani di Abbattimento</span>
+                <span className="sm:hidden">Quote</span>
+              </TabsTrigger>
+              <TabsTrigger value="reservations" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Le Mie Prenotazioni</span>
+                <span className="sm:hidden">Prenotazioni</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">I Miei Report</span>
+                <span className="sm:hidden">Report</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="quotas" className="space-y-6">
             <h3 className="text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
@@ -239,20 +244,24 @@ export default function HunterDashboard() {
               {visibleReservations.length > 0 ? (
                 visibleReservations.map((reservation) => (
                   <Card key={reservation.id} className="border-l-4 border-l-available">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900">{reservation.zone.name}</h3>
-                          <p className="text-gray-600">
-                            {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
+                            {reservation.zone.name}
+                          </h3>
+                          <p className="text-sm sm:text-base text-gray-600">
+                            {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })}
+                          </p>
+                          <p className="text-sm text-gray-500">
                             {reservation.timeSlot === "morning" 
-                              ? "Mattina" 
+                              ? "Alba-12:00" 
                               : reservation.timeSlot === "afternoon" 
-                              ? "Pomeriggio" 
-                              : "Tutto il Giorno"}
+                              ? "12:00-Tramonto" 
+                              : "Alba-Tramonto"}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                           <Badge
                             variant={
                               reservation.status === "active"
