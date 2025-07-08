@@ -337,58 +337,60 @@ export default function SuperAdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Shield className="h-8 w-8 text-blue-600" />
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard SuperAdmin</h1>
-                <p className="text-sm text-gray-600">Gestione completa del sistema SeleApp</p>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Dashboard SuperAdmin</h1>
+                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Gestione completa del sistema SeleApp</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <Button
                 onClick={() => window.open('/api/download/manual', '_blank')}
                 variant="outline"
                 size="sm"
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <Download className="w-4 h-4 mr-2" />
-                Manuale Utente
+                <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Manuale Utente</span>
+                <span className="sm:hidden">Manuale</span>
               </Button>
               <Button
                 onClick={handleLogout}
                 variant="outline"
                 size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Esci
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Esci</span>
+                <span className="sm:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs defaultValue="reserves" className="space-y-6">
-          <div className="w-full overflow-x-auto px-4 sm:px-0">
-            <TabsList className="flex w-full min-w-max flex-row gap-2 sm:grid sm:grid-cols-6 sm:gap-0">
-              <TabsTrigger value="reserves" className="whitespace-nowrap px-4 py-2">Riserve</TabsTrigger>
-              <TabsTrigger value="admins" className="whitespace-nowrap px-4 py-2">Amministratori</TabsTrigger>
-              <TabsTrigger value="settings" className="whitespace-nowrap px-4 py-2">Impostazioni</TabsTrigger>
-              <TabsTrigger value="support" className="whitespace-nowrap px-4 py-2">Supporto</TabsTrigger>
-              <TabsTrigger value="billing" className="whitespace-nowrap px-4 py-2">Fatturazione</TabsTrigger>
-              <TabsTrigger value="materials" className="whitespace-nowrap px-4 py-2">Formazione</TabsTrigger>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+        <Tabs defaultValue="reserves" className="space-y-4 sm:space-y-6">
+          <div className="w-full overflow-x-auto px-1 sm:px-0">
+            <TabsList className="flex w-full min-w-max flex-row gap-1 sm:grid sm:grid-cols-6 sm:gap-0">
+              <TabsTrigger value="reserves" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Riserve</TabsTrigger>
+              <TabsTrigger value="admins" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Amministratori</TabsTrigger>
+              <TabsTrigger value="settings" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Impostazioni</TabsTrigger>
+              <TabsTrigger value="support" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Supporto</TabsTrigger>
+              <TabsTrigger value="billing" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Fatturazione</TabsTrigger>
+              <TabsTrigger value="materials" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Formazione</TabsTrigger>
             </TabsList>
           </div>
 
           {/* Tab Riserve */}
-          <TabsContent value="reserves" className="space-y-6">
-            <div className="flex items-center justify-between">
+          <TabsContent value="reserves" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Riserve di Caccia</h2>
-                <p className="text-gray-600">Gestisci tutte le riserve del sistema</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Riserve di Caccia</h2>
+                <p className="text-sm sm:text-base text-gray-600">Gestisci tutte le riserve del sistema</p>
               </div>
               <Dialog open={createReserveOpen} onOpenChange={(open) => {
                 setCreateReserveOpen(open);
@@ -398,9 +400,10 @@ export default function SuperAdminDashboard() {
                 }
               }}>
                 <DialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuova Riserva
+                  <Button className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm px-3 sm:px-4">
+                    <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Nuova Riserva</span>
+                    <span className="sm:hidden">Nuova</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -535,13 +538,14 @@ export default function SuperAdminDashboard() {
             {/* Tabella Riserve */}
             <Card>
               <CardHeader>
-                <CardTitle>Elenco Riserve</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Elenco Riserve</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
                   {reserves.length} riserve totali nel sistema
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-full">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
@@ -625,7 +629,8 @@ export default function SuperAdminDashboard() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
                 
                 {reserves.length === 0 && (
                   <div className="text-center py-12">
@@ -641,17 +646,18 @@ export default function SuperAdminDashboard() {
           </TabsContent>
 
           {/* Tab Amministratori */}
-          <TabsContent value="admins" className="space-y-6">
-            <div className="flex items-center justify-between">
+          <TabsContent value="admins" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Amministratori</h2>
-                <p className="text-gray-600">Gestisci gli account amministratore</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Amministratori</h2>
+                <p className="text-sm sm:text-base text-gray-600">Gestisci gli account amministratore</p>
               </div>
               <Dialog open={createAdminOpen} onOpenChange={setCreateAdminOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Nuovo Admin
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 sm:px-4">
+                    <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Nuovo Admin</span>
+                    <span className="sm:hidden">Nuovo</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -783,13 +789,14 @@ export default function SuperAdminDashboard() {
             {/* Tabella Amministratori */}
             <Card>
               <CardHeader>
-                <CardTitle>Elenco Amministratori</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Elenco Amministratori</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
                   {admins.length} amministratori nel sistema
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-full">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
@@ -839,7 +846,8 @@ export default function SuperAdminDashboard() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
                 
                 {admins.length === 0 && (
                   <div className="text-center py-12">
