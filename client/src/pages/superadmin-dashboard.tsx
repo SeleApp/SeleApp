@@ -409,13 +409,13 @@ export default function SuperAdminDashboard() {
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>
-                      {editingReserve && editingReserve.comune === "Pederobba" 
-                        ? "Modifica CA17 Pederobba" 
+                      {editingReserve 
+                        ? "Modifica Riserva" 
                         : "Crea Nuova Riserva"}
                     </DialogTitle>
                     <DialogDescription>
-                      {editingReserve && editingReserve.comune === "Pederobba"
-                        ? "Modifica i dettagli della riserva CA17 di Pederobba"
+                      {editingReserve
+                        ? "Modifica i dettagli della riserva selezionata"
                         : "Inserisci i dati della nuova riserva di caccia"}
                     </DialogDescription>
                   </DialogHeader>
@@ -425,7 +425,7 @@ export default function SuperAdminDashboard() {
                       <Input
                         id="name"
                         {...reserveForm.register("name")}
-                        placeholder="Es. Riserva Monte Verde"
+                        placeholder="Nome della riserva"
                       />
                       {reserveForm.formState.errors.name && (
                         <p className="text-sm text-red-600 mt-1">
@@ -439,7 +439,7 @@ export default function SuperAdminDashboard() {
                       <Input
                         id="comune"
                         {...reserveForm.register("comune")}
-                        placeholder="Es. Treviso"
+                        placeholder="Comune di appartenenza"
                       />
                       {reserveForm.formState.errors.comune && (
                         <p className="text-sm text-red-600 mt-1">
@@ -494,11 +494,10 @@ export default function SuperAdminDashboard() {
                         {...reserveForm.register("managementType")}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="standard_zones">Standard con Zone (es. Cison)</option>
-                        <option value="standard_random">Standard Random (es. Pederobba)</option>
-                        <option value="ca17_system">Sistema CA17 Avanzato</option>
+                        <option value="standard_zones">Gestione Standard con Zone</option>
+                        <option value="standard_random">Gestione Standard Random</option>
                         <option value="quota_only">Solo Gestione Quote</option>
-                        <option value="custom">Personalizzato</option>
+                        <option value="custom">Gestione Personalizzata</option>
                       </select>
                       {reserveForm.formState.errors.managementType && (
                         <p className="text-sm text-red-600 mt-1">
@@ -525,8 +524,8 @@ export default function SuperAdminDashboard() {
                       >
                         {(createReserveMutation.isPending || updateReserveMutation.isPending) 
                           ? "Salvando..." 
-                          : editingReserve && editingReserve.comune === "Pederobba"
-                          ? "Aggiorna CA17"
+                          : editingReserve
+                          ? "Aggiorna Riserva"
                           : "Crea Riserva"}
                       </Button>
                     </div>
