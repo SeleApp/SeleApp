@@ -117,16 +117,22 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
               Seleziona la Zona di Caccia
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
-              {zones.slice(0, 16).map((zone) => (
-                <Button
-                  key={zone.id}
-                  variant={selectedZone === zone.id ? "default" : "outline"}
-                  className="h-12 sm:h-16 text-sm sm:text-lg font-medium"
-                  onClick={() => setSelectedZone(zone.id)}
-                >
-                  {zone.name}
-                </Button>
-              ))}
+              {zones.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  <p>Nessuna zona disponibile. Contatta l'amministratore per configurare le zone di caccia.</p>
+                </div>
+              ) : (
+                zones.slice(0, 16).map((zone) => (
+                  <Button
+                    key={zone.id}
+                    variant={selectedZone === zone.id ? "default" : "outline"}
+                    className="h-12 sm:h-16 text-sm sm:text-lg font-medium"
+                    onClick={() => setSelectedZone(zone.id)}
+                  >
+                    {zone.name}
+                  </Button>
+                ))
+              )}
             </div>
           </div>
 

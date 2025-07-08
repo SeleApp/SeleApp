@@ -73,24 +73,26 @@ export default function HunterDashboard() {
           <p className="text-sm sm:text-base text-gray-600">Benvenuto, {authService.getUser()?.firstName}</p>
         </div>
 
-        <Tabs defaultValue="quotas" className="space-y-6">
-          <TabsList className="w-full grid grid-cols-3 overflow-x-auto">
-            <TabsTrigger value="quotas" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Piani di Abbattimento</span>
-              <span className="sm:hidden">Quote</span>
-            </TabsTrigger>
-            <TabsTrigger value="reservations" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-              <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Le Mie Prenotazioni</span>
-              <span className="sm:hidden">Prenotazioni</span>
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-              <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">I Miei Report</span>
-              <span className="sm:hidden">Report</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="quotas" className="space-y-4 sm:space-y-6">
+          <div className="w-full overflow-x-auto">
+            <TabsList className="flex w-full min-w-max gap-1 sm:grid sm:grid-cols-3 sm:gap-0">
+              <TabsTrigger value="quotas" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Piani di Abbattimento</span>
+                <span className="sm:hidden">Quote</span>
+              </TabsTrigger>
+              <TabsTrigger value="reservations" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Le Mie Prenotazioni</span>
+                <span className="sm:hidden">Prenotazioni</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
+                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">I Miei Report</span>
+                <span className="sm:hidden">Report</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="quotas" className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -169,21 +171,21 @@ export default function HunterDashboard() {
 
           <TabsContent value="reservations" className="space-y-4 sm:space-y-6">
             <h3 className="text-lg sm:text-2xl font-bold text-gray-900">Le Mie Prenotazioni</h3>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {reservations.length > 0 ? (
                 reservations.map((reservation) => (
                   <Card key={reservation.id} className="border-l-4 border-l-available">
                     <CardContent className="p-3 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                        <div className="flex-1">
-                          <h3 className="text-lg sm:text-xl font-bold text-gray-900">{reservation.zone.name}</h3>
-                          <p className="text-sm sm:text-base text-gray-600">
+                      <div className="flex flex-col gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{reservation.zone.name}</h3>
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
                             {reservation.timeSlot === "morning" ? "Mattina" : 
                              reservation.timeSlot === "afternoon" ? "Pomeriggio" : "Tutto il Giorno"}
                           </p>
                         </div>
-                        <div className="flex items-center justify-between sm:justify-end space-x-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                           <Badge
                             variant={
                               reservation.status === "active"
@@ -192,7 +194,7 @@ export default function HunterDashboard() {
                                 ? "secondary"
                                 : "destructive"
                             }
-                            className={`text-xs sm:text-sm ${
+                            className={`text-xs sm:text-sm w-fit ${
                               reservation.status === "active"
                                 ? "status-available text-white"
                                 : ""

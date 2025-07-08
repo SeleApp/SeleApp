@@ -6,8 +6,13 @@ const router = Router();
 
 router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const zones = await storage.getAllZones();
-    const regionalQuotas = await storage.getRegionalQuotas();
+    const user = req.user;
+    if (!user?.reserveId) {
+      return res.status(403).json({ message: "Utente non associato a una riserva" });
+    }
+    
+    const zones = await storage.getAllZones(user.reserveId);
+    const regionalQuotas = await storage.getRegionalQuotas(user.reserveId);
     
     const zonesWithQuotas = zones.map((zone) => {
       // Calculate overall quota status based on regional quotas
@@ -59,6 +64,11 @@ router.get("/:id/availability", authenticateToken, async (req: AuthRequest, res)
   try {
     const { id } = req.params;
     const { date } = req.query;
+    const user = req.user;
+    
+    if (!user?.reserveId) {
+      return res.status(403).json({ message: "Utente non associato a una riserva" });
+    }
     
     if (!date) {
       return res.status(400).json({ message: "Data richiesta" });
@@ -67,13 +77,15 @@ router.get("/:id/availability", authenticateToken, async (req: AuthRequest, res)
     const morningReservations = await storage.getZoneReservations(
       parseInt(id),
       date as string,
-      "morning"
+      "morning",
+      user.reserveId
     );
     
     const afternoonReservations = await storage.getZoneReservations(
       parseInt(id),
       date as string,
-      "afternoon"
+      "afternoon", 
+      user.reserveId
     );
     
     res.json({
