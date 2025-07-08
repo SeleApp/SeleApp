@@ -77,8 +77,8 @@ router.get("/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: Aut
   }
 });
 
-// PATCH /api/superadmin/reserves/:id - Aggiorna stato riserva (solo SUPERADMIN)
-router.patch('/superadmin/reserves/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+// PATCH /:id - Aggiorna stato riserva (solo SUPERADMIN)
+router.patch('/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
@@ -99,8 +99,8 @@ router.patch('/superadmin/reserves/:id', authenticateToken, requireRole('SUPERAD
   }
 });
 
-// DELETE /api/superadmin/reserves/:id - Elimina riserva (solo SUPERADMIN)
-router.delete('/superadmin/reserves/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+// DELETE /:id - Elimina riserva (solo SUPERADMIN)
+router.delete('/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 

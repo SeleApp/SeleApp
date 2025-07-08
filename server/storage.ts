@@ -145,24 +145,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteReserve(id: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      // Elimina tutti i record associati alla riserva
-      await tx.delete(huntReports).where(eq(huntReports.reserveId, id));
-      await tx.delete(reservations).where(eq(reservations.reserveId, id));
-      await tx.delete(regionalQuotas).where(eq(regionalQuotas.reserveId, id));
-      await tx.delete(wildlifeQuotas).where(eq(wildlifeQuotas.reserveId, id));
-      await tx.delete(zones).where(eq(zones.reserveId, id));
-      await tx.delete(users).where(eq(users.reserveId, id));
+    console.log(`Starting deletion of reserve: ${id}`);
+    
+    try {
+      // Elimina tutti i record associati prima di eliminare la riserva
+      console.log('Deleting associated records...');
       
-      // Elimina i record superadmin associati
-      await tx.delete(supportTickets).where(eq(supportTickets.reserveId, id));
-      await tx.delete(billing).where(eq(billing.reserveId, id));
-      await tx.delete(contracts).where(eq(contracts.reserveId, id));
-      await tx.delete(reserveSettings).where(eq(reserveSettings.reserveId, id));
+      // Elimina hunt reports
+      await db.delete(huntReports).where(eq(huntReports.reserveId, id));
+      
+      // Elimina reservations  
+      await db.delete(reservations).where(eq(reservations.reserveId, id));
+      
+      // Elimina regional quotas
+      await db.delete(regionalQuotas).where(eq(regionalQuotas.reserveId, id));
+      
+      // Elimina zones
+      await db.delete(zones).where(eq(zones.reserveId, id));
+      
+      // Elimina users
+      await db.delete(users).where(eq(users.reserveId, id));
+      
+      // Elimina support tickets
+      await db.delete(supportTickets).where(eq(supportTickets.reserveId, id));
+      
+      // Elimina billing
+      await db.delete(billing).where(eq(billing.reserveId, id));
+      
+      // Elimina contracts
+      await db.delete(contracts).where(eq(contracts.reserveId, id));
+      
+      // Elimina reserve settings
+      await db.delete(reserveSettings).where(eq(reserveSettings.reserveId, id));
       
       // Infine elimina la riserva
-      await tx.delete(reserves).where(eq(reserves.id, id));
-    });
+      const result = await db.delete(reserves).where(eq(reserves.id, id));
+      console.log(`Successfully deleted reserve: ${id}`);
+    } catch (error) {
+      console.error(`Error deleting reserve ${id}:`, error);
+      throw error;
+    }
   }
 
   async updateReserveAccessCode(reserveId: string, data: { accessCode?: string; codeActive?: boolean }): Promise<Reserve | undefined> {

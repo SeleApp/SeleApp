@@ -36,6 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
   
+  // SuperAdmin reserves management routes
+  app.use("/api/superadmin/reserves", reservesRoutes);
+  
   // SuperAdmin advanced features routes
   const reserveSettingsRoutes = await import("./routes/superadmin/reserveSettings");
   app.use("/api/superadmin/reserve-settings", reserveSettingsRoutes.default);
