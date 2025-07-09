@@ -7,7 +7,7 @@ import { storage } from "../storage";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 import { insertHuntReportSchema } from "@shared/schema";
 import { z } from "zod";
-import { EmailService } from "../services/emailService.js";
+import { EmailService } from "../services/emailService";
 
 const router = Router();
 
