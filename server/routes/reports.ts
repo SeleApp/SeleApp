@@ -26,7 +26,14 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       return res.status(403).json({ message: "Solo i cacciatori possono inviare report" });
     }
 
-    const reportData = insertHuntReportSchema.parse(req.body);
+    // Aggiungi reserveId dai dati utente
+    const reportDataWithReserve = {
+      ...req.body,
+      reserveId: req.user.reserveId,
+      killCardPhoto: req.body.killCardPhoto || "" // Rendi opzionale per ora
+    };
+    
+    const reportData = insertHuntReportSchema.parse(reportDataWithReserve);
 
     // Verify that the reservation belongs to the hunter
     const reservations = await storage.getReservations(req.user.reserveId, req.user.id);

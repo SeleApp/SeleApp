@@ -64,9 +64,12 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
         reservationId: parseInt(data.reservationId),
         outcome: data.outcome,
         species: data.outcome === "harvest" ? data.species : undefined,
+        roeDeerCategory: data.outcome === "harvest" && data.species === "roe_deer" ? "M0" : undefined,
+        redDeerCategory: data.outcome === "harvest" && data.species === "red_deer" ? "CL0" : undefined,
         sex: data.outcome === "harvest" ? data.sex : undefined,
         ageClass: data.outcome === "harvest" ? data.ageClass : undefined,
         notes: data.notes || "",
+        killCardPhoto: "",
       };
       
       return await apiRequest("/api/reports", {
@@ -106,9 +109,9 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Nuovo Report di Supporto</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">Nuovo Report di Supporto</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -227,18 +230,19 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
             />
           </div>
 
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Annulla
             </Button>
             <Button 
               type="submit" 
               disabled={createReportMutation.isPending}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto order-1 sm:order-2"
             >
               {createReportMutation.isPending ? "Creando..." : "Crea Report"}
             </Button>

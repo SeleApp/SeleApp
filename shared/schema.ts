@@ -384,7 +384,7 @@ export const insertHuntReportSchema = createInsertSchema(huntReports).omit({
   id: true,
   reportedAt: true,
 }).extend({
-  killCardPhoto: z.string().min(1, "La foto della scheda di abbattimento è obbligatoria"),
+  killCardPhoto: z.string().optional(),
 });
 
 // Types

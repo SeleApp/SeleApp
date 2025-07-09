@@ -50,7 +50,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
         method: "POST",
         body: JSON.stringify(data)
       });
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
@@ -191,11 +191,11 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       return;
     }
 
-    // Validate photo upload
-    if (!killCardPhoto) {
+    // Validate photo upload solo per i prelievi
+    if (data.outcome === "harvest" && !killCardPhoto) {
       toast({
         title: "Foto mancante",
-        description: "È obbligatorio caricare la foto della scheda di abbattimento",
+        description: "È obbligatorio caricare la foto della scheda di abbattimento per i prelievi",
         variant: "destructive",
       });
       return;
@@ -203,7 +203,11 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
     setIsLoading(true);
     try {
-      const submitData = { ...data, killCardPhoto };
+      const submitData = { 
+        ...data, 
+        killCardPhoto: killCardPhoto || "",
+        reservationId: Number(data.reservationId)
+      };
       await createReport.mutateAsync(submitData);
     } finally {
       setIsLoading(false);
@@ -230,31 +234,32 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-900">
+          <DialogTitle className="text-lg sm:text-xl font-bold text-gray-900">
             Report di Caccia
           </DialogTitle>
         </DialogHeader>
 
-        <div className="bg-gray-50 rounded-xl p-4 mb-6">
-          <p className="text-lg font-medium text-gray-900">{reservation.zone.name}</p>
-          <p className="text-gray-600">
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+          <p className="text-base sm:text-lg font-medium text-gray-900">{reservation.zone.name}</p>
+          <p className="text-sm sm:text-base text-gray-600">
             {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
-            {reservation.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
+            {reservation.timeSlot === "morning" ? "Mattina" : 
+             reservation.timeSlot === "afternoon" ? "Pomeriggio" : "Giornata intera"}
           </p>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
           <div>
-            <Label className="block text-lg font-medium text-gray-700 mb-2">
+            <Label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
               Esito Caccia
             </Label>
             <Select
               value={form.watch("outcome")}
               onValueChange={(value) => form.setValue("outcome", value as "no_harvest" | "harvest")}
             >
-              <SelectTrigger className="input-large">
+              <SelectTrigger className="h-12 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -271,15 +276,15 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
           {showHarvestDetails && (
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h4 className="font-medium text-blue-900 mb-2">Dettagli Capo Abbattuto</h4>
-                <p className="text-sm text-blue-700">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                <h4 className="font-medium text-blue-900 mb-2 text-sm sm:text-base">Dettagli Capo Abbattuto</h4>
+                <p className="text-xs sm:text-sm text-blue-700">
                   Seleziona attentamente il tipo di capo abbattuto. Questa informazione aggiornerà automaticamente le quote della zona.
                 </p>
               </div>
 
               <div>
-                <Label className="block text-lg font-medium text-gray-700 mb-2">
+                <Label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
                   Specie *
                 </Label>
                 <Select
@@ -291,7 +296,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                     form.setValue("redDeerCategory", undefined);
                   }}
                 >
-                  <SelectTrigger className="input-large">
+                  <SelectTrigger className="h-12 text-base">
                     <SelectValue placeholder="Seleziona la specie..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -375,13 +380,24 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             </div>
           )}
 
-          {/* Sezione caricamento foto obbligatoria */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-            <Label className="block text-lg font-medium text-amber-800 mb-3">
-              📸 Foto Scheda di Abbattimento *
+          {/* Sezione caricamento foto */}
+          <div className={`border rounded-xl p-6 ${
+            showHarvestDetails 
+              ? "bg-amber-50 border-amber-200" 
+              : "bg-gray-50 border-gray-200"
+          }`}>
+            <Label className={`block text-lg font-medium mb-3 ${
+              showHarvestDetails ? "text-amber-800" : "text-gray-700"
+            }`}>
+              📸 Foto Scheda di Abbattimento {showHarvestDetails ? "*" : "(Opzionale)"}
             </Label>
-            <p className="text-amber-700 text-sm mb-4">
-              È obbligatorio caricare una foto della scheda di abbattimento compilata
+            <p className={`text-sm mb-4 ${
+              showHarvestDetails ? "text-amber-700" : "text-gray-600"
+            }`}>
+              {showHarvestDetails 
+                ? "È obbligatorio caricare una foto della scheda di abbattimento compilata per i prelievi"
+                : "Puoi caricare una foto della scheda di abbattimento compilata (facoltativo per nessun prelievo)"
+              }
             </p>
             
             <input
@@ -449,22 +465,22 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             />
           </div>
 
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
             <Button
               type="button"
               onClick={handleClose}
               variant="outline"
-              className="flex-1 btn-large"
+              className="flex-1 h-12 text-base order-2 sm:order-1"
               disabled={isLoading}
             >
               Annulla
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !killCardPhoto}
-              className="flex-1 btn-large bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={isLoading || (showHarvestDetails && !killCardPhoto)}
+              className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700 order-1 sm:order-2"
             >
-              {isLoading ? "Invio..." : !killCardPhoto ? "Carica la Foto" : "Invia Report"}
+              {isLoading ? "Invio..." : (showHarvestDetails && !killCardPhoto) ? "Carica la Foto" : "Invia Report"}
             </Button>
           </div>
         </form>

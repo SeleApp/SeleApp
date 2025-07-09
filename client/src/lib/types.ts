@@ -63,7 +63,7 @@ export interface CreateHuntReportRequest {
   sex?: 'male' | 'female';
   ageClass?: 'adult' | 'young';
   notes?: string;
-  killCardPhoto: string; // Base64 della foto obbligatoria
+  killCardPhoto?: string; // Base64 della foto opzionale
 }
 
 export const TIME_SLOT_LABELS = {
