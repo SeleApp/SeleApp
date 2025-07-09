@@ -124,6 +124,11 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Errore invio email conferma prenotazione:', error);
+      console.error('Error details:', error.message);
+      console.error('SMTP config check:', { 
+        user: process.env.GMAIL_USER ? 'SET' : 'MISSING',
+        password: process.env.GMAIL_APP_PASSWORD ? 'SET' : 'MISSING'
+      });
       return false;
     }
   }

@@ -6,6 +6,7 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 import { insertHuntReportSchema } from "@shared/schema";
+import { z } from "zod";
 import { EmailService } from "../services/emailService.js";
 
 const router = Router();
@@ -124,6 +125,17 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     res.status(201).json(report);
   } catch (error) {
     console.error("Error creating report:", error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        message: "Errori di validazione", 
+        errors: error.errors.map(e => ({ 
+          field: e.path.join('.'), 
+          message: e.message 
+        }))
+      });
+    }
+    
     res.status(500).json({ message: "Errore nella creazione del report" });
   }
 });
