@@ -413,6 +413,82 @@ export class EmailService {
   }
 
   /**
+   * Invia notifica all'admin quando viene inviato un nuovo report
+   */
+  static async sendReportNotificationToAdmin(data: {
+    adminEmail: string;
+    adminName: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+    outcome: string;
+  }): Promise<boolean> {
+    try {
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.adminEmail,
+        subject: "📋 Nuovo Report di Caccia - SeleApp",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #7c2d12; text-align: center;">📋 Nuovo Report di Caccia</h2>
+            
+            <div style="background-color: #fef7ff; border: 2px solid #a855f7; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #7c2d12; margin-top: 0;">Dettagli Report</h3>
+              <p><strong>Cacciatore:</strong> ${data.hunterName}</p>
+              <p><strong>Zona:</strong> ${data.zoneName}</p>
+              <p><strong>Data Caccia:</strong> ${data.huntDate}</p>
+              <p><strong>Esito:</strong> ${data.outcome}</p>
+            </div>
+
+            <div style="background-color: #e0f2fe; border-left: 4px solid #0288d1; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #01579b; margin-top: 0;">📊 Azioni Amministratore:</h4>
+              <ul style="color: #01579b; margin: 0;">
+                <li>Accedi alla dashboard per visualizzare i dettagli completi</li>
+                <li>Verifica il report e i dati inseriti</li>
+                <li>Monitora le quote regionali aggiornate</li>
+                <li>Controlla eventuali foto allegate</li>
+              </ul>
+            </div>
+
+            <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Questa è una email automatica del sistema SeleApp<br>
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
+            </p>
+          </div>
+        `,
+        text: `
+          NUOVO REPORT DI CACCIA - SeleApp
+          
+          Caro ${data.adminName},
+          
+          Un nuovo report di caccia è stato inviato e richiede la tua attenzione.
+          
+          DETTAGLI REPORT:
+          - Cacciatore: ${data.hunterName}
+          - Zona: ${data.zoneName}  
+          - Data Caccia: ${data.huntDate}
+          - Esito: ${data.outcome}
+          
+          AZIONI AMMINISTRATORE:
+          - Accedi alla dashboard per visualizzare i dettagli completi
+          - Verifica il report e i dati inseriti
+          - Monitora le quote regionali aggiornate
+          - Controlla eventuali foto allegate
+          
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email notifica report inviata all'admin ${data.adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio email notifica report admin:', error);
+      return false;
+    }
+  }
+
+  /**
    * Invia email per richieste di contatto dal form della landing page
    */
   static async sendContactRequest(data: ContactRequestData): Promise<boolean> {
