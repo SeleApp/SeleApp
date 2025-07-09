@@ -59,6 +59,8 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
       form.setValue("species", undefined);
       form.setValue("sex", undefined);
       form.setValue("ageClass", undefined);
+      form.setValue("roeDeerCategory", undefined);
+      form.setValue("redDeerCategory", undefined);
     }
   }, [outcome, form]);
 
@@ -201,12 +203,14 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
       return;
     }
 
-    // Validate photo upload for harvests - optional for admin but recommended
+    // Validate photo upload for harvests - required for both admin and hunter
     if (data.outcome === "harvest" && !killCardPhoto) {
       toast({
-        title: "Avviso foto mancante",
-        description: "Raccomandato: carica la foto della scheda di abbattimento per i prelievi",
+        title: "Foto richiesta",
+        description: "È obbligatorio caricare la foto della scheda di abbattimento per i prelievi",
+        variant: "destructive",
       });
+      return;
     }
 
     setIsLoading(true);
@@ -415,13 +419,13 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
             <Label className={`block text-lg font-medium mb-3 ${
               showHarvestDetails ? "text-amber-800" : "text-gray-700"
             }`}>
-              📸 Foto Scheda di Abbattimento {showHarvestDetails ? "(Raccomandato)" : "(Opzionale)"}
+              📸 Foto Scheda di Abbattimento {showHarvestDetails ? "*" : "(Opzionale)"}
             </Label>
             <p className={`text-sm mb-4 ${
               showHarvestDetails ? "text-amber-700" : "text-gray-600"
             }`}>
               {showHarvestDetails 
-                ? "Raccomandato: carica una foto della scheda di abbattimento compilata per i prelievi"
+                ? "È obbligatorio caricare una foto della scheda di abbattimento compilata per i prelievi"
                 : "Puoi caricare una foto della scheda di abbattimento compilata (facoltativo per nessun prelievo)"
               }
             </p>

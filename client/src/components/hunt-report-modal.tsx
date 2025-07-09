@@ -72,16 +72,17 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     },
   });
 
-  const outcome = form.watch("outcome");
-
   useEffect(() => {
+    const outcome = form.watch("outcome");
     setShowHarvestDetails(outcome === "harvest");
     if (outcome === "no_harvest") {
       form.setValue("species", undefined);
       form.setValue("sex", undefined);
       form.setValue("ageClass", undefined);
+      form.setValue("roeDeerCategory", undefined);
+      form.setValue("redDeerCategory", undefined);
     }
-  }, [outcome, form]);
+  }, [form]);
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
