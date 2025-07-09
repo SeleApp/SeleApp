@@ -10,7 +10,7 @@ import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
-import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings, LogOut } from "lucide-react";
+import { Users, CalendarCheck, Target, AlertTriangle, MapPin, Calendar, BarChart, FileText, X, Edit, Save, Check, Settings, LogOut, Trash2 } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 
 // This is the old admin dashboard, replace with the new one
@@ -39,6 +39,10 @@ export default function AdminDashboard() {
 
   const { data: quotasData = [], isLoading: quotasLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/quotas"],
+  });
+
+  const { data: reports = [], isLoading: reportsLoading } = useQuery<any[]>({
+    queryKey: ["/api/reports"],
   });
 
   const updateQuotaMutation = useMutation({
@@ -98,6 +102,35 @@ export default function AdminDashboard() {
     setEditingQuota(null);
     setEditingType(null);
     setQuotaValues({});
+  };
+
+  const deleteReportMutation = useMutation({
+    mutationFn: async (reportId: number) => {
+      const response = await apiRequest("DELETE", `/api/reports/${reportId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+      toast({
+        title: "Report eliminato",
+        description: "Report eliminato con successo. Le quote sono state ripristinate.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Errore nell'eliminazione",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteReport = (reportId: number, hunterName: string) => {
+    if (window.confirm(`Sei sicuro di voler eliminare il report di ${hunterName}? Questa azione ripristinerà automaticamente le quote di caccia.`)) {
+      deleteReportMutation.mutate(reportId);
+    }
   };
 
   // Helper function per mappare vecchio formato a nuove categorie
@@ -610,12 +643,100 @@ export default function AdminDashboard() {
           <TabsContent value="reports">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Report e Statistiche</h3>
-                <div className="text-center py-8 text-gray-500">
-                  <BarChart className="mx-auto mb-4" size={48} />
-                  <p className="text-lg">Sezione in sviluppo</p>
-                  <p className="text-base">Grafici e analisi dettagliate</p>
-                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Report di Caccia</h3>
+                
+                {reportsLoading ? (
+                  <div className="text-center py-8">Caricamento report...</div>
+                ) : reports.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <BarChart className="mx-auto mb-4" size={48} />
+                    <p className="text-lg">Nessun report trovato</p>
+                    <p className="text-base">I report appariranno qui quando i cacciatori li invieranno</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full bg-white border border-gray-200 rounded-lg">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cacciatore
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Zona
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Data Caccia
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Esito
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Dettagli
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Note
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Azioni
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {reports.map((report) => (
+                          <tr key={report.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-sm text-gray-900">
+                              {report.reservation?.hunter?.firstName} {report.reservation?.hunter?.lastName}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900">
+                              {report.reservation?.zone?.name}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {new Date(report.reservation?.huntDate).toLocaleDateString('it-IT')}
+                            </td>
+                            <td className="px-6 py-4">
+                              <Badge 
+                                variant={report.outcome === 'harvest' ? 'default' : 'secondary'}
+                                className={report.outcome === 'harvest' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                              >
+                                {report.outcome === 'harvest' ? 'Prelievo' : 'Senza prelievo'}
+                              </Badge>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {report.outcome === 'harvest' ? (
+                                <div>
+                                  <div className="font-medium">
+                                    {report.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {report.roeDeerCategory || report.redDeerCategory}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                              <div className="truncate">
+                                {report.notes || '-'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteReport(report.id, `${report.reservation?.hunter?.firstName} ${report.reservation?.hunter?.lastName}`)}
+                                className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                disabled={deleteReportMutation.isPending}
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

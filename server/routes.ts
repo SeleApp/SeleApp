@@ -24,6 +24,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/zones", zonesRoutes);
   app.use("/api/reservations", reservationsRoutes);
   app.use("/api/reports", reportsRoutes);
+  
+  // Delete reports route (ADMIN only)
+  const deleteReportRoutes = await import("./routes/deleteReport");
+  app.use("/api/reports", deleteReportRoutes.default);
   app.use("/api/admin", adminRoutes);
   app.use("/api/regional-quotas", regionalQuotasRoutes);
   app.use("/api/reserves", reservesRoutes);

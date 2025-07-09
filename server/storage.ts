@@ -95,6 +95,7 @@ export interface IStorage {
   // Hunt Reports (filtered by reserveId)
   createHuntReport(report: InsertHuntReport): Promise<HuntReport>;
   getHuntReports(reserveId: string): Promise<(HuntReport & { reservation: Reservation & { zone: Zone; hunter: User } })[]>;
+  deleteHuntReport(id: number, reserveId: string): Promise<void>;
   
   // Admin Statistics (filtered by reserveId)
   getAdminStats(reserveId: string): Promise<{
@@ -666,6 +667,85 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error creating/updating regional quota:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Elimina un report di caccia e ripristina automaticamente le quote regionali
+   * Solo per prelievi (harvest), incrementa la quota disponibile
+   */
+  async deleteHuntReport(id: number, reserveId: string): Promise<void> {
+    try {
+      // Prima di eliminare, ottieni i dettagli del report per ripristinare le quote
+      const [reportToDelete] = await db
+        .select()
+        .from(huntReports)
+        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)));
+
+      if (!reportToDelete) {
+        throw new Error(`Report ${id} non trovato nella riserva ${reserveId}`);
+      }
+
+      // Se era un prelievo, ripristina la quota regionale
+      if (reportToDelete.outcome === 'harvest' && reportToDelete.species) {
+        await this.restoreRegionalQuotaAfterDelete(
+          reportToDelete.species,
+          reportToDelete.roeDeerCategory || reportToDelete.redDeerCategory || '',
+          reserveId
+        );
+      }
+
+      // Elimina il report
+      await db.delete(huntReports).where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)));
+      
+      console.log(`Report ${id} eliminato e quote ripristinate`);
+    } catch (error) {
+      console.error("Errore eliminazione report:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Ripristina le quote regionali dopo l'eliminazione di un report di prelievo
+   */
+  private async restoreRegionalQuotaAfterDelete(
+    species: 'roe_deer' | 'red_deer',
+    category: string,
+    reserveId: string
+  ): Promise<void> {
+    if (!category) {
+      console.warn("Categoria non specificata per il ripristino quota");
+      return;
+    }
+
+    const quotaCondition = species === 'roe_deer' 
+      ? eq(regionalQuotas.roeDeerCategory, category as any)
+      : eq(regionalQuotas.redDeerCategory, category as any);
+    
+    const [quotaToRestore] = await db
+      .select()
+      .from(regionalQuotas)
+      .where(
+        and(
+          eq(regionalQuotas.species, species),
+          quotaCondition,
+          eq(regionalQuotas.reserveId, reserveId)
+        )
+      );
+
+    if (quotaToRestore && quotaToRestore.harvested > 0) {
+      // Decrementa i prelievi (ripristina la quota)
+      await db
+        .update(regionalQuotas)
+        .set({ 
+          harvested: quotaToRestore.harvested - 1,
+          updatedAt: new Date()
+        })
+        .where(eq(regionalQuotas.id, quotaToRestore.id));
+      
+      console.log(`Quota regionale ripristinata: ${species}-${category}, prelievi: ${quotaToRestore.harvested - 1}/${quotaToRestore.totalQuota}`);
+    } else {
+      console.warn(`Quota non trovata o già a zero per: ${species}-${category}`);
     }
   }
 
