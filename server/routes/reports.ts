@@ -117,6 +117,29 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
           huntDate: reservation.huntDate.toLocaleDateString('it-IT'),
           outcome: reportData.outcome === 'harvest' ? 'prelievo' : 'nessun prelievo'
         });
+
+        // Se è un prelievo con foto, invia anche la scheda di abbattimento
+        if (reportData.outcome === 'harvest' && reportData.killCardPhoto) {
+          const speciesCategory = reportData.species === 'roe_deer' 
+            ? reportData.roeDeerCategory 
+            : reportData.redDeerCategory;
+
+          const timeSlotText = reservation.timeSlot === 'morning' ? 'Alba-12:00' :
+                              reservation.timeSlot === 'afternoon' ? '12:00-Tramonto' : 'Alba-Tramonto';
+
+          await EmailService.sendKillCardToAdmin({
+            adminEmail: reserveAdmin.email,
+            adminName: `${reserveAdmin.firstName} ${reserveAdmin.lastName}`,
+            hunterName: `${req.user.firstName} ${req.user.lastName}`,
+            zoneName: reservation.zone.name,
+            huntDate: reservation.huntDate.toLocaleDateString('it-IT'),
+            timeSlot: timeSlotText,
+            species: reportData.species,
+            category: speciesCategory,
+            killCardPhoto: reportData.killCardPhoto,
+            notes: reportData.notes
+          });
+        }
       }
     } catch (emailError) {
       console.error("Errore invio email notifica admin:", emailError);

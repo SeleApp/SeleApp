@@ -494,6 +494,119 @@ export class EmailService {
   }
 
   /**
+   * Invia scheda di abbattimento all'admin della riserva
+   */
+  static async sendKillCardToAdmin(data: {
+    adminEmail: string;
+    adminName: string;
+    hunterName: string;
+    zoneName: string;
+    huntDate: string;
+    timeSlot: string;
+    species: string;
+    category: string;
+    killCardPhoto: string;
+    notes?: string;
+  }): Promise<boolean> {
+    try {
+      const speciesName = data.species === 'roe_deer' ? 'Capriolo' : 'Cervo';
+      
+      const mailOptions = {
+        from: `"SeleApp" <${process.env.GMAIL_USER}>`,
+        to: data.adminEmail,
+        subject: `📸 Scheda di Abbattimento - ${speciesName} ${data.category} - ${data.zoneName}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #7c2d12; text-align: center;">📸 Scheda di Abbattimento</h2>
+            
+            <div style="background-color: #fef7ff; border: 2px solid #a855f7; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #7c2d12; margin-top: 0;">🦌 Dettagli Prelievo</h3>
+              <p><strong>Cacciatore:</strong> ${data.hunterName}</p>
+              <p><strong>Zona:</strong> ${data.zoneName}</p>
+              <p><strong>Data:</strong> ${data.huntDate}</p>
+              <p><strong>Orario:</strong> ${data.timeSlot}</p>
+              <p><strong>Specie:</strong> ${speciesName} (${data.species})</p>
+              <p><strong>Categoria:</strong> ${data.category}</p>
+              ${data.notes ? `<p><strong>Note:</strong> ${data.notes}</p>` : ''}
+            </div>
+
+            <div style="background-color: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+              <h3 style="color: #15803d; margin-top: 0;">📷 Scheda di Abbattimento Allegata</h3>
+              <p style="color: #15803d; margin-bottom: 15px;">
+                La foto della scheda di abbattimento è allegata a questa email per la verifica amministrativa.
+              </p>
+              <div style="background-color: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; display: inline-block;">
+                <img src="${data.killCardPhoto}" alt="Scheda di Abbattimento" style="max-width: 400px; height: auto; border-radius: 4px;">
+              </div>
+            </div>
+
+            <div style="background-color: #e0f2fe; border-left: 4px solid #0288d1; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #01579b; margin-top: 0;">📋 Azioni Amministrative:</h4>
+              <ul style="color: #01579b; margin: 0;">
+                <li>Verifica la correttezza dei dati del prelievo</li>
+                <li>Controlla la scheda di abbattimento allegata</li>
+                <li>Monitora l'aggiornamento automatico delle quote regionali</li>
+                <li>Archivia la documentazione per controlli futuri</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #92400e; margin-top: 0;">⚠️ Importante:</h4>
+              <p style="color: #92400e; margin: 0;">
+                Questa email contiene documentazione ufficiale di prelievo. 
+                Conservare per eventuali controlli delle autorità competenti.
+              </p>
+            </div>
+
+            <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Questa è una email automatica del sistema SeleApp<br>
+              Per assistenza: <a href="mailto:seleapp.info@gmail.com">seleapp.info@gmail.com</a>
+            </p>
+          </div>
+        `,
+        text: `
+          SCHEDA DI ABBATTIMENTO - SeleApp
+          
+          Caro ${data.adminName},
+          
+          È stata inviata una nuova scheda di abbattimento che richiede la tua verifica.
+          
+          DETTAGLI PRELIEVO:
+          - Cacciatore: ${data.hunterName}
+          - Zona: ${data.zoneName}
+          - Data: ${data.huntDate}
+          - Orario: ${data.timeSlot}
+          - Specie: ${speciesName} (${data.species})
+          - Categoria: ${data.category}
+          ${data.notes ? `- Note: ${data.notes}` : ''}
+          
+          SCHEDA DI ABBATTIMENTO:
+          La foto della scheda di abbattimento è allegata a questa email per la verifica amministrativa.
+          
+          AZIONI AMMINISTRATIVE:
+          - Verifica la correttezza dei dati del prelievo
+          - Controlla la scheda di abbattimento allegata
+          - Monitora l'aggiornamento automatico delle quote regionali
+          - Archivia la documentazione per controlli futuri
+          
+          IMPORTANTE:
+          Questa email contiene documentazione ufficiale di prelievo. 
+          Conservare per eventuali controlli delle autorità competenti.
+          
+          SeleApp - Per assistenza: seleapp.info@gmail.com
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Scheda di abbattimento inviata all'admin ${data.adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Errore invio scheda di abbattimento:', error);
+      return false;
+    }
+  }
+
+  /**
    * Invia email per richieste di contatto dal form della landing page
    */
   static async sendContactRequest(data: ContactRequestData): Promise<boolean> {
