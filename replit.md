@@ -414,6 +414,8 @@ Changelog:
   - **Improved UX**: Separated complex target species selection into dedicated step for better usability
   - **Validation Flow**: Step-by-step validation ensuring users complete required fields before proceeding
   - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
+  - **Complete Recreation**: Recreated modal component from scratch to resolve persistent browser cache issues
+  - **Service Worker**: Updated cache version to v3-multistep for forced refresh of cached components
 
 # User Preferences
 

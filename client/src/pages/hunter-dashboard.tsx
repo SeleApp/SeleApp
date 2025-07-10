@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import ReservationModal from "@/components/reservation-modal";
+import ReservationModalNew from "@/components/reservation-modal-new";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { authService } from "@/lib/auth";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
-import { CalendarCheck, Target, Plus, ClipboardList } from "lucide-react";
+import { CalendarCheck, Target, Plus, ClipboardList, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -299,7 +299,7 @@ export default function HunterDashboard() {
       </main>
 
       {/* Modals */}
-      <ReservationModal
+      <ReservationModalNew
         open={showReservationModal}
         onOpenChange={setShowReservationModal}
         zones={zones}
