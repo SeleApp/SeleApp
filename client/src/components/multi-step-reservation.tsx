@@ -149,24 +149,24 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
             {/* STEP 1: ZONE */}
             {step === 1 && (
               <div className="space-y-6">
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Zona</h3>
-                  <p className="text-lg text-gray-600">Scegli la zona di caccia che preferisci</p>
+                  <p className="text-lg text-gray-600">Tutte le 16 zone di caccia disponibili</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-80 overflow-y-auto border-2 rounded-xl p-6 bg-gray-50">
+                <div className="grid grid-cols-4 md:grid-cols-8 gap-3 p-4 bg-gray-50 rounded-xl">
                   {zones.slice(0, 16).map((zone) => (
                     <button
                       key={zone.id}
                       type="button"
                       onClick={() => setValue("zoneId", zone.id)}
-                      className={`p-6 rounded-xl border-3 text-center transition-all ${
+                      className={`p-4 rounded-lg border-2 text-center transition-all ${
                         watch("zoneId") === zone.id
                           ? "border-blue-600 bg-blue-100 text-blue-700 shadow-lg transform scale-105"
                           : "border-gray-300 hover:border-gray-400 hover:bg-white hover:shadow-md"
                       }`}
                     >
-                      <div className="text-2xl font-bold mb-2">{zone.name}</div>
-                      <div className="text-sm font-medium">Disponibile</div>
+                      <div className="text-xl font-bold">{zone.name}</div>
+                      <div className="text-xs text-green-600 mt-1">Disponibile</div>
                     </button>
                   ))}
                 </div>
@@ -179,44 +179,60 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
             {/* STEP 2: DATE */}
             {step === 2 && (
               <div className="space-y-6">
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Data</h3>
-                  <p className="text-lg text-gray-600">Scegli il giorno per la tua caccia</p>
-                  <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-4 mx-auto max-w-md">
+                  <p className="text-lg text-gray-600">Scegli tra i prossimi giorni disponibili</p>
+                  <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-4 mx-auto max-w-lg">
                     <p className="text-sm text-yellow-800">
                       <strong>Ricorda:</strong> Martedì e Venerdì sono giorni di silenzio venatorio
                     </p>
                   </div>
                 </div>
-                <div className="max-w-md mx-auto">
-                  <Input
-                    type="date"
-                    className="w-full text-xl p-6 border-3 border-gray-300 rounded-xl focus:border-blue-600 text-center"
-                    {...register("huntDate", { 
-                      required: "La data è obbligatoria",
-                      validate: (value) => {
-                        if (!isValidHuntingDate(value)) {
-                          return "Non puoi cacciare di martedì o venerdì (silenzio venatorio)";
-                        }
-                        const selectedDate = new Date(value);
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        if (selectedDate < today) {
-                          return "Non puoi selezionare una data passata";
-                        }
-                        return true;
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                  {(() => {
+                    const dates = [];
+                    const today = new Date();
+                    let dateCount = 0;
+                    let dayOffset = 0;
+                    
+                    while (dateCount < 8) {
+                      const currentDate = new Date(today);
+                      currentDate.setDate(today.getDate() + dayOffset);
+                      const dayOfWeek = currentDate.getDay();
+                      
+                      // Skip Tuesday (2) and Friday (5) - silenzio venatorio
+                      if (dayOfWeek !== 2 && dayOfWeek !== 5) {
+                        const dateString = currentDate.toISOString().split('T')[0];
+                        const dayName = currentDate.toLocaleDateString('it-IT', { weekday: 'short' });
+                        const dayNumber = currentDate.getDate();
+                        const monthName = currentDate.toLocaleDateString('it-IT', { month: 'short' });
+                        
+                        dates.push(
+                          <button
+                            key={dateString}
+                            type="button"
+                            onClick={() => setValue("huntDate", dateString)}
+                            className={`p-4 rounded-xl border-2 text-center transition-all ${
+                              watch("huntDate") === dateString
+                                ? "border-blue-600 bg-blue-100 text-blue-700 shadow-lg transform scale-105"
+                                : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="text-sm font-medium text-gray-600 uppercase">{dayName}</div>
+                            <div className="text-2xl font-bold mt-1">{dayNumber}</div>
+                            <div className="text-sm text-gray-600 capitalize">{monthName}</div>
+                          </button>
+                        );
+                        dateCount++;
                       }
-                    })}
-                  />
-                  {errors.huntDate && (
-                    <p className="text-red-600 text-lg font-medium mt-2 text-center">{errors.huntDate.message}</p>
-                  )}
-                  {watch("huntDate") && !isValidHuntingDate(watch("huntDate")) && (
-                    <p className="text-orange-600 text-lg font-medium mt-2 text-center">
-                      ⚠️ Attenzione: Martedì e Venerdì è vietata la caccia
-                    </p>
-                  )}
+                      dayOffset++;
+                    }
+                    return dates;
+                  })()}
                 </div>
+                {errors.huntDate && (
+                  <p className="text-red-600 text-lg font-medium text-center">{errors.huntDate.message}</p>
+                )}
               </div>
             )}
 

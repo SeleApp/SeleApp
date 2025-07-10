@@ -415,7 +415,9 @@ Changelog:
   - **Progress Indicator**: Visual step progress with numbered circles and labels for clear navigation
   - **Date Validation**: Real-time validation preventing past dates and hunting silence days (Tuesday/Friday)
   - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
-  - **Service Worker**: Updated cache version to v5-zona-prima-data for forced refresh of cached components
+  - **Visual Calendar**: Replaced date input with 8 visual date buttons showing next available hunting days
+  - **Compact Zone Grid**: All 16 zones visible without scrolling in 4x8 or 8x4 grid layout
+  - **Service Worker**: Updated cache version to v6-visual-calendar for forced refresh of cached components
 
 # User Preferences
 

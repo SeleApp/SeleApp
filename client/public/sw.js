@@ -2,7 +2,7 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-const CACHE_NAME = 'seleapp-v5-zona-prima-data';
+const CACHE_NAME = 'seleapp-v6-visual-calendar';
 const urlsToCache = [
   '/',
   '/app',
