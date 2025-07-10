@@ -583,7 +583,7 @@ export class DatabaseStorage implements IStorage {
   /**
    * Ottiene tutte le quote regionali con stato disponibilità e periodo di caccia
    */
-  async getRegionalQuotas(): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
+  async getRegionalQuotas(reserveId?: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
     const quotas = await db.select().from(regionalQuotas).orderBy(regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
     const now = new Date();
     
