@@ -84,7 +84,7 @@ router.patch('/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: A
     const updateData = req.body;
 
     // Valida solo i campi presenti nel body
-    const allowedFields = ['name', 'comune', 'emailContatto', 'presidentName', 'huntingType', 'species', 'accessCode', 'managementType', 'isActive', 'codeActive'];
+    const allowedFields = ['name', 'comune', 'emailContatto', 'presidentName', 'huntingType', 'species', 'accessCode', 'managementType', 'assignmentMode', 'isActive', 'codeActive'];
     const filteredData: any = {};
     
     allowedFields.forEach(field => {

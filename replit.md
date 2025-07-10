@@ -408,17 +408,13 @@ Changelog:
   - **Category Filtering**: Dynamic filtering shows only available categories based on current regional quota status
   - **Full Day Option**: Added "Alba-Tramonto" time slot with proper conflict prevention logic
   - **Type Safety**: Updated all TypeScript interfaces to support new target species fields throughout system
-- July 10, 2025. **MULTI-STEP RESERVATION SYSTEM**: Redesigned reservation modal with guided 5-step process
-  - **Step Sequence UPDATED**: Changed order per elderly user needs: 1) Zona, 2) Data, 3) Orario, 4) Specie/Classe di età, 5) Conferma
-  - **Hunting Silence Validation**: Added automatic blocking of Tuesday and Friday bookings with clear warning messages
-  - **Senior-Friendly Zone Selection**: Zone selection first (easier visual selection) then date with silence day warnings
-  - **Progress Indicator**: Visual step progress with numbered circles and labels for clear navigation
-  - **Date Validation**: Real-time validation preventing past dates and hunting silence days (Tuesday/Friday)
-  - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
-  - **Visual Calendar**: Replaced date input with 10 visual date buttons showing next available hunting days
-  - **Compact Zone Grid**: All 16 zones visible without scrolling in 4x8 or 8x4 grid layout
-  - **Clean UI Design**: Removed "Disponibile" text from zone buttons and animal emojis from species selection
-  - **Service Worker**: Updated cache version to v6-visual-calendar for forced refresh of cached components
+- July 10, 2025. **UNIFIED RESERVE MANAGEMENT SYSTEM**: Complete integration of hunting type and management type into coherent system
+  - **Unified Logic**: Hunting type and management type are now synchronized - "caccia per zone" = standard zones, "capo assegnato" = random assignment, "misto" = hybrid system
+  - **Assignment Mode Selection**: Added choice between manual vs random assignment for "capo assegnato" hunting type
+  - **Enhanced Form**: Single dropdown controls both hunting approach and management system with clear descriptions
+  - **Database Integration**: Added assignment_mode column with backend support for unified reserve creation
+  - **Simplified Interface**: Eliminated redundant fields, maintaining only essential unified management controls
+  - **Clear Labels**: Management type badges show "Caccia per Zone", "Capo Assegnato", "Misto Zone+Capi" for clarity
 
 # User Preferences
 

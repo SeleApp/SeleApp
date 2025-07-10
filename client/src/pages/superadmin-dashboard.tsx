@@ -129,6 +129,7 @@ export default function SuperAdminDashboard() {
       species: "[]",
       accessCode: "",
       managementType: "standard_zones",
+      assignmentMode: "manual",
       isActive: true,
     },
   });
@@ -306,6 +307,7 @@ export default function SuperAdminDashboard() {
       species: reserve.species || "[]",
       accessCode: reserve.accessCode,
       managementType: reserve.managementType || "standard_zones",
+      assignmentMode: (reserve as any).assignmentMode || "manual",
       isActive: reserve.isActive,
     });
     setCreateReserveOpen(true);
@@ -534,26 +536,61 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="huntingType">Tipo di Caccia</Label>
+                      <Label htmlFor="managementType">Tipologia di Gestione</Label>
                       <Select 
-                        onValueChange={(value) => reserveForm.setValue("huntingType", value as any)}
-                        defaultValue={reserveForm.watch("huntingType")}
+                        onValueChange={(value) => {
+                          reserveForm.setValue("managementType", value as any);
+                          // Sincronizza huntingType con managementType
+                          if (value === "standard_zones") {
+                            reserveForm.setValue("huntingType", "zone");
+                          } else if (value === "standard_random") {
+                            reserveForm.setValue("huntingType", "capo_assegnato");
+                          } else if (value === "custom") {
+                            reserveForm.setValue("huntingType", "misto");
+                          }
+                        }}
+                        defaultValue={reserveForm.watch("managementType")}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleziona tipo di caccia" />
+                          <SelectValue placeholder="Seleziona tipologia di gestione" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="capo_assegnato">Caccia per Capo assegnato</SelectItem>
-                          <SelectItem value="zone">Caccia per Zone</SelectItem>
-                          <SelectItem value="misto">Misto (Capo e Zona)</SelectItem>
+                          <SelectItem value="standard_zones">Caccia per Zone (Gestione Standard)</SelectItem>
+                          <SelectItem value="standard_random">Caccia per Capo Assegnato (Sistema Random)</SelectItem>
+                          <SelectItem value="custom">Misto (Zone + Capo Assegnato)</SelectItem>
                         </SelectContent>
                       </Select>
-                      {reserveForm.formState.errors.huntingType && (
+                      {reserveForm.formState.errors.managementType && (
                         <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.huntingType.message}
+                          {reserveForm.formState.errors.managementType.message}
                         </p>
                       )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        Determina il sistema di prenotazione e gestione della riserva
+                      </p>
                     </div>
+
+                    {/* Sottotipo per Capo Assegnato */}
+                    {reserveForm.watch("managementType") === "standard_random" && (
+                      <div>
+                        <Label htmlFor="assignmentMode">Modalità Assegnazione Capi</Label>
+                        <Select 
+                          onValueChange={(value) => reserveForm.setValue("assignmentMode", value)}
+                          defaultValue={reserveForm.watch("assignmentMode") || "manual"}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona modalità assegnazione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manual">Assegnazione Manuale</SelectItem>
+                            <SelectItem value="random">Assegnazione Random/Sorteggio</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Come vengono assegnati i capi ai cacciatori
+                        </p>
+                      </div>
+                    )}
 
                     <div>
                       <div className="flex items-center justify-between">
@@ -584,27 +621,7 @@ export default function SuperAdminDashboard() {
                       onChange={(value) => reserveForm.setValue("species", value)}
                     />
 
-                    <div>
-                      <Label htmlFor="managementType">Tipologia di Gestione</Label>
-                      <select
-                        id="managementType"
-                        {...reserveForm.register("managementType")}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="standard_zones">Gestione Standard con Zone</option>
-                        <option value="standard_random">Gestione Standard Random</option>
-                        <option value="quota_only">Solo Gestione Quote</option>
-                        <option value="custom">Gestione Personalizzata</option>
-                      </select>
-                      {reserveForm.formState.errors.managementType && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.managementType.message}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        Seleziona il tipo di gestione per questa riserva
-                      </p>
-                    </div>
+
 
                     <div className="flex justify-end space-x-2 pt-4">
                       <Button
@@ -684,11 +701,11 @@ export default function SuperAdminDashboard() {
                               'bg-gray-50 text-gray-700 border-gray-200'
                             }
                           >
-                            {reserve.managementType === 'standard_zones' ? 'Zone Standard' :
-                             reserve.managementType === 'standard_random' ? 'Random Standard' :
+                            {reserve.managementType === 'standard_zones' ? 'Caccia per Zone' :
+                             reserve.managementType === 'standard_random' ? 'Capo Assegnato' :
                              reserve.managementType === 'ca17_system' ? 'Sistema CA17' :
                              reserve.managementType === 'quota_only' ? 'Solo Quote' :
-                             'Personalizzato'}
+                             'Misto Zone+Capi'}
                           </Badge>
                         </TableCell>
                         <TableCell>
