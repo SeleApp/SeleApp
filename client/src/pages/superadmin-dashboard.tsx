@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReserveSchema } from "@shared/schema";
@@ -18,6 +20,51 @@ import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import AccessCodeManager from "@/components/access-code-manager";
 
+// Componente per la selezione specie
+function SpeciesCheckboxes({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const speciesList = ["Capriolo", "Cervo", "Daino", "Muflone", "Camoscio"];
+  
+  const selectedSpecies = JSON.parse(value || "[]");
+  
+  const handleSpeciesChange = (species: string, checked: boolean) => {
+    let newSpecies = [...selectedSpecies];
+    if (checked) {
+      if (!newSpecies.includes(species)) {
+        newSpecies.push(species);
+      }
+    } else {
+      newSpecies = newSpecies.filter(s => s !== species);
+    }
+    onChange(JSON.stringify(newSpecies));
+  };
+
+  return (
+    <div>
+      <Label className="text-sm font-medium">Specie Cacciabili</Label>
+      <div className="grid grid-cols-2 gap-3 mt-2">
+        {speciesList.map((species) => (
+          <div key={species} className="flex items-center space-x-2">
+            <Checkbox
+              id={`species-${species}`}
+              checked={selectedSpecies.includes(species)}
+              onCheckedChange={(checked) => handleSpeciesChange(species, !!checked)}
+            />
+            <Label 
+              htmlFor={`species-${species}`}
+              className="text-sm font-normal cursor-pointer"
+            >
+              {species}
+            </Label>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-gray-500 mt-1">
+        Seleziona le specie cacciabili in questa riserva
+      </p>
+    </div>
+  );
+}
+
 type CreateReserveData = z.infer<typeof insertReserveSchema>;
 
 interface Reserve {
@@ -25,6 +72,9 @@ interface Reserve {
   name: string;
   comune: string;
   emailContatto: string;
+  presidentName?: string;
+  huntingType?: 'capo_assegnato' | 'zone' | 'misto';
+  species: string; // JSON array 
   accessCode: string;
   codeActive: boolean;
   isActive: boolean;
@@ -67,13 +117,16 @@ export default function SuperAdminDashboard() {
     queryKey: ["/api/superadmin/admins"],
   });
 
-  // Form per creare riserve
+  // Form per creare riserve con nuovi campi
   const reserveForm = useForm<CreateReserveData>({
     resolver: zodResolver(insertReserveSchema.omit({ id: true })),
     defaultValues: {
       name: "",
       comune: "",
       emailContatto: "",
+      presidentName: "",
+      huntingType: "zone",
+      species: "[]",
       accessCode: "",
       managementType: "standard_zones",
       isActive: true,
@@ -248,6 +301,9 @@ export default function SuperAdminDashboard() {
       name: reserve.name,
       comune: reserve.comune,
       emailContatto: reserve.emailContatto,
+      presidentName: reserve.presidentName || "",
+      huntingType: reserve.huntingType || "zone",
+      species: reserve.species || "[]",
       accessCode: reserve.accessCode,
       managementType: reserve.managementType || "standard_zones",
       isActive: reserve.isActive,
@@ -464,6 +520,42 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     <div>
+                      <Label htmlFor="presidentName">Nome Presidente</Label>
+                      <Input
+                        id="presidentName"
+                        {...reserveForm.register("presidentName")}
+                        placeholder="Nome del presidente della riserva"
+                      />
+                      {reserveForm.formState.errors.presidentName && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.presidentName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="huntingType">Tipo di Caccia</Label>
+                      <Select 
+                        onValueChange={(value) => reserveForm.setValue("huntingType", value as any)}
+                        defaultValue={reserveForm.watch("huntingType")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleziona tipo di caccia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="capo_assegnato">Caccia per Capo assegnato</SelectItem>
+                          <SelectItem value="zone">Caccia per Zone</SelectItem>
+                          <SelectItem value="misto">Misto (Capo e Zona)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {reserveForm.formState.errors.huntingType && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {reserveForm.formState.errors.huntingType.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
                       <div className="flex items-center justify-between">
                         <Label htmlFor="accessCode">Codice d'Accesso</Label>
                         <Button
@@ -486,6 +578,11 @@ export default function SuperAdminDashboard() {
                         </p>
                       )}
                     </div>
+
+                    <SpeciesCheckboxes 
+                      value={reserveForm.watch("species")}
+                      onChange={(value) => reserveForm.setValue("species", value)}
+                    />
 
                     <div>
                       <Label htmlFor="managementType">Tipologia di Gestione</Label>

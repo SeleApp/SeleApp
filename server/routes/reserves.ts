@@ -77,25 +77,35 @@ router.get("/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: Aut
   }
 });
 
-// PATCH /:id - Aggiorna stato riserva (solo SUPERADMIN)
+// PATCH /:id - Aggiorna riserva con supporto per tutti i campi (solo SUPERADMIN)
 router.patch('/:id', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { isActive } = req.body;
+    const updateData = req.body;
 
-    const updatedReserve = await storage.updateReserve(id, { isActive });
+    // Valida solo i campi presenti nel body
+    const allowedFields = ['name', 'comune', 'emailContatto', 'presidentName', 'huntingType', 'species', 'accessCode', 'managementType', 'isActive', 'codeActive'];
+    const filteredData: any = {};
+    
+    allowedFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        filteredData[field] = updateData[field];
+      }
+    });
+
+    const updatedReserve = await storage.updateReserve(id, filteredData);
     
     if (!updatedReserve) {
       return res.status(404).json({ message: "Riserva non trovata" });
     }
 
     res.json({
-      message: "Stato della riserva aggiornato con successo",
+      message: "Riserva aggiornata con successo",
       reserve: updatedReserve
     });
   } catch (error) {
-    console.error("Error updating reserve status:", error);
-    res.status(500).json({ message: "Errore nell'aggiornamento dello stato della riserva" });
+    console.error("Error updating reserve:", error);
+    res.status(500).json({ message: "Errore nell'aggiornamento della riserva" });
   }
 });
 

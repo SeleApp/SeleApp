@@ -36,6 +36,9 @@ export const reserves = pgTable("reserves", {
   name: text("name").notNull(),
   comune: text("comune").notNull(),
   emailContatto: text("email_contatto").notNull(),
+  presidentName: text("president_name"), // Nome del presidente della riserva
+  huntingType: text("hunting_type"), // Tipo di caccia: "capo_assegnato", "zone", "misto"
+  species: text("species").notNull().default("[]"), // Array JSON delle specie: ["capriolo", "cervo", "daino", "muflone", "camoscio"]
   systemType: text("system_type").notNull().default("standard"), // 'standard', 'ca17'
   managementType: managementTypeEnum("management_type").notNull().default("standard_zones"), // Tipologia di gestione
   accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
@@ -341,6 +344,8 @@ export const insertReserveSchema = createInsertSchema(reserves).omit({
   createdAt: true,
 }).extend({
   managementType: z.enum(['standard_zones', 'standard_random', 'ca17_system', 'quota_only', 'custom']),
+  huntingType: z.enum(['capo_assegnato', 'zone', 'misto']).optional(),
+  species: z.string().optional(), // JSON array come stringa
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
