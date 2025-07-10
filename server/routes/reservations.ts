@@ -116,6 +116,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       huntDate,
       timeSlot: reservationData.timeSlot,
       status: 'active',
+      reserveId: req.user.reserveId,
       ...targetSpeciesData,
     });
 

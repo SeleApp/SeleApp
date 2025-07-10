@@ -357,6 +357,7 @@ export class DatabaseStorage implements IStorage {
         huntDate: reservations.huntDate,
         timeSlot: reservations.timeSlot,
         status: reservations.status,
+        reserveId: reservations.reserveId,
         createdAt: reservations.createdAt,
         zone: {
           id: zones.id,
@@ -378,6 +379,7 @@ export class DatabaseStorage implements IStorage {
       .from(reservations)
       .innerJoin(zones, eq(reservations.zoneId, zones.id))
       .innerJoin(users, eq(reservations.hunterId, users.id))
+      .where(eq(reservations.reserveId, reserveId))
       .orderBy(desc(reservations.huntDate));
 
     if (hunterId) {
@@ -416,7 +418,8 @@ export class DatabaseStorage implements IStorage {
           and(
             eq(reservations.hunterId, reservation.hunterId),
             eq(reservations.huntDate, reservation.huntDate),
-            eq(reservations.status, 'active')
+            eq(reservations.status, 'active'),
+            eq(reservations.reserveId, reservation.reserveId)
           )
         );
 
@@ -446,7 +449,8 @@ export class DatabaseStorage implements IStorage {
           and(
             eq(reservations.zoneId, reservation.zoneId),
             eq(reservations.huntDate, reservation.huntDate),
-            eq(reservations.status, 'active')
+            eq(reservations.status, 'active'),
+            eq(reservations.reserveId, reservation.reserveId)
           )
         );
 
