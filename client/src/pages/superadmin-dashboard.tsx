@@ -79,6 +79,7 @@ interface Reserve {
   codeActive: boolean;
   isActive: boolean;
   managementType: 'standard_zones' | 'standard_random' | 'ca17_system' | 'quota_only' | 'custom';
+  numberOfZones?: number;
   createdAt: string;
   stats: {
     totalUsers: number;
@@ -130,6 +131,7 @@ export default function SuperAdminDashboard() {
       accessCode: "",
       managementType: "standard_zones",
       assignmentMode: "manual",
+      numberOfZones: 16,
       isActive: true,
     },
   });
@@ -569,6 +571,34 @@ export default function SuperAdminDashboard() {
                         Determina il sistema di prenotazione e gestione della riserva
                       </p>
                     </div>
+
+                    {/* Campo Numero Zone per gestioni con zone */}
+                    {(reserveForm.watch("managementType") === "standard_zones" || reserveForm.watch("managementType") === "custom") && (
+                      <div>
+                        <Label htmlFor="numberOfZones">Numero di Zone</Label>
+                        <Input
+                          id="numberOfZones"
+                          type="number"
+                          min="1"
+                          max="50"
+                          {...reserveForm.register("numberOfZones", { 
+                            valueAsNumber: true,
+                            min: { value: 1, message: "Minimo 1 zona" },
+                            max: { value: 50, message: "Massimo 50 zone" }
+                          })}
+                          placeholder="16"
+                          defaultValue="16"
+                        />
+                        {reserveForm.formState.errors.numberOfZones && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {reserveForm.formState.errors.numberOfZones.message}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Numero di zone di caccia da creare per questa riserva
+                        </p>
+                      </div>
+                    )}
 
                     {/* Sottotipo per Capo Assegnato */}
                     {reserveForm.watch("managementType") === "standard_random" && (

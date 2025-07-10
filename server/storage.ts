@@ -158,13 +158,13 @@ export class DatabaseStorage implements IStorage {
     console.log(`Initializing new reserve: ${reserve.name} (${reserve.id})`);
     
     try {
-      // 1. Crea le 16 zone standard se managementType include zone
+      // 1. Crea le zone specificate se managementType include zone
       if (reserve.managementType === 'standard_zones' || reserve.managementType === 'custom') {
-        await this.createStandardZones(reserve.id);
+        await this.createStandardZones(reserve.id, reserve.numberOfZones || 16);
       }
       
-      // 2. Crea le quote regionali standard per tutte le riserve
-      await this.createStandardRegionalQuotas(reserve.id);
+      // 2. Crea le quote regionali basate sulle specie selezionate
+      await this.createQuotasForSelectedSpecies(reserve.id, reserve.species);
       
       // 3. Crea impostazioni di default per la riserva
       await this.createReserveSettings({
@@ -181,11 +181,12 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  private async createStandardZones(reserveId: string): Promise<void> {
-    const zoneNames = [
-      "Zona 1", "Zona 2", "Zona 3", "Zona 4", "Zona 5", "Zona 6", "Zona 7", "Zona 8",
-      "Zona 9", "Zona 10", "Zona 11", "Zona 12", "Zona 13", "Zona 14", "Zona 15", "Zona 16"
-    ];
+  private async createStandardZones(reserveId: string, numberOfZones: number = 16): Promise<void> {
+    // Crea zone personalizzate per la riserva
+    const zoneNames = [];
+    for (let i = 1; i <= numberOfZones; i++) {
+      zoneNames.push(`Zona ${i}`);
+    }
 
     const zonesToCreate = zoneNames.map(name => ({
       name,
@@ -194,11 +195,178 @@ export class DatabaseStorage implements IStorage {
     }));
 
     await db.insert(zones).values(zonesToCreate);
-    console.log(`Created ${zoneNames.length} standard zones for reserve ${reserveId}`);
+    console.log(`Created ${zoneNames.length} zones for reserve ${reserveId}`);
+  }
+
+  private async createQuotasForSelectedSpecies(reserveId: string, speciesJson: string): Promise<void> {
+    try {
+      const selectedSpecies: string[] = JSON.parse(speciesJson || '[]');
+      console.log(`Creating quotas for selected species: ${selectedSpecies.join(', ')}`);
+      
+      const quotasToCreate: any[] = [];
+      const currentYear = new Date().getFullYear();
+      
+      // Crea quote per ogni specie selezionata
+      for (const species of selectedSpecies) {
+        const normalizedSpecies = species.toLowerCase();
+        
+        if (normalizedSpecies === 'capriolo') {
+          // Quote standard per Capriolo (5 categorie)
+          const roeDeerQuotas = [
+            { category: 'M0', quota: 10 },
+            { category: 'F0', quota: 8 },
+            { category: 'FA', quota: 12 },
+            { category: 'M1', quota: 6 },
+            { category: 'MA', quota: 4 }
+          ];
+          
+          for (const cat of roeDeerQuotas) {
+            quotasToCreate.push({
+              species: 'roe_deer',
+              roeDeerCategory: cat.category,
+              redDeerCategory: null,
+              fallowDeerCategory: null,
+              mouflonCategory: null,
+              chamoisCategory: null,
+              totalQuota: cat.quota,
+              harvested: 0,
+              reserveId,
+              season: currentYear.toString(),
+              isActive: true,
+              huntingStartDate: new Date(`${currentYear}-10-01`),
+              huntingEndDate: new Date(`${currentYear + 1}-01-31`),
+              notes: `Quote ${species} - create automaticamente`
+            });
+          }
+        } else if (normalizedSpecies === 'cervo') {
+          // Quote standard per Cervo (4 categorie)
+          const redDeerQuotas = [
+            { category: 'CL0', quota: 5 },
+            { category: 'FF', quota: 8 },
+            { category: 'MM', quota: 3 },
+            { category: 'MCL1', quota: 2 }
+          ];
+          
+          for (const cat of redDeerQuotas) {
+            quotasToCreate.push({
+              species: 'red_deer',
+              roeDeerCategory: null,
+              redDeerCategory: cat.category,
+              fallowDeerCategory: null,
+              mouflonCategory: null,
+              chamoisCategory: null,
+              totalQuota: cat.quota,
+              harvested: 0,
+              reserveId,
+              season: currentYear.toString(),
+              isActive: true,
+              huntingStartDate: new Date(`${currentYear}-10-01`),
+              huntingEndDate: new Date(`${currentYear + 1}-01-31`),
+              notes: `Quote ${species} - create automaticamente`
+            });
+          }
+        } else if (normalizedSpecies === 'daino') {
+          // Quote standard per Daino (5 categorie)
+          const fallowDeerQuotas = [
+            { category: 'D0', quota: 6 },
+            { category: 'DA', quota: 8 },
+            { category: 'DF', quota: 10 },
+            { category: 'D1', quota: 4 },
+            { category: 'DM', quota: 3 }
+          ];
+          
+          for (const cat of fallowDeerQuotas) {
+            quotasToCreate.push({
+              species: 'fallow_deer',
+              roeDeerCategory: null,
+              redDeerCategory: null,
+              fallowDeerCategory: cat.category,
+              mouflonCategory: null,
+              chamoisCategory: null,
+              totalQuota: cat.quota,
+              harvested: 0,
+              reserveId,
+              season: currentYear.toString(),
+              isActive: true,
+              huntingStartDate: new Date(`${currentYear}-10-01`),
+              huntingEndDate: new Date(`${currentYear + 1}-01-31`),
+              notes: `Quote ${species} - create automaticamente`
+            });
+          }
+        } else if (normalizedSpecies === 'muflone') {
+          // Quote standard per Muflone (5 categorie)
+          const mouflonQuotas = [
+            { category: 'MU0', quota: 4 },
+            { category: 'MUA', quota: 6 },
+            { category: 'MUF', quota: 8 },
+            { category: 'MU1', quota: 3 },
+            { category: 'MUM', quota: 2 }
+          ];
+          
+          for (const cat of mouflonQuotas) {
+            quotasToCreate.push({
+              species: 'mouflon',
+              roeDeerCategory: null,
+              redDeerCategory: null,
+              fallowDeerCategory: null,
+              mouflonCategory: cat.category,
+              chamoisCategory: null,
+              totalQuota: cat.quota,
+              harvested: 0,
+              reserveId,
+              season: currentYear.toString(),
+              isActive: true,
+              huntingStartDate: new Date(`${currentYear}-10-01`),
+              huntingEndDate: new Date(`${currentYear + 1}-01-31`),
+              notes: `Quote ${species} - create automaticamente`
+            });
+          }
+        } else if (normalizedSpecies === 'camoscio') {
+          // Quote standard per Camoscio (5 categorie)
+          const chamoisQuotas = [
+            { category: 'CA0', quota: 3 },
+            { category: 'CAA', quota: 5 },
+            { category: 'CAF', quota: 7 },
+            { category: 'CA1', quota: 2 },
+            { category: 'CAM', quota: 1 }
+          ];
+          
+          for (const cat of chamoisQuotas) {
+            quotasToCreate.push({
+              species: 'chamois',
+              roeDeerCategory: null,
+              redDeerCategory: null,
+              fallowDeerCategory: null,
+              mouflonCategory: null,
+              chamoisCategory: cat.category,
+              totalQuota: cat.quota,
+              harvested: 0,
+              reserveId,
+              season: currentYear.toString(),
+              isActive: true,
+              huntingStartDate: new Date(`${currentYear}-10-01`),
+              huntingEndDate: new Date(`${currentYear + 1}-01-31`),
+              notes: `Quote ${species} - create automaticamente`
+            });
+          }
+        }
+      }
+      
+      if (quotasToCreate.length > 0) {
+        await db.insert(regionalQuotas).values(quotasToCreate);
+        console.log(`Created ${quotasToCreate.length} quotas for selected species in reserve ${reserveId}`);
+      } else {
+        console.log(`No quotas created - no valid species found for reserve ${reserveId}`);
+      }
+    } catch (error) {
+      console.error(`Error creating quotas for selected species:`, error);
+      // Fallback: crea quote standard per capriolo e cervo
+      await this.createStandardRegionalQuotas(reserveId);
+    }
   }
 
   private async createStandardRegionalQuotas(reserveId: string): Promise<void> {
-    // Quote standard per tutte le riserve (9 categorie totali) usando lo schema corretto
+    // Quote standard di fallback (solo capriolo e cervo)
     const quotaCategories = [
       // Capriolo (5 categorie)
       { species: 'roe_deer' as const, roeDeerCategory: 'M0', totalQuota: 10, harvested: 0 },

@@ -10,12 +10,15 @@ import { z } from "zod";
 // Enums
 export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN', 'SUPERADMIN']);
 export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon', 'full_day']);
-export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer']);
+export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer', 'fallow_deer', 'mouflon', 'chamois']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
 export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
-// Nuove categorie specifiche per specie
+// Categorie specifiche per specie
 export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
+export const fallowDeerCategoryEnum = pgEnum('fallow_deer_category', ['D0', 'DA', 'DF', 'D1', 'DM']);
+export const mouflonCategoryEnum = pgEnum('mouflon_category', ['MU0', 'MUA', 'MUF', 'MU1', 'MUM']);
+export const chamoisCategoryEnum = pgEnum('chamois_category', ['CA0', 'CAA', 'CAF', 'CA1', 'CAM']);
 export const reservationStatusEnum = pgEnum('reservation_status', ['active', 'completed', 'cancelled']);
 export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest']);
 // Tipologie di gestione delle riserve
@@ -44,6 +47,7 @@ export const reserves = pgTable("reserves", {
   accessCode: text("access_code").notNull(), // Codice d'accesso per registrazione cacciatori
   codeActive: boolean("code_active").notNull().default(true), // Se false, il codice non permette registrazioni
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
+  numberOfZones: integer("number_of_zones").default(16), // Numero di zone da creare per riserve con gestione zone
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -154,6 +158,9 @@ export const regionalQuotas = pgTable("regional_quotas", {
   species: speciesEnum("species").notNull(),
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"),
+  mouflonCategory: mouflonCategoryEnum("mouflon_category"),
+  chamoisCategory: chamoisCategoryEnum("chamois_category"),
   totalQuota: integer("total_quota").notNull().default(0),
   harvested: integer("harvested").notNull().default(0),
   season: text("season").notNull().default("2024-2025"),
@@ -174,6 +181,9 @@ export const wildlifeQuotas = pgTable("wildlife_quotas", {
   species: speciesEnum("species").notNull(),
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"),
+  mouflonCategory: mouflonCategoryEnum("mouflon_category"),
+  chamoisCategory: chamoisCategoryEnum("chamois_category"),
   sex: sexEnum("sex"),
   ageClass: ageClassEnum("age_class"),
   totalQuota: integer("total_quota").notNull().default(0),
@@ -195,6 +205,9 @@ export const reservations = pgTable("reservations", {
   targetSpecies: speciesEnum("target_species"),
   targetRoeDeerCategory: roeDeerCategoryEnum("target_roe_deer_category"),
   targetRedDeerCategory: redDeerCategoryEnum("target_red_deer_category"),
+  targetFallowDeerCategory: fallowDeerCategoryEnum("target_fallow_deer_category"),
+  targetMouflonCategory: mouflonCategoryEnum("target_mouflon_category"),
+  targetChamoisCategory: chamoisCategoryEnum("target_chamois_category"),
   targetSex: sexEnum("target_sex"),
   targetAgeClass: ageClassEnum("target_age_class"),
   targetNotes: text("target_notes"), // Note aggiuntive del cacciatore
@@ -211,6 +224,9 @@ export const huntReports = pgTable("hunt_reports", {
   ageClass: ageClassEnum("age_class"),
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"),
+  mouflonCategory: mouflonCategoryEnum("mouflon_category"),
+  chamoisCategory: chamoisCategoryEnum("chamois_category"),
   notes: text("notes"),
   killCardPhoto: text("kill_card_photo"), // Base64 della foto della scheda di abbattimento
   reserveId: text("reserve_id").notNull(),
