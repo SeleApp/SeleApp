@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import ReservationModal from "@/components/reservation-modal-new";
+import ReservationModal from "@/components/reservation-modal";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { authService } from "@/lib/auth";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
