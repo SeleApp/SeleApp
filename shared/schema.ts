@@ -188,6 +188,13 @@ export const reservations = pgTable("reservations", {
   timeSlot: timeSlotEnum("time_slot").notNull(),
   status: reservationStatusEnum("status").notNull().default('active'),
   reserveId: text("reserve_id").notNull(),
+  // Campi per selezione capo target (opzionali)
+  targetSpecies: speciesEnum("target_species"),
+  targetRoeDeerCategory: roeDeerCategoryEnum("target_roe_deer_category"),
+  targetRedDeerCategory: redDeerCategoryEnum("target_red_deer_category"),
+  targetSex: sexEnum("target_sex"),
+  targetAgeClass: ageClassEnum("target_age_class"),
+  targetNotes: text("target_notes"), // Note aggiuntive del cacciatore
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -384,6 +391,41 @@ export const insertReservationSchema = createInsertSchema(reservations).omit({
   createdAt: true,
 });
 
+// Schema per creazione prenotazione con validazione completa
+export const createReservationSchema = insertReservationSchema.extend({
+  huntDate: z.string().refine((date) => {
+    const day = new Date(date).getDay();
+    // Block Tuesday (2) and Friday (5) - silenzio venatorio
+    return day !== 2 && day !== 5;
+  }, "Caccia non permessa nei giorni di silenzio venatorio (martedì e venerdì)"),
+  // Campi per selezione capo target (opzionali)
+  targetSpecies: z.enum(['roe_deer', 'red_deer']).optional(),
+  targetRoeDeerCategory: z.enum(['M0', 'F0', 'FA', 'M1', 'MA']).optional(),
+  targetRedDeerCategory: z.enum(['CL0', 'FF', 'MM', 'MCL1']).optional(),
+  targetSex: z.enum(['male', 'female']).optional(),
+  targetAgeClass: z.enum(['adult', 'young']).optional(),
+  targetNotes: z.string().optional(),
+}).refine((data) => {
+  // Se viene specificata una specie, deve essere specificata anche la categoria corretta
+  if (data.targetSpecies === 'roe_deer' && data.targetRoeDeerCategory === undefined) {
+    return false;
+  }
+  if (data.targetSpecies === 'red_deer' && data.targetRedDeerCategory === undefined) {
+    return false;
+  }
+  // Se viene specificata una categoria, deve essere specificata anche la specie corrispondente
+  if (data.targetRoeDeerCategory && data.targetSpecies !== 'roe_deer') {
+    return false;
+  }
+  if (data.targetRedDeerCategory && data.targetSpecies !== 'red_deer') {
+    return false;
+  }
+  return true;
+}, {
+  message: "Specie e categoria devono essere coerenti tra loro",
+  path: ["targetSpecies"],
+});
+
 export const insertHuntReportSchema = createInsertSchema(huntReports).omit({
   id: true,
   reportedAt: true,
@@ -475,15 +517,6 @@ export const loginSchema = z.object({
 });
 
 export type LoginRequest = z.infer<typeof loginSchema>;
-
-// Extended reservation schema with validation
-export const createReservationSchema = insertReservationSchema.extend({
-  huntDate: z.string().refine((date) => {
-    const day = new Date(date).getDay();
-    // Block Tuesday (2) and Friday (5) - silenzio venatorio
-    return day !== 2 && day !== 5;
-  }, "Caccia non permessa nei giorni di silenzio venatorio (martedì e venerdì)"),
-});
 
 export type CreateReservationRequest = z.infer<typeof createReservationSchema>;
 

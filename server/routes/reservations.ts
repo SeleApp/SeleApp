@@ -79,12 +79,34 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     }
 
+    // Prepare target species data if provided
+    const targetSpeciesData: any = {};
+    if (reservationData.targetSpecies) {
+      targetSpeciesData.targetSpecies = reservationData.targetSpecies;
+      if (reservationData.targetSpecies === 'roe_deer' && reservationData.targetRoeDeerCategory) {
+        targetSpeciesData.targetRoeDeerCategory = reservationData.targetRoeDeerCategory;
+      }
+      if (reservationData.targetSpecies === 'red_deer' && reservationData.targetRedDeerCategory) {
+        targetSpeciesData.targetRedDeerCategory = reservationData.targetRedDeerCategory;
+      }
+      if (reservationData.targetSex) {
+        targetSpeciesData.targetSex = reservationData.targetSex;
+      }
+      if (reservationData.targetAgeClass) {
+        targetSpeciesData.targetAgeClass = reservationData.targetAgeClass;
+      }
+      if (reservationData.targetNotes) {
+        targetSpeciesData.targetNotes = reservationData.targetNotes;
+      }
+    }
+
     console.log("Creating reservation with final data:", {
       hunterId: req.user.id,
       zoneId: reservationData.zoneId,
       huntDate,
       timeSlot: reservationData.timeSlot,
       status: 'active',
+      ...targetSpeciesData,
     });
 
     const reservation = await storage.createReservation({
@@ -93,6 +115,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       huntDate,
       timeSlot: reservationData.timeSlot,
       status: 'active',
+      ...targetSpeciesData,
     });
 
     console.log("Reservation created successfully:", reservation);
