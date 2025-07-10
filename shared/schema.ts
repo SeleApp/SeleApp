@@ -26,6 +26,10 @@ export const managementTypeEnum = pgEnum('management_type', [
   'custom' // Personalizzato per esigenze specifiche
 ]);
 
+// Sistema di sorteggio per assegnazione random
+export const lotteryStatusEnum = pgEnum('lottery_status', ['draft', 'active', 'closed', 'completed']);
+export const participationStatusEnum = pgEnum('participation_status', ['registered', 'winner', 'excluded']);
+
 // Reserves table (multi-tenant support)
 export const reserves = pgTable("reserves", {
   id: text("id").primaryKey(), // UUID
@@ -544,6 +548,73 @@ export const insertCa17BloccoSchema = createInsertSchema(ca17Blocchi).omit({
 });
 
 export type Ca17Prelievo = typeof ca17Prelievi.$inferSelect;
+
+// Sistema di Sorteggio/Lotteria (per riserve standard_random)
+export const lotteries = pgTable('lotteries', {
+  id: serial('id').primaryKey(),
+  reserveId: text('reserve_id').notNull().references(() => reserves.id),
+  title: text('title').notNull(),
+  description: text('description'),
+  species: speciesEnum('species').notNull(),
+  category: text('category').notNull(), // M0, F0, FA, etc.
+  totalSpots: integer('total_spots').notNull().default(1), // Posti disponibili
+  registrationStart: timestamp('registration_start').notNull(),
+  registrationEnd: timestamp('registration_end').notNull(),
+  drawDate: timestamp('draw_date').notNull(),
+  status: lotteryStatusEnum('status').notNull().default('draft'),
+  winnersDrawn: boolean('winners_drawn').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Partecipazioni al sorteggio
+export const lotteryParticipations = pgTable('lottery_participations', {
+  id: serial('id').primaryKey(),
+  lotteryId: integer('lottery_id').notNull().references(() => lotteries.id, { onDelete: 'cascade' }),
+  hunterId: integer('hunter_id').notNull().references(() => users.id),
+  registeredAt: timestamp('registered_at').defaultNow().notNull(),
+  status: participationStatusEnum('status').notNull().default('registered'),
+  position: integer('position'), // Posizione estratta nel sorteggio
+  isWinner: boolean('is_winner').notNull().default(false),
+});
+
+// Schema per sistema lottery
+export const insertLotterySchema = createInsertSchema(lotteries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLotteryParticipationSchema = createInsertSchema(lotteryParticipations).omit({
+  id: true,
+  registeredAt: true,
+});
+
+// Relazioni per lottery system
+export const lotteriesRelations = relations(lotteries, ({ one, many }) => ({
+  reserve: one(reserves, {
+    fields: [lotteries.reserveId],
+    references: [reserves.id],
+  }),
+  participations: many(lotteryParticipations),
+}));
+
+export const lotteryParticipationsRelations = relations(lotteryParticipations, ({ one }) => ({
+  lottery: one(lotteries, {
+    fields: [lotteryParticipations.lotteryId],
+    references: [lotteries.id],
+  }),
+  hunter: one(users, {
+    fields: [lotteryParticipations.hunterId],
+    references: [users.id],
+  }),
+}));
+
+// Tipi per lottery system
+export type Lottery = typeof lotteries.$inferSelect;
+export type InsertLottery = z.infer<typeof insertLotterySchema>;
+export type LotteryParticipation = typeof lotteryParticipations.$inferSelect;
+export type InsertLotteryParticipation = z.infer<typeof insertLotteryParticipationSchema>;
 export type InsertCa17Prelievo = z.infer<typeof insertCa17PrelievoSchema>;
 
 export type Ca17Uscita = typeof ca17Uscite.$inferSelect;
