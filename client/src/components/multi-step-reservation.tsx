@@ -194,7 +194,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     const dates = [];
                     const today = new Date();
                     let dateCount = 0;
-                    let dayOffset = 0;
+                    let dayOffset = 1; // Inizio da domani, non da oggi
                     
                     while (dateCount < 10) {
                       const currentDate = new Date(today);
