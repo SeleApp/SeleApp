@@ -401,6 +401,13 @@ Changelog:
   - **Upload Complete**: 238 objects (174.13 KiB) uploaded including all project files and database schema
   - **Version Control**: Full Git history maintained with proper branching and upstream configuration
   - **Production Ready**: SeleApp v2.0 now available on GitHub for deployment and collaboration
+- July 10, 2025. **ADVANCED TARGET SPECIES SELECTION**: Complete implementation of optional prey/game selection in reservation system
+  - **Database Enhancement**: Added targetSpecies, targetRoeDeerCategory, targetRedDeerCategory, targetSex, targetAgeClass, targetNotes fields to reservations table
+  - **Schema Validation**: Enhanced createReservationSchema with conditional validation ensuring species-category consistency
+  - **UI Interface**: Advanced accordion-style selection panel with real-time quota availability checking
+  - **Category Filtering**: Dynamic filtering shows only available categories based on current regional quota status
+  - **Full Day Option**: Added "Alba-Tramonto" time slot with proper conflict prevention logic
+  - **Type Safety**: Updated all TypeScript interfaces to support new target species fields throughout system
 
 # User Preferences
 

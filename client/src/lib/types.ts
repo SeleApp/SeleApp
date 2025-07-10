@@ -22,9 +22,16 @@ export interface ReservationWithDetails {
   hunterId: number;
   zoneId: number;
   huntDate: string;
-  timeSlot: 'morning' | 'afternoon';
+  timeSlot: 'morning' | 'afternoon' | 'full_day';
   status: 'active' | 'completed' | 'cancelled';
   createdAt: string;
+  // Campi target species opzionali
+  targetSpecies?: 'roe_deer' | 'red_deer';
+  targetRoeDeerCategory?: 'M0' | 'F0' | 'FA' | 'M1' | 'MA';
+  targetRedDeerCategory?: 'CL0' | 'FF' | 'MM' | 'MCL1';
+  targetSex?: 'male' | 'female';
+  targetAgeClass?: 'adult' | 'young';
+  targetNotes?: string;
   zone: {
     id: number;
     name: string;
@@ -51,7 +58,14 @@ export interface AdminStats {
 export interface CreateReservationRequest {
   zoneId: number;
   huntDate: string;
-  timeSlot: 'morning' | 'afternoon';
+  timeSlot: 'morning' | 'afternoon' | 'full_day';
+  // Campi opzionali per selezione capo target
+  targetSpecies?: 'roe_deer' | 'red_deer';
+  targetRoeDeerCategory?: 'M0' | 'F0' | 'FA' | 'M1' | 'MA';
+  targetRedDeerCategory?: 'CL0' | 'FF' | 'MM' | 'MCL1';
+  targetSex?: 'male' | 'female';
+  targetAgeClass?: 'adult' | 'young';
+  targetNotes?: string;
 }
 
 export interface CreateHuntReportRequest {
@@ -67,8 +81,9 @@ export interface CreateHuntReportRequest {
 }
 
 export const TIME_SLOT_LABELS = {
-  morning: 'Mattina (6:00 - 12:00)',
-  afternoon: 'Pomeriggio (14:00 - 18:00)',
+  morning: 'Alba - 12:00',
+  afternoon: '12:00 - Tramonto', 
+  full_day: 'Alba - Tramonto',
 } as const;
 
 export const SPECIES_LABELS = {

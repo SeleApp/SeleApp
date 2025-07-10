@@ -126,7 +126,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
             {/* Time Slot Selection */}
             <div className="space-y-4">
               <Label className="text-xl font-semibold text-gray-900">Fascia Oraria</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   type="button"
                   onClick={() => setValue("timeSlot", "morning")}
@@ -153,6 +153,20 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
                   <div className="text-center">
                     <div className="text-2xl font-bold">12:00 - Tramonto</div>
                     <div className="text-lg text-gray-600 mt-2">Pomeriggio</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("timeSlot", "full_day")}
+                  className={`p-8 rounded-xl border-3 text-xl font-medium transition-all ${
+                    watch("timeSlot") === "full_day"
+                      ? "border-primary bg-primary/20 text-primary shadow-lg"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">Alba - Tramonto</div>
+                    <div className="text-lg text-gray-600 mt-2">Tutto il Giorno</div>
                   </div>
                 </button>
               </div>
