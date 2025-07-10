@@ -506,9 +506,7 @@ export default function AdminDashboard() {
                         variant={getSpeciesButtonVariant('red_deer')}
                         onClick={() => setSelectedSpecies('red_deer')}
                         className="h-8"
-                      >
-                        🦌 Cervo
-                      </Button>
+                      >Cervo</Button>
                     </div>
                   </div>
                 </div>
