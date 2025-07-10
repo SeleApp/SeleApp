@@ -23,12 +23,13 @@ interface ReservationModalProps {
 export default function ReservationModal({ open, onOpenChange, zones }: ReservationModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showTargetSelection, setShowTargetSelection] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
 
   // Fetch regional quotas to show available categories
   const { data: quotas = [] } = useQuery({
     queryKey: ['/api/regional-quotas'],
-    enabled: showTargetSelection,
+    enabled: currentStep === 4, // Load quotas when reaching target species step
   });
 
   const form = useForm<ClientCreateReservationRequest>({
@@ -81,8 +82,26 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
 
   const handleClose = () => {
     form.reset();
-    setShowTargetSelection(false);
+    setCurrentStep(1);
     onOpenChange(false);
+  };
+
+  const nextStep = () => {
+    setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const canProceedToNext = () => {
+    switch (currentStep) {
+      case 1: return watch("huntDate");
+      case 2: return watch("timeSlot");
+      case 3: return watch("zoneId") && watch("zoneId") !== 0;
+      case 4: return true; // Target species is optional
+      default: return true;
+    }
   };
 
   const selectedSpecies = watch("targetSpecies");
@@ -110,6 +129,27 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
           </DialogDescription>
         </DialogHeader>
         
+        {/* Step Progress Indicator */}
+        <div className="flex justify-between items-center mb-8">
+          {[1, 2, 3, 4, 5].map((step) => (
+            <div key={step} className="flex items-center">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                step === currentStep ? 'bg-primary' : 
+                step < currentStep ? 'bg-green-500' : 'bg-gray-300'
+              }`}>
+                {step}
+              </div>
+              <div className={`text-sm ml-2 ${step === currentStep ? 'text-primary font-semibold' : 'text-gray-500'}`}>
+                {step === 1 ? 'Data' :
+                 step === 2 ? 'Orario' :
+                 step === 3 ? 'Zona' :
+                 step === 4 ? 'Capo Target' : 'Conferma'}
+              </div>
+              {step < 5 && <div className="w-8 h-1 bg-gray-300 mx-4"></div>}
+            </div>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Hidden inputs for target species to ensure they are included in form submission */}
           <input type="hidden" {...register("targetSpecies")} />
@@ -119,7 +159,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
           <input type="hidden" {...register("targetAgeClass")} />
           <input type="hidden" {...register("targetNotes")} />
           
-          <div className="space-y-8 py-6">
+          <div className="min-h-[400px] py-6">
             {/* Data Selection */}
             <div className="space-y-3">
               <Label className="text-xl font-semibold text-gray-900">Data di Caccia</Label>
