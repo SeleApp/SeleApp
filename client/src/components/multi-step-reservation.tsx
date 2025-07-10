@@ -166,7 +166,6 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                       }`}
                     >
                       <div className="text-xl font-bold">{zone.name}</div>
-                      <div className="text-xs text-green-600 mt-1">Disponibile</div>
                     </button>
                   ))}
                 </div>
