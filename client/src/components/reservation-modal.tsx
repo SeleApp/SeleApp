@@ -141,7 +141,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="pb-4">
-          <DialogTitle className="text-2xl font-bold text-gray-900">Nuova Prenotazione</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-gray-900">Nuova Prenotazione - Multi-Step</DialogTitle>
           <DialogDescription className="text-lg text-gray-600">
             Passo {currentStep} di {totalSteps}: {
               currentStep === 1 ? 'Seleziona la data' :
