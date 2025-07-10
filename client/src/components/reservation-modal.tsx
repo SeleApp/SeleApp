@@ -74,6 +74,8 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
 
   const onSubmit = async (data: ClientCreateReservationRequest) => {
     console.log("Frontend form data:", data);
+    console.log("Current form values:", form.getValues());
+    console.log("Target species state:", selectedSpecies);
     mutation.mutate(data);
   };
 
@@ -109,6 +111,14 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Hidden inputs for target species to ensure they are included in form submission */}
+          <input type="hidden" {...register("targetSpecies")} />
+          <input type="hidden" {...register("targetRoeDeerCategory")} />
+          <input type="hidden" {...register("targetRedDeerCategory")} />
+          <input type="hidden" {...register("targetSex")} />
+          <input type="hidden" {...register("targetAgeClass")} />
+          <input type="hidden" {...register("targetNotes")} />
+          
           <div className="space-y-8 py-6">
             {/* Data Selection */}
             <div className="space-y-3">
