@@ -182,7 +182,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Data</h3>
-                  <p className="text-lg text-gray-600">Scegli tra i prossimi 10 giorni disponibili</p>
+                  <p className="text-lg text-gray-600">Scegli tra i prossimi giorni disponibili (esclusi martedì e venerdì)</p>
                   <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-4 mx-auto max-w-lg">
                     <p className="text-sm text-yellow-800">
                       <strong>Ricorda:</strong> Martedì e Venerdì sono giorni di silenzio venatorio
@@ -196,7 +196,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     let dateCount = 0;
                     let dayOffset = 1; // Inizio da domani, non da oggi
                     
-                    while (dateCount < 10) {
+                    while (dateCount < 10 && dayOffset < 20) {
                       const currentDate = new Date(today);
                       currentDate.setDate(today.getDate() + dayOffset);
                       const dayOfWeek = currentDate.getDay();
@@ -212,8 +212,11 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                           <button
                             key={dateString}
                             type="button"
-                            onClick={() => setValue("huntDate", dateString)}
-                            className={`p-4 rounded-xl border-2 text-center transition-all ${
+                            onClick={() => {
+                              console.log('Cliccato su data:', dateString, dayName, dayNumber);
+                              setValue("huntDate", dateString);
+                            }}
+                            className={`p-4 rounded-xl border-2 text-center transition-all hover:bg-blue-50 ${
                               watch("huntDate") === dateString
                                 ? "border-blue-600 bg-blue-100 text-blue-700 shadow-lg transform scale-105"
                                 : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
