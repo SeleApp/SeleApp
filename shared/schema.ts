@@ -406,13 +406,6 @@ export const createReservationSchema = insertReservationSchema.extend({
   targetAgeClass: z.enum(['adult', 'young']).optional(),
   targetNotes: z.string().optional(),
 }).refine((data) => {
-  // Se viene specificata una specie, deve essere specificata anche la categoria corretta
-  if (data.targetSpecies === 'roe_deer' && data.targetRoeDeerCategory === undefined) {
-    return false;
-  }
-  if (data.targetSpecies === 'red_deer' && data.targetRedDeerCategory === undefined) {
-    return false;
-  }
   // Se viene specificata una categoria, deve essere specificata anche la specie corrispondente
   if (data.targetRoeDeerCategory && data.targetSpecies !== 'roe_deer') {
     return false;
@@ -420,9 +413,13 @@ export const createReservationSchema = insertReservationSchema.extend({
   if (data.targetRedDeerCategory && data.targetSpecies !== 'red_deer') {
     return false;
   }
+  // Se viene specificata una categoria di capriolo, non può essere specificata una categoria di cervo
+  if (data.targetRoeDeerCategory && data.targetRedDeerCategory) {
+    return false;
+  }
   return true;
 }, {
-  message: "Specie e categoria devono essere coerenti tra loro",
+  message: "Categoria non compatibile con la specie selezionata",
   path: ["targetSpecies"],
 });
 

@@ -24,6 +24,7 @@ router.get("/", authenticateToken, async (req: AuthRequest, res) => {
 router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
     console.log("Creating reservation with data:", req.body);
+  console.log("Raw form data received:", JSON.stringify(req.body, null, 2));
     console.log("User:", req.user);
     
     if (req.user?.role !== 'HUNTER') {

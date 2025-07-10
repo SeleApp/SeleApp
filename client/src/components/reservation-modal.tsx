@@ -73,6 +73,7 @@ export default function ReservationModal({ open, onOpenChange, zones }: Reservat
   });
 
   const onSubmit = async (data: ClientCreateReservationRequest) => {
+    console.log("Frontend form data:", data);
     mutation.mutate(data);
   };
 
