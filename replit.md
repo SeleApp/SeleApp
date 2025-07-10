@@ -408,6 +408,12 @@ Changelog:
   - **Category Filtering**: Dynamic filtering shows only available categories based on current regional quota status
   - **Full Day Option**: Added "Alba-Tramonto" time slot with proper conflict prevention logic
   - **Type Safety**: Updated all TypeScript interfaces to support new target species fields throughout system
+- July 10, 2025. **MULTI-STEP RESERVATION SYSTEM**: Redesigned reservation modal with guided 5-step process
+  - **Step Sequence**: Implemented user-requested step order: 1) Data, 2) Zona, 3) Orario, 4) Specie/Classe di età, 5) Conferma
+  - **Progress Indicator**: Visual step progress with numbered circles and labels for clear navigation
+  - **Improved UX**: Separated complex target species selection into dedicated step for better usability
+  - **Validation Flow**: Step-by-step validation ensuring users complete required fields before proceeding
+  - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
 
 # User Preferences
 
