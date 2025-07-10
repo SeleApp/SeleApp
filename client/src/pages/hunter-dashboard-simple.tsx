@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import ReservationModal from "@/components/reservation-modal-elderly";
+import MultiStepReservation from "@/components/multi-step-reservation";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -412,7 +412,7 @@ export default function HunterDashboard() {
         </Tabs>
       </main>
 
-      <ReservationModal
+      <MultiStepReservation
         open={showReservationModal}
         onOpenChange={setShowReservationModal}
         zones={zones}

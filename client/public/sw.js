@@ -2,7 +2,7 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-const CACHE_NAME = 'seleapp-v3-multistep';
+const CACHE_NAME = 'seleapp-v4-final-multistep';
 const urlsToCache = [
   '/',
   '/app',
