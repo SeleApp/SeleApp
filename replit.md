@@ -409,13 +409,13 @@ Changelog:
   - **Full Day Option**: Added "Alba-Tramonto" time slot with proper conflict prevention logic
   - **Type Safety**: Updated all TypeScript interfaces to support new target species fields throughout system
 - July 10, 2025. **MULTI-STEP RESERVATION SYSTEM**: Redesigned reservation modal with guided 5-step process
-  - **Step Sequence**: Implemented user-requested step order: 1) Data, 2) Zona, 3) Orario, 4) Specie/Classe di età, 5) Conferma
+  - **Step Sequence UPDATED**: Changed order per elderly user needs: 1) Zona, 2) Data, 3) Orario, 4) Specie/Classe di età, 5) Conferma
+  - **Hunting Silence Validation**: Added automatic blocking of Tuesday and Friday bookings with clear warning messages
+  - **Senior-Friendly Zone Selection**: Zone selection first (easier visual selection) then date with silence day warnings
   - **Progress Indicator**: Visual step progress with numbered circles and labels for clear navigation
-  - **Improved UX**: Separated complex target species selection into dedicated step for better usability
-  - **Validation Flow**: Step-by-step validation ensuring users complete required fields before proceeding
+  - **Date Validation**: Real-time validation preventing past dates and hunting silence days (Tuesday/Friday)
   - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
-  - **Complete Recreation**: Recreated modal component from scratch to resolve persistent browser cache issues
-  - **Service Worker**: Updated cache version to v3-multistep for forced refresh of cached components
+  - **Service Worker**: Updated cache version to v5-zona-prima-data for forced refresh of cached components
 
 # User Preferences
 

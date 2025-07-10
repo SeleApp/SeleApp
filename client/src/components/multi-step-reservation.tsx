@@ -84,18 +84,26 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
 
   const canProceed = (): boolean => {
     switch (step) {
-      case 1: return !!watch("huntDate");
-      case 2: return !!watch("zoneId");
+      case 1: return !!watch("zoneId");
+      case 2: return !!watch("huntDate") && isValidHuntingDate(watch("huntDate"));
       case 3: return !!watch("timeSlot");
       case 4: return true;
       default: return true;
     }
   };
 
+  const isValidHuntingDate = (dateString: string): boolean => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    // Martedì = 2, Venerdì = 5 (silenzio venatorio)
+    return dayOfWeek !== 2 && dayOfWeek !== 5;
+  };
+
   const getStepTitle = () => {
     switch (step) {
-      case 1: return 'Seleziona la Data';
-      case 2: return 'Seleziona la Zona';
+      case 1: return 'Seleziona la Zona';
+      case 2: return 'Seleziona la Data';
       case 3: return 'Scegli l\'Orario';
       case 4: return 'Specie Target (Opzionale)';
       case 5: return 'Conferma Prenotazione';
@@ -126,8 +134,8 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 {stepNum}
               </div>
               <div className={`text-sm ml-2 hidden sm:block ${stepNum === step ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
-                {stepNum === 1 ? 'Data' :
-                 stepNum === 2 ? 'Zona' :
+                {stepNum === 1 ? 'Zona' :
+                 stepNum === 2 ? 'Data' :
                  stepNum === 3 ? 'Orario' :
                  stepNum === 4 ? 'Specie' : 'Conferma'}
               </div>
@@ -138,32 +146,12 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="min-h-[400px] py-6">
-            {/* STEP 1: DATE */}
+            {/* STEP 1: ZONE */}
             {step === 1 && (
               <div className="space-y-6">
                 <div className="text-center mb-8">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Data</h3>
-                  <p className="text-lg text-gray-600">Scegli il giorno per la tua caccia</p>
-                </div>
-                <div className="max-w-md mx-auto">
-                  <Input
-                    type="date"
-                    className="w-full text-xl p-6 border-3 border-gray-300 rounded-xl focus:border-blue-600 text-center"
-                    {...register("huntDate", { required: "La data è obbligatoria" })}
-                  />
-                  {errors.huntDate && (
-                    <p className="text-red-600 text-lg font-medium mt-2 text-center">{errors.huntDate.message}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* STEP 2: ZONE */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Zona</h3>
-                  <p className="text-lg text-gray-600">Scegli la zona di caccia</p>
+                  <p className="text-lg text-gray-600">Scegli la zona di caccia che preferisci</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-80 overflow-y-auto border-2 rounded-xl p-6 bg-gray-50">
                   {zones.slice(0, 16).map((zone) => (
@@ -185,6 +173,50 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 {errors.zoneId && (
                   <p className="text-red-600 text-lg font-medium text-center">{errors.zoneId.message}</p>
                 )}
+              </div>
+            )}
+
+            {/* STEP 2: DATE */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="text-center mb-8">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Data</h3>
+                  <p className="text-lg text-gray-600">Scegli il giorno per la tua caccia</p>
+                  <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-4 mx-auto max-w-md">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Ricorda:</strong> Martedì e Venerdì sono giorni di silenzio venatorio
+                    </p>
+                  </div>
+                </div>
+                <div className="max-w-md mx-auto">
+                  <Input
+                    type="date"
+                    className="w-full text-xl p-6 border-3 border-gray-300 rounded-xl focus:border-blue-600 text-center"
+                    {...register("huntDate", { 
+                      required: "La data è obbligatoria",
+                      validate: (value) => {
+                        if (!isValidHuntingDate(value)) {
+                          return "Non puoi cacciare di martedì o venerdì (silenzio venatorio)";
+                        }
+                        const selectedDate = new Date(value);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (selectedDate < today) {
+                          return "Non puoi selezionare una data passata";
+                        }
+                        return true;
+                      }
+                    })}
+                  />
+                  {errors.huntDate && (
+                    <p className="text-red-600 text-lg font-medium mt-2 text-center">{errors.huntDate.message}</p>
+                  )}
+                  {watch("huntDate") && !isValidHuntingDate(watch("huntDate")) && (
+                    <p className="text-orange-600 text-lg font-medium mt-2 text-center">
+                      ⚠️ Attenzione: Martedì e Venerdì è vietata la caccia
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -376,12 +408,12 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 
                 <div className="max-w-2xl mx-auto bg-gray-50 rounded-xl p-6 space-y-4">
                   <div className="flex justify-between">
-                    <span className="font-semibold">Data:</span>
-                    <span>{watch("huntDate")}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="font-semibold">Zona:</span>
                     <span>{zones.find(z => z.id === watch("zoneId"))?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Data:</span>
+                    <span>{watch("huntDate")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold">Orario:</span>
