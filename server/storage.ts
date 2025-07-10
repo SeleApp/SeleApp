@@ -147,7 +147,88 @@ export class DatabaseStorage implements IStorage {
 
   async createReserve(reserve: InsertReserve): Promise<Reserve> {
     const [newReserve] = await db.insert(reserves).values(reserve).returning();
+    
+    // Inizializzazione automatica della riserva con zone e quote
+    await this.initializeNewReserve(newReserve);
+    
     return newReserve;
+  }
+
+  private async initializeNewReserve(reserve: Reserve): Promise<void> {
+    console.log(`Initializing new reserve: ${reserve.name} (${reserve.id})`);
+    
+    try {
+      // 1. Crea le 16 zone standard se managementType include zone
+      if (reserve.managementType === 'standard_zones' || reserve.managementType === 'custom') {
+        await this.createStandardZones(reserve.id);
+      }
+      
+      // 2. Crea le quote regionali standard per tutte le riserve
+      await this.createStandardRegionalQuotas(reserve.id);
+      
+      // 3. Crea impostazioni di default per la riserva
+      await this.createReserveSettings({
+        reserveId: reserve.id,
+        logoUrl: null,
+        silenceDays: "[2,5]", // Martedì e Venerdì di default
+        emailTemplateCustomizations: "{}"
+      });
+      
+      console.log(`Successfully initialized reserve: ${reserve.name}`);
+    } catch (error) {
+      console.error(`Error initializing reserve ${reserve.id}:`, error);
+      // Non bloccare la creazione della riserva per errori di inizializzazione
+    }
+  }
+
+  private async createStandardZones(reserveId: string): Promise<void> {
+    const zoneNames = [
+      "Zona 1", "Zona 2", "Zona 3", "Zona 4", "Zona 5", "Zona 6", "Zona 7", "Zona 8",
+      "Zona 9", "Zona 10", "Zona 11", "Zona 12", "Zona 13", "Zona 14", "Zona 15", "Zona 16"
+    ];
+
+    const zonesToCreate = zoneNames.map(name => ({
+      name,
+      reserveId,
+      isActive: true,
+    }));
+
+    await db.insert(zones).values(zonesToCreate);
+    console.log(`Created ${zoneNames.length} standard zones for reserve ${reserveId}`);
+  }
+
+  private async createStandardRegionalQuotas(reserveId: string): Promise<void> {
+    // Quote standard per tutte le riserve (9 categorie totali) usando lo schema corretto
+    const quotaCategories = [
+      // Capriolo (5 categorie)
+      { species: 'roe_deer' as const, roeDeerCategory: 'M0', totalQuota: 10, harvested: 0 },
+      { species: 'roe_deer' as const, roeDeerCategory: 'F0', totalQuota: 8, harvested: 0 },
+      { species: 'roe_deer' as const, roeDeerCategory: 'FA', totalQuota: 12, harvested: 0 },
+      { species: 'roe_deer' as const, roeDeerCategory: 'M1', totalQuota: 6, harvested: 0 },
+      { species: 'roe_deer' as const, roeDeerCategory: 'MA', totalQuota: 4, harvested: 0 },
+      // Cervo (4 categorie)
+      { species: 'red_deer' as const, redDeerCategory: 'CL0', totalQuota: 5, harvested: 0 },
+      { species: 'red_deer' as const, redDeerCategory: 'FF', totalQuota: 8, harvested: 0 },
+      { species: 'red_deer' as const, redDeerCategory: 'MM', totalQuota: 3, harvested: 0 },
+      { species: 'red_deer' as const, redDeerCategory: 'MCL1', totalQuota: 2, harvested: 0 },
+    ];
+
+    const quotasToCreate = quotaCategories.map(quota => ({
+      species: quota.species,
+      roeDeerCategory: quota.species === 'roe_deer' ? quota.roeDeerCategory : null,
+      redDeerCategory: quota.species === 'red_deer' ? quota.redDeerCategory : null,
+      totalQuota: quota.totalQuota,
+      harvested: quota.harvested,
+      reserveId,
+      season: new Date().getFullYear().toString(),
+      isActive: true,
+      huntingStartDate: new Date(`${new Date().getFullYear()}-10-01`),
+      huntingEndDate: new Date(`${new Date().getFullYear() + 1}-01-31`),
+      notes: 'Quote standard create automaticamente'
+    }));
+
+    await db.insert(regionalQuotas).values(quotasToCreate);
+    console.log(`Created ${quotaCategories.length} standard regional quotas for reserve ${reserveId}`);
   }
 
   async updateReserve(id: string, data: Partial<Reserve>): Promise<Reserve | undefined> {
