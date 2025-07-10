@@ -500,9 +500,7 @@ export default function AdminDashboard() {
                         variant={getSpeciesButtonVariant('roe_deer')}
                         onClick={() => setSelectedSpecies('roe_deer')}
                         className="h-8"
-                      >
-                        🦌 Capriolo
-                      </Button>
+                      >Capriolo</Button>
                       <Button
                         size="sm"
                         variant={getSpeciesButtonVariant('red_deer')}
@@ -1117,17 +1115,14 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-
       <RegionalQuotaManager 
         open={showRegionalQuotaManager}
         onOpenChange={setShowRegionalQuotaManager}
       />
-      
       <HunterManagementModal
         open={showHunterManagement}
         onOpenChange={setShowHunterManagement}
       />
-      
       <AdminReportModal
         open={showReportModal}
         onOpenChange={setShowReportModal}
