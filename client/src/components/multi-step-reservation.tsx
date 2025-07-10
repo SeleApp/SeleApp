@@ -65,8 +65,8 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   });
 
   const onSubmit = (data: CreateReservationInput) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form errors:', errors);
+    console.log('🚀 Form submitted with data:', data);
+    console.log('📝 Form errors:', errors);
     createReservationMutation.mutate(data);
   };
 
@@ -487,9 +487,9 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 type="submit"
                 disabled={createReservationMutation.isPending}
                 onClick={() => {
-                  console.log('Submit button clicked');
-                  console.log('Current form values:', watch());
-                  console.log('Form errors:', errors);
+                  console.log('🎯 Submit button clicked');
+                  console.log('📊 Current form values:', watch());
+                  console.log('❌ Form errors:', errors);
                 }}
               >
                 {createReservationMutation.isPending ? "Creazione..." : "Conferma"}
