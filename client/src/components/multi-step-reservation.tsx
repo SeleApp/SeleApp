@@ -180,7 +180,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona la Data</h3>
-                  <p className="text-lg text-gray-600">Scegli tra i prossimi giorni disponibili</p>
+                  <p className="text-lg text-gray-600">Scegli tra i prossimi 10 giorni disponibili</p>
                   <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-4 mx-auto max-w-lg">
                     <p className="text-sm text-yellow-800">
                       <strong>Ricorda:</strong> Martedì e Venerdì sono giorni di silenzio venatorio
@@ -194,7 +194,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     let dateCount = 0;
                     let dayOffset = 0;
                     
-                    while (dateCount < 8) {
+                    while (dateCount < 10) {
                       const currentDate = new Date(today);
                       currentDate.setDate(today.getDate() + dayOffset);
                       const dayOfWeek = currentDate.getDay();
@@ -332,7 +332,6 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                         }`}
                       >
                         <div className="text-center">
-                          <div className="text-4xl mb-2">🦌</div>
                           <div className="text-xl font-bold">Capriolo</div>
                         </div>
                       </button>
@@ -349,7 +348,6 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                         }`}
                       >
                         <div className="text-center">
-                          <div className="text-4xl mb-2">🦌</div>
                           <div className="text-xl font-bold">Cervo</div>
                         </div>
                       </button>

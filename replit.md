@@ -415,8 +415,9 @@ Changelog:
   - **Progress Indicator**: Visual step progress with numbered circles and labels for clear navigation
   - **Date Validation**: Real-time validation preventing past dates and hunting silence days (Tuesday/Friday)
   - **Mobile Responsive**: Optimized step indicator and form layout for mobile devices
-  - **Visual Calendar**: Replaced date input with 8 visual date buttons showing next available hunting days
+  - **Visual Calendar**: Replaced date input with 10 visual date buttons showing next available hunting days
   - **Compact Zone Grid**: All 16 zones visible without scrolling in 4x8 or 8x4 grid layout
+  - **Clean UI Design**: Removed "Disponibile" text from zone buttons and animal emojis from species selection
   - **Service Worker**: Updated cache version to v6-visual-calendar for forced refresh of cached components
 
 # User Preferences
