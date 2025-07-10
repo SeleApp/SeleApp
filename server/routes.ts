@@ -59,6 +59,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const materialsRoutes = await import("./routes/superadmin/materials");
   app.use("/api/superadmin/materials", materialsRoutes.default);
 
+  // Lottery system routes (for standard_random reserves)
+  const lotteryRoutes = await import("./routes/lottery");
+  app.use("/api/lottery", lotteryRoutes.default);
+
   // Endpoint per validazione riserve attive durante registrazione
   app.get("/api/validate-reserve/:name", async (req: Request, res: Response) => {
     try {

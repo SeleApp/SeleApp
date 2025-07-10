@@ -5,12 +5,14 @@
 import { 
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
+  lotteries, lotteryParticipations,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
   type ReserveSettings, type InsertReserveSettings, type Contract, type InsertContract,
   type SupportTicket, type InsertSupportTicket, type Billing, type InsertBilling,
-  type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog
+  type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
+  type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -63,6 +65,17 @@ export interface IStorage {
   deleteMaterial(id: number): Promise<void>;
   logMaterialAccess(materialId: number, userId: number): Promise<MaterialAccessLog>;
   getMaterialAccessLogs(materialId?: number, userId?: number): Promise<(MaterialAccessLog & { material: Material; user: User })[]>;
+
+  // Lottery System (for standard_random reserves)
+  getLotteries(reserveId: string): Promise<(Lottery & { participationsCount: number })[]>;
+  getActiveLotteries(reserveId: string): Promise<(Lottery & { participationsCount: number; isRegistrationOpen: boolean })[]>;
+  createLottery(lottery: InsertLottery): Promise<Lottery>;
+  updateLottery(id: number, data: Partial<Lottery>, reserveId: string): Promise<Lottery | undefined>;
+  deleteLottery(id: number, reserveId: string): Promise<void>;
+  joinLottery(lotteryId: number, hunterId: number, reserveId: string): Promise<LotteryParticipation>;
+  getLotteryParticipations(lotteryId: number, reserveId: string): Promise<(LotteryParticipation & { hunter: User })[]>;
+  getHunterParticipations(hunterId: number, reserveId: string): Promise<(LotteryParticipation & { lottery: Lottery })[]>;
+  drawLotteryWinners(lotteryId: number, reserveId: string): Promise<(LotteryParticipation & { hunter: User })[]>;
   
   // Users (filtered by reserveId for non-SUPERADMIN)
   getUser(id: number, reserveId?: string): Promise<User | undefined>;
@@ -1246,6 +1259,265 @@ export class DatabaseStorage implements IStorage {
       material: row.materials!,
       user: row.users!
     }));
+  }
+
+  // Lottery System Implementation (standard_random management type)
+  
+  async getLotteries(reserveId: string): Promise<(Lottery & { participationsCount: number })[]> {
+    return await db
+      .select({
+        id: lotteries.id,
+        reserveId: lotteries.reserveId,
+        title: lotteries.title,
+        description: lotteries.description,
+        species: lotteries.species,
+        category: lotteries.category,
+        totalSpots: lotteries.totalSpots,
+        registrationStart: lotteries.registrationStart,
+        registrationEnd: lotteries.registrationEnd,
+        drawDate: lotteries.drawDate,
+        status: lotteries.status,
+        winnersDrawn: lotteries.winnersDrawn,
+        createdAt: lotteries.createdAt,
+        updatedAt: lotteries.updatedAt,
+        participationsCount: count(lotteryParticipations.id),
+      })
+      .from(lotteries)
+      .leftJoin(lotteryParticipations, eq(lotteries.id, lotteryParticipations.lotteryId))
+      .where(eq(lotteries.reserveId, reserveId))
+      .groupBy(lotteries.id)
+      .orderBy(desc(lotteries.createdAt));
+  }
+
+  async getActiveLotteries(reserveId: string): Promise<(Lottery & { participationsCount: number; isRegistrationOpen: boolean })[]> {
+    const now = new Date();
+    
+    return await db
+      .select({
+        id: lotteries.id,
+        reserveId: lotteries.reserveId,
+        title: lotteries.title,
+        description: lotteries.description,
+        species: lotteries.species,
+        category: lotteries.category,
+        totalSpots: lotteries.totalSpots,
+        registrationStart: lotteries.registrationStart,
+        registrationEnd: lotteries.registrationEnd,
+        drawDate: lotteries.drawDate,
+        status: lotteries.status,
+        winnersDrawn: lotteries.winnersDrawn,
+        createdAt: lotteries.createdAt,
+        updatedAt: lotteries.updatedAt,
+        participationsCount: count(lotteryParticipations.id),
+        isRegistrationOpen: sql<boolean>`${lotteries.registrationStart} <= ${now} AND ${lotteries.registrationEnd} >= ${now}`,
+      })
+      .from(lotteries)
+      .leftJoin(lotteryParticipations, eq(lotteries.id, lotteryParticipations.lotteryId))
+      .where(and(
+        eq(lotteries.reserveId, reserveId),
+        eq(lotteries.status, 'active')
+      ))
+      .groupBy(lotteries.id)
+      .orderBy(lotteries.drawDate);
+  }
+
+  async createLottery(lottery: InsertLottery): Promise<Lottery> {
+    const [newLottery] = await db.insert(lotteries).values(lottery).returning();
+    return newLottery;
+  }
+
+  async updateLottery(id: number, data: Partial<Lottery>, reserveId: string): Promise<Lottery | undefined> {
+    const [updatedLottery] = await db
+      .update(lotteries)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(lotteries.id, id), eq(lotteries.reserveId, reserveId)))
+      .returning();
+    return updatedLottery || undefined;
+  }
+
+  async deleteLottery(id: number, reserveId: string): Promise<void> {
+    await db
+      .delete(lotteries)
+      .where(and(eq(lotteries.id, id), eq(lotteries.reserveId, reserveId)));
+  }
+
+  async joinLottery(lotteryId: number, hunterId: number, reserveId: string): Promise<LotteryParticipation> {
+    // Verifica che la lotteria esista e sia nella riserva corretta
+    const [lottery] = await db
+      .select()
+      .from(lotteries)
+      .where(and(eq(lotteries.id, lotteryId), eq(lotteries.reserveId, reserveId)));
+    
+    if (!lottery) {
+      throw new Error('Sorteggio non trovato');
+    }
+
+    // Verifica che le registrazioni siano aperte
+    const now = new Date();
+    if (now < lottery.registrationStart || now > lottery.registrationEnd) {
+      throw new Error('Le registrazioni per questo sorteggio sono chiuse');
+    }
+
+    // Verifica che l'utente non sia già iscritto
+    const [existingParticipation] = await db
+      .select()
+      .from(lotteryParticipations)
+      .where(and(
+        eq(lotteryParticipations.lotteryId, lotteryId),
+        eq(lotteryParticipations.hunterId, hunterId)
+      ));
+
+    if (existingParticipation) {
+      throw new Error('Sei già iscritto a questo sorteggio');
+    }
+
+    const [participation] = await db
+      .insert(lotteryParticipations)
+      .values({ lotteryId, hunterId })
+      .returning();
+    
+    return participation;
+  }
+
+  async getLotteryParticipations(lotteryId: number, reserveId: string): Promise<(LotteryParticipation & { hunter: User })[]> {
+    return await db
+      .select({
+        id: lotteryParticipations.id,
+        lotteryId: lotteryParticipations.lotteryId,
+        hunterId: lotteryParticipations.hunterId,
+        registeredAt: lotteryParticipations.registeredAt,
+        status: lotteryParticipations.status,
+        position: lotteryParticipations.position,
+        isWinner: lotteryParticipations.isWinner,
+        hunter: {
+          id: users.id,
+          email: users.email,
+          password: users.password,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role,
+          isActive: users.isActive,
+          reserveId: users.reserveId,
+          isSelezionatore: users.isSelezionatore,
+          isEsperto: users.isEsperto,
+          partecipatoCensimenti: users.partecipatoCensimenti,
+          isOspite: users.isOspite,
+          accompagnato: users.accompagnato,
+          createdAt: users.createdAt,
+        },
+      })
+      .from(lotteryParticipations)
+      .innerJoin(lotteries, eq(lotteryParticipations.lotteryId, lotteries.id))
+      .innerJoin(users, eq(lotteryParticipations.hunterId, users.id))
+      .where(and(
+        eq(lotteryParticipations.lotteryId, lotteryId),
+        eq(lotteries.reserveId, reserveId)
+      ))
+      .orderBy(lotteryParticipations.registeredAt);
+  }
+
+  async getHunterParticipations(hunterId: number, reserveId: string): Promise<(LotteryParticipation & { lottery: Lottery })[]> {
+    return await db
+      .select({
+        id: lotteryParticipations.id,
+        lotteryId: lotteryParticipations.lotteryId,
+        hunterId: lotteryParticipations.hunterId,
+        registeredAt: lotteryParticipations.registeredAt,
+        status: lotteryParticipations.status,
+        position: lotteryParticipations.position,
+        isWinner: lotteryParticipations.isWinner,
+        lottery: {
+          id: lotteries.id,
+          reserveId: lotteries.reserveId,
+          title: lotteries.title,
+          description: lotteries.description,
+          species: lotteries.species,
+          category: lotteries.category,
+          totalSpots: lotteries.totalSpots,
+          registrationStart: lotteries.registrationStart,
+          registrationEnd: lotteries.registrationEnd,
+          drawDate: lotteries.drawDate,
+          status: lotteries.status,
+          winnersDrawn: lotteries.winnersDrawn,
+          createdAt: lotteries.createdAt,
+          updatedAt: lotteries.updatedAt,
+        },
+      })
+      .from(lotteryParticipations)
+      .innerJoin(lotteries, eq(lotteryParticipations.lotteryId, lotteries.id))
+      .where(and(
+        eq(lotteryParticipations.hunterId, hunterId),
+        eq(lotteries.reserveId, reserveId)
+      ))
+      .orderBy(desc(lotteries.drawDate));
+  }
+
+  async drawLotteryWinners(lotteryId: number, reserveId: string): Promise<(LotteryParticipation & { hunter: User })[]> {
+    // Verifica che la lotteria esista e sia nella riserva corretta
+    const [lottery] = await db
+      .select()
+      .from(lotteries)
+      .where(and(eq(lotteries.id, lotteryId), eq(lotteries.reserveId, reserveId)));
+    
+    if (!lottery) {
+      throw new Error('Sorteggio non trovato');
+    }
+
+    if (lottery.winnersDrawn) {
+      throw new Error('I vincitori sono già stati estratti per questo sorteggio');
+    }
+
+    // Ottieni tutti i partecipanti
+    const participants = await db
+      .select()
+      .from(lotteryParticipations)
+      .where(eq(lotteryParticipations.lotteryId, lotteryId));
+
+    if (participants.length === 0) {
+      throw new Error('Nessun partecipante trovato per questo sorteggio');
+    }
+
+    // Mescola i partecipanti e seleziona i vincitori
+    const shuffled = participants.sort(() => Math.random() - 0.5);
+    const winners = shuffled.slice(0, lottery.totalSpots);
+
+    // Aggiorna i vincitori nel database
+    for (let i = 0; i < winners.length; i++) {
+      await db
+        .update(lotteryParticipations)
+        .set({
+          status: 'winner',
+          isWinner: true,
+          position: i + 1,
+        })
+        .where(eq(lotteryParticipations.id, winners[i].id));
+    }
+
+    // Segna i non vincitori
+    const losers = shuffled.slice(lottery.totalSpots);
+    for (const loser of losers) {
+      await db
+        .update(lotteryParticipations)
+        .set({
+          status: 'excluded',
+          isWinner: false,
+        })
+        .where(eq(lotteryParticipations.id, loser.id));
+    }
+
+    // Aggiorna la lotteria come completata
+    await db
+      .update(lotteries)
+      .set({
+        status: 'completed',
+        winnersDrawn: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(lotteries.id, lotteryId));
+
+    // Restituisci i vincitori con le informazioni del cacciatore
+    return await this.getLotteryParticipations(lotteryId, reserveId)
+      .then(results => results.filter(p => p.isWinner));
   }
 }
 
