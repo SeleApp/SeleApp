@@ -125,10 +125,17 @@ export default function HunterDashboard() {
                       const available = quota.totalQuota - quota.harvested;
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
-                          return q.roeDeerCategory; // Mostra il codice esatto: M0, F0, FA, M1, MA
-                        } else {
-                          return q.redDeerCategory; // Mostra il codice esatto: CL0, FF, MM, MCL1
+                          return q.roeDeerCategory; // M0, F0, FA, M1, MA
+                        } else if (q.species === 'red_deer') {
+                          return q.redDeerCategory; // CL0, FF, MM, MCL1
+                        } else if (q.species === 'fallow_deer') {
+                          return q.fallowDeerCategory; // DA-M-0, DA-M-I, DA-M-II, DA-F-0, DA-F-I, DA-F-II
+                        } else if (q.species === 'mouflon') {
+                          return q.mouflonCategory; // MU-M-0, MU-M-I, MU-M-II, MU-F-0, MU-F-I, MU-F-II
+                        } else if (q.species === 'chamois') {
+                          return q.chamoisCategory; // CA-M-0, CA-M-I, CA-M-II, CA-M-III, CA-F-0, CA-F-I, CA-F-II, CA-F-III
                         }
+                        return 'N/A';
                       };
 
                       const formatPeriod = (startDate: string | null, endDate: string | null, notes: string | null) => {
@@ -144,7 +151,11 @@ export default function HunterDashboard() {
                       return (
                         <TableRow key={quota.id}>
                           <TableCell className="font-medium text-xs sm:text-sm">
-                            {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                            {quota.species === 'roe_deer' ? 'Capriolo' : 
+                             quota.species === 'red_deer' ? 'Cervo' :
+                             quota.species === 'fallow_deer' ? 'Daino' :
+                             quota.species === 'mouflon' ? 'Muflone' :
+                             quota.species === 'chamois' ? 'Camoscio' : quota.species}
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm">
                             <Badge variant="outline" className="text-xs px-1 py-0">{getCategoryLabel(quota)}</Badge>

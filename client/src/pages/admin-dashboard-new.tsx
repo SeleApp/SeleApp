@@ -18,7 +18,7 @@ import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("quotas");
-  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
+  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer' | 'fallow_deer' | 'mouflon' | 'chamois'>('all');
   const [editingQuota, setEditingQuota] = useState<number | null>(null);
   const [editingField, setEditingField] = useState<'quota' | 'harvested' | 'period' | null>(null);
   const [quotaValues, setQuotaValues] = useState<Record<number, number>>({});
@@ -343,20 +343,34 @@ export default function AdminDashboard() {
     );
   };
 
-  const getSpeciesButtonVariant = (species: 'all' | 'roe_deer' | 'red_deer') => {
+  const getSpeciesButtonVariant = (species: 'all' | 'roe_deer' | 'red_deer' | 'fallow_deer' | 'mouflon' | 'chamois') => {
     return selectedSpecies === species ? 'default' : 'outline';
   };
 
   const getCategoryLabel = (quota: any) => {
     if (quota.species === 'roe_deer') {
       return quota.roeDeerCategory || 'N/A';
-    } else {
+    } else if (quota.species === 'red_deer') {
       return quota.redDeerCategory || 'N/A';
+    } else if (quota.species === 'fallow_deer') {
+      return quota.fallowDeerCategory || 'N/A';
+    } else if (quota.species === 'mouflon') {
+      return quota.mouflonCategory || 'N/A';
+    } else if (quota.species === 'chamois') {
+      return quota.chamoisCategory || 'N/A';
     }
+    return 'N/A';
   };
 
   const getSpeciesLabel = (species: string) => {
-    return species === 'roe_deer' ? 'Capriolo' : 'Cervo';
+    switch (species) {
+      case 'roe_deer': return 'Capriolo';
+      case 'red_deer': return 'Cervo';
+      case 'fallow_deer': return 'Daino';
+      case 'mouflon': return 'Muflone';
+      case 'chamois': return 'Camoscio';
+      default: return species;
+    }
   };
 
   const getStatusIndicator = (quota: any) => {
@@ -507,6 +521,24 @@ export default function AdminDashboard() {
                         onClick={() => setSelectedSpecies('red_deer')}
                         className="h-8"
                       >Cervo</Button>
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('fallow_deer')}
+                        onClick={() => setSelectedSpecies('fallow_deer')}
+                        className="h-8"
+                      >Daino</Button>
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('mouflon')}
+                        onClick={() => setSelectedSpecies('mouflon')}
+                        className="h-8"
+                      >Muflone</Button>
+                      <Button
+                        size="sm"
+                        variant={getSpeciesButtonVariant('chamois')}
+                        onClick={() => setSelectedSpecies('chamois')}
+                        className="h-8"
+                      >Camoscio</Button>
                     </div>
                   </div>
                 </div>
