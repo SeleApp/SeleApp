@@ -466,7 +466,7 @@ export default function SuperAdminDashboard() {
                     <span className="sm:hidden">Nuova</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingReserve 
@@ -479,62 +479,71 @@ export default function SuperAdminDashboard() {
                         : "Inserisci i dati della nuova riserva di caccia"}
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={reserveForm.handleSubmit(onCreateReserve)} className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Nome Riserva</Label>
-                      <Input
-                        id="name"
-                        {...reserveForm.register("name")}
-                        placeholder="Nome della riserva"
-                      />
-                      {reserveForm.formState.errors.name && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.name.message}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="comune">Comune</Label>
-                      <Input
-                        id="comune"
-                        {...reserveForm.register("comune")}
-                        placeholder="Comune di appartenenza"
-                      />
-                      {reserveForm.formState.errors.comune && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.comune.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="emailContatto">Email Contatto</Label>
-                      <Input
-                        id="emailContatto"
-                        type="email"
-                        {...reserveForm.register("emailContatto")}
-                        placeholder="admin@riserva.it"
-                      />
-                      {reserveForm.formState.errors.emailContatto && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.emailContatto.message}
-                        </p>
-                      )}
+                  <form onSubmit={reserveForm.handleSubmit(onCreateReserve)} className="space-y-6">
+                    {/* Griglia responsive per i campi base */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Nome Riserva</Label>
+                        <Input
+                          id="name"
+                          {...reserveForm.register("name")}
+                          placeholder="Nome della riserva"
+                          className="w-full"
+                        />
+                        {reserveForm.formState.errors.name && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {reserveForm.formState.errors.name.message}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="comune">Comune</Label>
+                        <Input
+                          id="comune"
+                          {...reserveForm.register("comune")}
+                          placeholder="Comune di appartenenza"
+                          className="w-full"
+                        />
+                        {reserveForm.formState.errors.comune && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {reserveForm.formState.errors.comune.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="presidentName">Nome Presidente</Label>
-                      <Input
-                        id="presidentName"
-                        {...reserveForm.register("presidentName")}
-                        placeholder="Nome del presidente della riserva"
-                      />
-                      {reserveForm.formState.errors.presidentName && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.presidentName.message}
-                        </p>
-                      )}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="emailContatto">Email Contatto</Label>
+                        <Input
+                          id="emailContatto"
+                          type="email"
+                          {...reserveForm.register("emailContatto")}
+                          placeholder="admin@riserva.it"
+                          className="w-full"
+                        />
+                        {reserveForm.formState.errors.emailContatto && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {reserveForm.formState.errors.emailContatto.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="presidentName">Nome Presidente</Label>
+                        <Input
+                          id="presidentName"
+                          {...reserveForm.register("presidentName")}
+                          placeholder="Nome del presidente della riserva"
+                          className="w-full"
+                        />
+                        {reserveForm.formState.errors.presidentName && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {reserveForm.formState.errors.presidentName.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
@@ -572,78 +581,87 @@ export default function SuperAdminDashboard() {
                       </p>
                     </div>
 
-                    {/* Campo Numero Zone per gestioni con zone */}
-                    {(reserveForm.watch("managementType") === "standard_zones" || reserveForm.watch("managementType") === "custom") && (
+                    {/* Griglia per campi condizionali */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Campo Numero Zone per gestioni con zone */}
+                      {(reserveForm.watch("managementType") === "standard_zones" || reserveForm.watch("managementType") === "custom") && (
+                        <div>
+                          <Label htmlFor="numberOfZones">Numero di Zone</Label>
+                          <Input
+                            id="numberOfZones"
+                            type="number"
+                            min="1"
+                            max="50"
+                            {...reserveForm.register("numberOfZones", { 
+                              valueAsNumber: true,
+                              min: { value: 1, message: "Minimo 1 zona" },
+                              max: { value: 50, message: "Massimo 50 zone" }
+                            })}
+                            placeholder="16"
+                            defaultValue="16"
+                            className="w-full"
+                          />
+                          {reserveForm.formState.errors.numberOfZones && (
+                            <p className="text-sm text-red-600 mt-1">
+                              {reserveForm.formState.errors.numberOfZones.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Numero di zone di caccia da creare per questa riserva
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Sottotipo per Capo Assegnato */}
+                      {reserveForm.watch("managementType") === "standard_random" && (
+                        <div>
+                          <Label htmlFor="assignmentMode">Modalità Assegnazione Capi</Label>
+                          <Select 
+                            onValueChange={(value) => reserveForm.setValue("assignmentMode", value)}
+                            defaultValue={reserveForm.watch("assignmentMode") || "manual"}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Seleziona modalità assegnazione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manual">Assegnazione Manuale</SelectItem>
+                              <SelectItem value="random">Assegnazione Random/Sorteggio</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Come vengono assegnati i capi ai cacciatori
+                          </p>
+                        </div>
+                      )}
+
                       <div>
-                        <Label htmlFor="numberOfZones">Numero di Zone</Label>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label htmlFor="accessCode">Codice d'Accesso</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={generateAccessCode}
+                            className="text-xs px-2 py-1"
+                          >
+                            Genera
+                          </Button>
+                        </div>
                         <Input
-                          id="numberOfZones"
-                          type="number"
-                          min="1"
-                          max="50"
-                          {...reserveForm.register("numberOfZones", { 
-                            valueAsNumber: true,
-                            min: { value: 1, message: "Minimo 1 zona" },
-                            max: { value: 50, message: "Massimo 50 zone" }
-                          })}
-                          placeholder="16"
-                          defaultValue="16"
+                          id="accessCode"
+                          {...reserveForm.register("accessCode")}
+                          placeholder="Codice per registrazione cacciatori"
+                          className="w-full"
                         />
-                        {reserveForm.formState.errors.numberOfZones && (
+                        {reserveForm.formState.errors.accessCode && (
                           <p className="text-sm text-red-600 mt-1">
-                            {reserveForm.formState.errors.numberOfZones.message}
+                            {reserveForm.formState.errors.accessCode.message}
                           </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
-                          Numero di zone di caccia da creare per questa riserva
+                          I cacciatori useranno questo codice per registrarsi
                         </p>
                       </div>
-                    )}
-
-                    {/* Sottotipo per Capo Assegnato */}
-                    {reserveForm.watch("managementType") === "standard_random" && (
-                      <div>
-                        <Label htmlFor="assignmentMode">Modalità Assegnazione Capi</Label>
-                        <Select 
-                          onValueChange={(value) => reserveForm.setValue("assignmentMode", value)}
-                          defaultValue={reserveForm.watch("assignmentMode") || "manual"}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona modalità assegnazione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="manual">Assegnazione Manuale</SelectItem>
-                            <SelectItem value="random">Assegnazione Random/Sorteggio</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Come vengono assegnati i capi ai cacciatori
-                        </p>
-                      </div>
-                    )}
-
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="accessCode">Codice d'Accesso</Label>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={generateAccessCode}
-                        >
-                          Genera
-                        </Button>
-                      </div>
-                      <Input
-                        id="accessCode"
-                        {...reserveForm.register("accessCode")}
-                        placeholder="Codice per registrazione cacciatori"
-                      />
-                      {reserveForm.formState.errors.accessCode && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {reserveForm.formState.errors.accessCode.message}
-                        </p>
-                      )}
                     </div>
 
                     <SpeciesCheckboxes 
@@ -686,86 +704,94 @@ export default function SuperAdminDashboard() {
                   {reserves.length} riserve totali nel sistema
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-2 sm:p-6">
                 <div className="w-full overflow-x-auto">
-                  <Table className="min-w-full">
+                  <Table className="min-w-full text-xs sm:text-sm">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Comune</TableHead>
-                      <TableHead>Codice</TableHead>
-                      <TableHead>Utenti</TableHead>
-                      <TableHead>Stato</TableHead>
-                      <TableHead>Tipologia</TableHead>
-                      <TableHead>Creata</TableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
+                      <TableHead className="px-2 py-3">Nome</TableHead>
+                      <TableHead className="px-2 py-3 hidden sm:table-cell">Comune</TableHead>
+                      <TableHead className="px-2 py-3 hidden md:table-cell">Codice</TableHead>
+                      <TableHead className="px-2 py-3">Utenti</TableHead>
+                      <TableHead className="px-2 py-3">Stato</TableHead>
+                      <TableHead className="px-2 py-3 hidden lg:table-cell">Tipologia</TableHead>
+                      <TableHead className="px-2 py-3 hidden xl:table-cell">Creata</TableHead>
+                      <TableHead className="px-2 py-3 text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {reserves.map((reserve) => (
                       <TableRow key={reserve.id}>
-                        <TableCell className="font-medium">{reserve.name}</TableCell>
-                        <TableCell>{reserve.comune}</TableCell>
-                        <TableCell>
-                          <AccessCodeManager reserve={reserve} />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 mr-1 text-blue-600" />
-                            {reserve.stats.totalUsers}
+                        <TableCell className="px-2 py-3 font-medium">
+                          <div className="flex flex-col">
+                            <span>{reserve.name}</span>
+                            <span className="text-xs text-gray-500 sm:hidden">{reserve.comune}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={reserve.isActive ? "default" : "secondary"}>
+                        <TableCell className="px-2 py-3 hidden sm:table-cell">{reserve.comune}</TableCell>
+                        <TableCell className="px-2 py-3 hidden md:table-cell">
+                          <AccessCodeManager reserve={reserve} />
+                        </TableCell>
+                        <TableCell className="px-2 py-3">
+                          <div className="flex items-center">
+                            <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-blue-600" />
+                            <span className="text-xs sm:text-sm">{reserve.stats.totalUsers}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-3">
+                          <Badge 
+                            variant={reserve.isActive ? "default" : "secondary"}
+                            className="text-xs px-1 py-0"
+                          >
                             {reserve.isActive ? "Attiva" : "Inattiva"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-2 py-3 hidden lg:table-cell">
                           <Badge 
                             variant="outline" 
-                            className={
+                            className={`text-xs ${
                               reserve.managementType === 'standard_zones' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               reserve.managementType === 'standard_random' ? 'bg-green-50 text-green-700 border-green-200' :
                               reserve.managementType === 'ca17_system' ? 'bg-orange-50 text-orange-700 border-orange-200' :
                               reserve.managementType === 'quota_only' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                               'bg-gray-50 text-gray-700 border-gray-200'
-                            }
+                            }`}
                           >
-                            {reserve.managementType === 'standard_zones' ? 'Caccia per Zone' :
-                             reserve.managementType === 'standard_random' ? 'Capo Assegnato' :
-                             reserve.managementType === 'ca17_system' ? 'Sistema CA17' :
-                             reserve.managementType === 'quota_only' ? 'Solo Quote' :
-                             'Misto Zone+Capi'}
+                            {reserve.managementType === 'standard_zones' ? 'Zone' :
+                             reserve.managementType === 'standard_random' ? 'Capi' :
+                             reserve.managementType === 'ca17_system' ? 'CA17' :
+                             reserve.managementType === 'quota_only' ? 'Quote' :
+                             'Misto'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-2 py-3 hidden xl:table-cell text-xs">
                           {new Date(reserve.createdAt).toLocaleDateString("it-IT")}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end space-x-2">
+                        <TableCell className="px-2 py-3 text-right">
+                          <div className="flex items-center justify-end space-x-1">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => startEditingReserve(reserve)}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 p-1 h-8 w-8"
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => toggleReserveStatus(reserve.id, !reserve.isActive)}
-                              className={reserve.isActive ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
+                              className={`p-1 h-8 w-8 ${reserve.isActive ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}`}
                             >
-                              {reserve.isActive ? "Sospendi" : "Attiva"}
+                              {reserve.isActive ? "⏸" : "▶"}
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => deleteReserve(reserve.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 p-1 h-8 w-8"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -803,7 +829,7 @@ export default function SuperAdminDashboard() {
                     <span className="sm:hidden">Nuovo</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="w-full max-w-[95vw] sm:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
                       {editingAdmin ? "Modifica Amministratore" : "Crea Nuovo Amministratore"}
@@ -815,7 +841,7 @@ export default function SuperAdminDashboard() {
                       }
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={adminForm.handleSubmit(onCreateAdmin)} className="space-y-4">
+                  <form onSubmit={adminForm.handleSubmit(onCreateAdmin)} className="space-y-6">
                     <div>
                       <Label htmlFor="email">Email</Label>
                       <Input
@@ -823,6 +849,7 @@ export default function SuperAdminDashboard() {
                         type="email"
                         {...adminForm.register("email")}
                         placeholder="admin@example.com"
+                        className="w-full"
                       />
                       {adminForm.formState.errors.email && (
                         <p className="text-sm text-red-600 mt-1">
@@ -831,13 +858,14 @@ export default function SuperAdminDashboard() {
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">Nome</Label>
                         <Input
                           id="firstName"
                           {...adminForm.register("firstName")}
                           placeholder="Mario"
+                          className="w-full"
                         />
                         {adminForm.formState.errors.firstName && (
                           <p className="text-sm text-red-600 mt-1">
@@ -852,6 +880,7 @@ export default function SuperAdminDashboard() {
                           id="lastName"
                           {...adminForm.register("lastName")}
                           placeholder="Rossi"
+                          className="w-full"
                         />
                         {adminForm.formState.errors.lastName && (
                           <p className="text-sm text-red-600 mt-1">
@@ -861,42 +890,45 @@ export default function SuperAdminDashboard() {
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="password">
-                        Password {editingAdmin && "(lascia vuoto per non modificare)"}
-                      </Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        {...adminForm.register("password")}
-                        placeholder="Minimo 6 caratteri"
-                      />
-                      {adminForm.formState.errors.password && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {adminForm.formState.errors.password.message}
-                        </p>
-                      )}
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="password">
+                          Password {editingAdmin && "(lascia vuoto per non modificare)"}
+                        </Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          {...adminForm.register("password")}
+                          placeholder="Minimo 6 caratteri"
+                          className="w-full"
+                        />
+                        {adminForm.formState.errors.password && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {adminForm.formState.errors.password.message}
+                          </p>
+                        )}
+                      </div>
 
-                    <div>
-                      <Label htmlFor="reserveId">Riserva Assegnata</Label>
-                      <select
-                        id="reserveId"
-                        {...adminForm.register("reserveId")}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Seleziona una riserva (opzionale)</option>
-                        {reserves?.map((reserve) => (
-                          <option key={reserve.id} value={reserve.id}>
-                            {reserve.name} - {reserve.comune}
-                          </option>
-                        ))}
-                      </select>
-                      {adminForm.formState.errors.reserveId && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {adminForm.formState.errors.reserveId.message}
-                        </p>
-                      )}
+                      <div>
+                        <Label htmlFor="reserveId">Riserva Assegnata</Label>
+                        <select
+                          id="reserveId"
+                          {...adminForm.register("reserveId")}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Seleziona una riserva (opzionale)</option>
+                          {reserves?.map((reserve) => (
+                            <option key={reserve.id} value={reserve.id}>
+                              {reserve.name} - {reserve.comune}
+                            </option>
+                          ))}
+                        </select>
+                        {adminForm.formState.errors.reserveId && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {adminForm.formState.errors.reserveId.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex justify-end space-x-2 pt-4">
@@ -937,54 +969,59 @@ export default function SuperAdminDashboard() {
                   {admins.length} amministratori nel sistema
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-2 sm:p-6">
                 <div className="w-full overflow-x-auto">
-                  <Table className="min-w-full">
+                  <Table className="min-w-full text-xs sm:text-sm">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Riserva</TableHead>
-                      <TableHead>Stato</TableHead>
-                      <TableHead>Creato</TableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
+                      <TableHead className="px-2 py-3">Nome</TableHead>
+                      <TableHead className="px-2 py-3 hidden sm:table-cell">Email</TableHead>
+                      <TableHead className="px-2 py-3 hidden md:table-cell">Riserva</TableHead>
+                      <TableHead className="px-2 py-3">Stato</TableHead>
+                      <TableHead className="px-2 py-3 hidden lg:table-cell">Creato</TableHead>
+                      <TableHead className="px-2 py-3 text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {admins.map((admin) => (
                       <TableRow key={admin.id}>
-                        <TableCell className="font-medium">
-                          {admin.firstName} {admin.lastName}
+                        <TableCell className="px-2 py-3 font-medium">
+                          <div className="flex flex-col">
+                            <span>{admin.firstName} {admin.lastName}</span>
+                            <span className="text-xs text-gray-500 sm:hidden">{admin.email}</span>
+                          </div>
                         </TableCell>
-                        <TableCell>{admin.email}</TableCell>
-                        <TableCell>
+                        <TableCell className="px-2 py-3 hidden sm:table-cell text-xs sm:text-sm">{admin.email}</TableCell>
+                        <TableCell className="px-2 py-3 hidden md:table-cell text-xs">
                           {admin.reserveId ? (
                             (() => {
                               const reserve = reserves?.find(r => r.id === admin.reserveId);
-                              return reserve ? `${reserve.name} - ${reserve.comune}` : admin.reserveId;
+                              return reserve ? `${reserve.name}` : admin.reserveId;
                             })()
                           ) : (
                             <span className="text-gray-500 italic">Non assegnata</span>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={admin.isActive ? "default" : "secondary"}>
+                        <TableCell className="px-2 py-3">
+                          <Badge 
+                            variant={admin.isActive ? "default" : "secondary"}
+                            className="text-xs px-1 py-0"
+                          >
                             {admin.isActive ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-2 py-3 hidden lg:table-cell text-xs">
                           {new Date(admin.createdAt).toLocaleDateString("it-IT")}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => startEditingAdmin(admin)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
+                        <TableCell className="px-2 py-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditingAdmin(admin)}
+                            className="text-blue-600 hover:text-blue-700 p-1 h-8 w-8"
+                          >
+                            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
