@@ -566,9 +566,9 @@ export default function SuperAdminDashboard() {
                           <SelectValue placeholder="Seleziona tipologia di gestione" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="standard_zones">Caccia per Zone (Gestione Standard)</SelectItem>
-                          <SelectItem value="standard_random">Caccia per Capo Assegnato (Sistema Random)</SelectItem>
-                          <SelectItem value="custom">Misto (Zone + Capo Assegnato)</SelectItem>
+                          <SelectItem value="standard_zones">Caccia per Zone</SelectItem>
+                          <SelectItem value="standard_random">Caccia per Capo Assegnato</SelectItem>
+                          <SelectItem value="custom">Misto</SelectItem>
                         </SelectContent>
                       </Select>
                       {reserveForm.formState.errors.managementType && (
