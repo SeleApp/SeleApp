@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth";
 import { loginSchema, type LoginRequest } from "@shared/schema";
 import AccessCodeRegistration from "@/components/access-code-registration";
-import React from "react";
+
 import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
@@ -30,7 +30,7 @@ export default function LoginPage() {
   });
 
   // Check authentication on mount
-  React.useEffect(() => {
+  useEffect(() => {
     if (authService.isAuthenticated()) {
       const user = authService.getUser();
       if (user?.role === "SUPERADMIN") {
