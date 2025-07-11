@@ -5,14 +5,15 @@
 import { 
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
-  lotteries, lotteryParticipations,
+  lotteries, lotteryParticipations, reserveRules,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
   type ReserveSettings, type InsertReserveSettings, type Contract, type InsertContract,
   type SupportTicket, type InsertSupportTicket, type Billing, type InsertBilling,
   type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
-  type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation
+  type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation,
+  type ReserveRule, type InsertReserveRule
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -126,6 +127,14 @@ export interface IStorage {
   createHunter(data: InsertUser): Promise<User>;
   deleteHunter(id: number, reserveId: string): Promise<void>;
   
+  // Reserve Rules Management (ADMIN only)
+  getReserveRules(reserveId: string): Promise<ReserveRule[]>;
+  createReserveRule(rule: InsertReserveRule): Promise<ReserveRule>;
+  updateReserveRule(id: number, data: Partial<ReserveRule>): Promise<ReserveRule | undefined>;
+  deleteReserveRule(id: number): Promise<void>;
+  checkZoneCooldown(reserveId: string, userId: number, zoneId: number): Promise<{ allowed: boolean; waitUntil?: Date; reason?: string }>;
+  checkHarvestLimits(reserveId: string, userId: number, species: string): Promise<{ allowed: boolean; current: number; limit: number; reason?: string }>;
+
   // Reserve Validation and Admin Management (SUPERADMIN only)
   validateActiveReserve(reserveName: string): Promise<boolean>;
   getActiveReserves(): Promise<Reserve[]>;
@@ -1791,6 +1800,183 @@ export class DatabaseStorage implements IStorage {
     // Restituisci i vincitori con le informazioni del cacciatore
     return await this.getLotteryParticipations(lotteryId, reserveId)
       .then(results => results.filter(p => p.isWinner));
+  }
+
+  // Reserve Rules Management
+  async getReserveRules(reserveId: string): Promise<ReserveRule[]> {
+    return await db.select().from(reserveRules).where(
+      and(eq(reserveRules.reserveId, reserveId), eq(reserveRules.isActive, true))
+    );
+  }
+
+  async createReserveRule(rule: InsertReserveRule): Promise<ReserveRule> {
+    const [newRule] = await db.insert(reserveRules).values(rule).returning();
+    return newRule;
+  }
+
+  async updateReserveRule(id: number, data: Partial<ReserveRule>): Promise<ReserveRule | undefined> {
+    const [updatedRule] = await db
+      .update(reserveRules)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(reserveRules.id, id))
+      .returning();
+    return updatedRule || undefined;
+  }
+
+  async deleteReserveRule(id: number): Promise<void> {
+    await db.delete(reserveRules).where(eq(reserveRules.id, id));
+  }
+
+  async checkZoneCooldown(reserveId: string, userId: number, zoneId: number): Promise<{ allowed: boolean; waitUntil?: Date; reason?: string }> {
+    // Ottieni le regole di cooldown per la riserva
+    const cooldownRules = await db.select().from(reserveRules).where(
+      and(
+        eq(reserveRules.reserveId, reserveId),
+        eq(reserveRules.ruleType, 'zone_cooldown'),
+        eq(reserveRules.isActive, true)
+      )
+    );
+
+    if (cooldownRules.length === 0) {
+      return { allowed: true };
+    }
+
+    // Ottieni l'ultima prenotazione dell'utente per questa zona
+    const lastReservation = await db
+      .select()
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.hunterId, userId),
+          eq(reservations.zoneId, zoneId),
+          eq(reservations.reserveId, reserveId),
+          eq(reservations.status, 'completed')
+        )
+      )
+      .orderBy(desc(reservations.huntDate))
+      .limit(1);
+
+    if (lastReservation.length === 0) {
+      return { allowed: true };
+    }
+
+    const lastHunt = lastReservation[0];
+    const now = new Date();
+
+    for (const rule of cooldownRules) {
+      if (rule.zoneCooldownHours) {
+        const cooldownMs = rule.zoneCooldownHours * 60 * 60 * 1000;
+        const waitUntil = new Date(lastHunt.huntDate.getTime() + cooldownMs);
+        
+        if (now < waitUntil) {
+          return {
+            allowed: false,
+            waitUntil,
+            reason: `Devi attendere ${rule.zoneCooldownHours} ore dall'ultima uscita in questa zona`
+          };
+        }
+      }
+
+      if (rule.zoneCooldownTime) {
+        const [hour, minute] = rule.zoneCooldownTime.split(':').map(Number);
+        const todayCooldownTime = new Date();
+        todayCooldownTime.setHours(hour, minute, 0, 0);
+        
+        // Se siamo oltre l'orario limite di oggi, può prenotare
+        if (now >= todayCooldownTime) {
+          return { allowed: true };
+        }
+
+        return {
+          allowed: false,
+          waitUntil: todayCooldownTime,
+          reason: `Puoi prenotare questa zona solo dalle ${rule.zoneCooldownTime} in poi`
+        };
+      }
+    }
+
+    return { allowed: true };
+  }
+
+  async checkHarvestLimits(reserveId: string, userId: number, species: string): Promise<{ allowed: boolean; current: number; limit: number; reason?: string }> {
+    // Ottieni le regole di limite prelievo per la riserva e specie
+    const harvestRules = await db.select().from(reserveRules).where(
+      and(
+        eq(reserveRules.reserveId, reserveId),
+        eq(reserveRules.ruleType, 'harvest_limit'),
+        eq(reserveRules.targetSpecies, species as any),
+        eq(reserveRules.isActive, true)
+      )
+    );
+
+    if (harvestRules.length === 0) {
+      return { allowed: true, current: 0, limit: 999 };
+    }
+
+    const currentSeason = new Date().getFullYear();
+    const seasonStart = new Date(currentSeason, 8, 1); // 1 settembre
+    const seasonEnd = new Date(currentSeason + 1, 1, 31); // 31 gennaio
+
+    // Conta i prelievi dell'utente per questa specie nella stagione corrente
+    const harvestCount = await db
+      .select({ count: count() })
+      .from(huntReports)
+      .where(
+        and(
+          eq(huntReports.reserveId, reserveId),
+          sql`${huntReports.reportedAt} >= ${seasonStart}`,
+          sql`${huntReports.reportedAt} <= ${seasonEnd}`,
+          eq(huntReports.outcome, 'harvest'),
+          eq(huntReports.species, species as any),
+          // Collega alla prenotazione per ottenere l'hunter
+          sql`${huntReports.reservationId} IN (
+            SELECT id FROM ${reservations} WHERE ${reservations.hunterId} = ${userId}
+          )`
+        )
+      );
+
+    const currentHarvests = harvestCount[0]?.count || 0;
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1; // 1-12
+    const currentDay = now.getDate();
+
+    for (const rule of harvestRules) {
+      let effectiveLimit = rule.maxHarvestPerSeason || 999;
+      
+      // Controlla se siamo nel periodo di bonus stagionale
+      if (rule.seasonalStartDate && rule.seasonalEndDate && rule.bonusHarvestAllowed) {
+        const [startMonth, startDay] = rule.seasonalStartDate.split('-').map(Number);
+        const [endMonth, endDay] = rule.seasonalEndDate.split('-').map(Number);
+        
+        const isInBonusPeriod = 
+          (currentMonth > startMonth || (currentMonth === startMonth && currentDay >= startDay)) &&
+          (currentMonth < endMonth || (currentMonth === endMonth && currentDay <= endDay));
+        
+        if (isInBonusPeriod) {
+          effectiveLimit += rule.bonusHarvestAllowed;
+        }
+      }
+      
+      if (effectiveLimit && currentHarvests >= effectiveLimit) {
+        const bonusInfo = rule.bonusHarvestAllowed && rule.seasonalStartDate ? 
+          ` (bonus +${rule.bonusHarvestAllowed} dal ${rule.seasonalStartDate})` : '';
+        
+        return {
+          allowed: false,
+          current: currentHarvests,
+          limit: effectiveLimit,
+          reason: `Limite stagionale raggiunto: ${currentHarvests}/${effectiveLimit} per ${species}${bonusInfo}`
+        };
+      }
+      
+      // TODO: Implementare controlli mensili e settimanali se necessario
+    }
+
+    return { 
+      allowed: true, 
+      current: currentHarvests, 
+      limit: harvestRules[0]?.maxHarvestPerSeason || 999 
+    };
   }
 }
 

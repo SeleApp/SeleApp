@@ -123,6 +123,37 @@ export const materialAccessLog = pgTable("material_access_log", {
   accessedAt: timestamp("accessed_at").notNull().defaultNow(),
 });
 
+// Reserve Rules table (limitazioni configurabili per riserva)
+export const reserveRules = pgTable("reserve_rules", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  ruleName: text("rule_name").notNull(), // Nome identificativo della regola
+  ruleType: text("rule_type").notNull(), // 'zone_cooldown', 'harvest_limit', 'custom'
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Limitazioni temporali zone (zone_cooldown)
+  zoneCooldownHours: integer("zone_cooldown_hours"), // Ore di attesa prima di riprenotare stessa zona
+  zoneCooldownTime: text("zone_cooldown_time"), // Ora limite per prenotazione (es. "20:00")
+  
+  // Limitazioni di prelievo per specie (harvest_limit)
+  targetSpecies: speciesEnum("target_species"), // Specie target per il limite
+  maxHarvestPerSeason: integer("max_harvest_per_season"), // Massimo capi prelevabili per stagione
+  maxHarvestPerMonth: integer("max_harvest_per_month"), // Massimo capi prelevabili per mese
+  maxHarvestPerWeek: integer("max_harvest_per_week"), // Massimo capi prelevabili per settimana
+  
+  // Limitazioni stagionali avanzate
+  seasonalStartDate: text("seasonal_start_date"), // Data inizio validità (es. "01-15" per 15 gennaio)
+  seasonalEndDate: text("seasonal_end_date"), // Data fine validità (es. "01-31" per 31 gennaio)
+  bonusHarvestAllowed: integer("bonus_harvest_allowed"), // Capi bonus consentiti nel periodo
+  
+  // Limitazioni personalizzate (custom)
+  customParameters: text("custom_parameters").default("{}"), // JSON per regole personalizzate
+  
+  description: text("description"), // Descrizione umana della regola
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -510,6 +541,12 @@ export const insertMaterialAccessLogSchema = createInsertSchema(materialAccessLo
   accessedAt: true,
 });
 
+export const insertReserveRuleSchema = createInsertSchema(reserveRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Nuovi tipi per SuperAdmin
 export type ReserveSettings = typeof reserveSettings.$inferSelect;
 export type InsertReserveSettings = z.infer<typeof insertReserveSettingsSchema>;
@@ -522,6 +559,9 @@ export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 
 export type Billing = typeof billing.$inferSelect;
 export type InsertBilling = z.infer<typeof insertBillingSchema>;
+
+export type ReserveRule = typeof reserveRules.$inferSelect;
+export type InsertReserveRule = z.infer<typeof insertReserveRuleSchema>;
 
 export type Material = typeof materials.$inferSelect;
 export type InsertMaterial = z.infer<typeof insertMaterialSchema>;

@@ -14,6 +14,7 @@ import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, 
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 import HunterManagementModal from "@/components/hunter-management-modal";
 import AdminReportModal from "@/components/admin-report-modal";
+import { AdminRulesManager } from "@/components/admin-rules-manager";
 import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
@@ -514,6 +515,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
               Report
+            </TabsTrigger>
+            <TabsTrigger value="rules" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Limitazioni
             </TabsTrigger>
 
           </TabsList>
@@ -1154,6 +1159,11 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Rules Management Tab */}
+          <TabsContent value="rules">
+            <AdminRulesManager />
           </TabsContent>
         </Tabs>
       </div>

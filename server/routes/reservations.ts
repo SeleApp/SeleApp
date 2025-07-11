@@ -80,6 +80,23 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     }
 
+    // Check zone cooldown rules
+    const zoneCooldownCheck = await storage.checkZoneCooldown(
+      req.user.reserveId, 
+      req.user.id, 
+      reservationData.zoneId
+    );
+
+    if (!zoneCooldownCheck.allowed) {
+      return res.status(400).json({ 
+        message: zoneCooldownCheck.reason || "Non puoi prenotare questa zona al momento",
+        cooldownInfo: {
+          waitUntil: zoneCooldownCheck.waitUntil,
+          reason: zoneCooldownCheck.reason
+        }
+      });
+    }
+
     // Prepare target species data if provided
     const targetSpeciesData: any = {};
     if (reservationData.targetSpecies) {
