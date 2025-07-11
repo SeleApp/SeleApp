@@ -424,58 +424,60 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard Amministratore</h1>
-            <p className="text-gray-600 mt-2">Gestione del sistema di caccia di Cison di Val Marino</p>
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+          <div className="w-full sm:w-auto">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Dashboard Amministratore</h1>
+            <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Gestione del sistema di caccia</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button 
               onClick={() => setShowHunterManagement(true)}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 text-xs sm:text-sm"
+              size="sm"
             >
-              <Users className="h-4 w-4" />
-              Gestione Cacciatori
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Gestione Cacciatori</span>
+              <span className="sm:hidden">Cacciatori</span>
             </Button>
           </div>
         </div>
 
         {/* Admin Stats */}
         {isLoadingStats ? (
-          <div className="text-center py-8">Caricamento statistiche...</div>
+          <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Caricamento statistiche...</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <Users className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-600">Cacciatori Attivi</p>
-                    <p className="text-2xl font-bold">{stats?.activeHunters || 0}</p>
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                  <div className="ml-2 sm:ml-4">
+                    <p className="text-xs sm:text-sm text-gray-600">Cacciatori Attivi</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats?.activeHunters || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <CalendarCheck className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-600">Prenotazioni Oggi</p>
-                    <p className="text-2xl font-bold">{stats?.todayReservations || 0}</p>
+                  <CalendarCheck className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                  <div className="ml-2 sm:ml-4">
+                    <p className="text-xs sm:text-sm text-gray-600">Prenotazioni Oggi</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats?.todayReservations || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <Target className="h-8 w-8 text-amber-600" />
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-600">Capi Prelevati Capriolo</p>
-                    <p className="text-2xl font-bold">
+                  <Target className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600" />
+                  <div className="ml-2 sm:ml-4">
+                    <p className="text-xs sm:text-sm text-gray-600">Capriolo</p>
+                    <p className="text-lg sm:text-2xl font-bold">
                       {isLoadingQuotas ? "..." : regionalQuotas
                         .filter((q: any) => q.species === 'roe_deer')
                         .reduce((sum: number, q: any) => sum + q.harvested, 0)}
@@ -485,12 +487,12 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <Target className="h-8 w-8 text-red-600" />
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-600">Capi Prelevati Cervo</p>
-                    <p className="text-2xl font-bold">
+                  <Target className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
+                  <div className="ml-2 sm:ml-4">
+                    <p className="text-xs sm:text-sm text-gray-600">Cervo</p>
+                    <p className="text-lg sm:text-2xl font-bold">
                       {isLoadingQuotas ? "..." : regionalQuotas
                         .filter((q: any) => q.species === 'red_deer')
                         .reduce((sum: number, q: any) => sum + q.harvested, 0)}
@@ -503,55 +505,60 @@ export default function AdminDashboard() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="quotas" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Quote Regionali
-            </TabsTrigger>
-            <TabsTrigger value="reservations" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Prenotazioni
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Report
-            </TabsTrigger>
-            <TabsTrigger value="rules" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Limitazioni
-            </TabsTrigger>
-
-          </TabsList>
+          <div className="w-full overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 min-w-max">
+              <TabsTrigger value="quotas" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+                <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Quote</span>
+                <span className="xs:hidden">Q</span>
+              </TabsTrigger>
+              <TabsTrigger value="reservations" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Prenotazioni</span>
+                <span className="xs:hidden">P</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Report</span>
+                <span className="xs:hidden">R</span>
+              </TabsTrigger>
+              <TabsTrigger value="rules" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Limitazioni</span>
+                <span className="xs:hidden">L</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Regional Quotas Tab */}
           <TabsContent value="quotas">
             <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-4 mb-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-gray-900">Quote Regionali di Caccia</h3>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-gray-600">Disponibile</span>
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">Quote Regionali di Caccia</h3>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-xs sm:text-sm text-gray-600">Disponibile</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span className="text-sm text-gray-600">Esaurito</span>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
+                        <span className="text-xs sm:text-sm text-gray-600">Esaurito</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
-                    <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">Filtra per specie:</span>
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
                       {getSpeciesFilters().map((filter) => (
                         <Button
                           key={filter.code}
                           size="sm"
                           variant={getSpeciesButtonVariant(filter.code as any)}
                           onClick={() => setSelectedSpecies(filter.code as any)}
-                          className="h-8"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                         >
                           {filter.label}
                         </Button>
@@ -912,39 +919,43 @@ export default function AdminDashboard() {
           {/* Reservations Tab */}
           <TabsContent value="reservations">
             <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Prenotazioni in Corso</h3>
+              <CardContent className="p-3 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Prenotazioni in Corso</h3>
 
                 {isLoadingReservations ? (
-                  <div className="text-center py-8">Caricamento prenotazioni...</div>
+                  <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Caricamento prenotazioni...</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
+                  <div className="overflow-x-auto -mx-3 sm:mx-0">
+                    <Table className="min-w-[600px]">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Cacciatore</TableHead>
-                          <TableHead>Zona</TableHead>
-                          <TableHead>Data</TableHead>
-                          <TableHead>Turno</TableHead>
-                          <TableHead>Stato</TableHead>
-                          <TableHead>Azioni</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Cacciatore</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Zona</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Data</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Turno</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Stato</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Azioni</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {reservations.map((reservation: ReservationWithDetails) => (
                           <TableRow key={reservation.id}>
-                            <TableCell>
-                              {reservation.hunter.firstName} {reservation.hunter.lastName}
+                            <TableCell className="text-xs sm:text-sm">
+                              <div className="font-medium">{reservation.hunter.firstName}</div>
+                              <div className="text-gray-500">{reservation.hunter.lastName}</div>
                             </TableCell>
-                            <TableCell>{reservation.zone.name}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-xs sm:text-sm font-medium">{reservation.zone.name}</TableCell>
+                            <TableCell className="text-xs sm:text-sm">
                               {new Date(reservation.huntDate).toLocaleDateString('it-IT')}
                             </TableCell>
                             <TableCell>
-                              <Badge variant={
-                                reservation.timeSlot === 'morning' ? 'default' : 
-                                reservation.timeSlot === 'afternoon' ? 'secondary' : 'outline'
-                              }>
+                              <Badge 
+                                variant={
+                                  reservation.timeSlot === 'morning' ? 'default' : 
+                                  reservation.timeSlot === 'afternoon' ? 'secondary' : 'outline'
+                                }
+                                className="text-xs"
+                              >
                                 {reservation.timeSlot === 'morning' 
                                   ? 'Alba-12:00' 
                                   : reservation.timeSlot === 'afternoon' 
@@ -953,10 +964,13 @@ export default function AdminDashboard() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={
-                                reservation.status === 'active' ? 'default' :
-                                reservation.status === 'completed' ? 'secondary' : 'destructive'
-                              }>
+                              <Badge 
+                                variant={
+                                  reservation.status === 'active' ? 'default' :
+                                  reservation.status === 'completed' ? 'secondary' : 'destructive'
+                                }
+                                className="text-xs"
+                              >
                                 {reservation.status === 'active' ? 'Attiva' :
                                  reservation.status === 'completed' ? 'Completata' : 'Cancellata'}
                               </Badge>
@@ -968,9 +982,11 @@ export default function AdminDashboard() {
                                   variant="destructive"
                                   size="sm"
                                   disabled={cancelReservationMutation.isPending}
+                                  className="text-xs px-2 py-1"
                                 >
-                                  <XCircle className="mr-1" size={14} />
-                                  Annulla
+                                  <XCircle className="mr-1" size={12} />
+                                  <span className="hidden sm:inline">Annulla</span>
+                                  <span className="sm:hidden">X</span>
                                 </Button>
                               )}
                             </TableCell>

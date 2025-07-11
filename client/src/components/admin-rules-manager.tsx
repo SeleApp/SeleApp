@@ -201,11 +201,11 @@ export function AdminRulesManager() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Gestione Limitazioni</h2>
-          <p className="text-gray-600">
+          <h2 className="text-lg sm:text-2xl font-bold">Gestione Limitazioni</h2>
+          <p className="text-sm sm:text-base text-gray-600">
             Configura regole per limitazioni temporali zone e limiti di prelievo
           </p>
         </div>
@@ -216,9 +216,9 @@ export function AdminRulesManager() {
           }
         }}>
           <DialogTrigger asChild>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuova Regola
+            <Button onClick={() => setIsCreateDialogOpen(true)} size="sm" className="w-full sm:w-auto">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Nuova Regola</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl lg:max-w-4xl">
@@ -544,58 +544,59 @@ export function AdminRulesManager() {
         ) : (
           rules.map((rule) => (
             <Card key={rule.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+              <CardHeader className="pb-3 p-3 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
                     {getRuleTypeIcon(rule.ruleType)}
-                    <div>
-                      <CardTitle className="text-lg">{rule.ruleName}</CardTitle>
-                      <CardDescription>
-                        <Badge variant={rule.isActive ? "default" : "secondary"} className="mr-2">
+                    <div className="flex-1">
+                      <CardTitle className="text-base sm:text-lg">{rule.ruleName}</CardTitle>
+                      <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-1">
+                        <Badge variant={rule.isActive ? "default" : "secondary"} className="text-xs">
                           {getRuleTypeLabel(rule.ruleType)}
                         </Badge>
                         {rule.isActive ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            <Check className="h-3 w-3 mr-1" />
+                          <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                             Attiva
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
-                            <X className="h-3 w-3 mr-1" />
+                          <Badge variant="secondary" className="text-xs">
+                            <X className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                             Disattiva
                           </Badge>
                         )}
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleToggleActive(rule)}
                       disabled={updateRuleMutation.isPending}
+                      className="text-xs flex-1 sm:flex-none"
                     >
                       {rule.isActive ? 'Disattiva' : 'Attiva'}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(rule)}>
-                      <Edit2 className="h-4 w-4" />
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(rule)} className="px-2">
+                      <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => deleteRuleMutation.mutate(rule.id)}
                       disabled={deleteRuleMutation.isPending}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 px-2"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6 pt-0">
                 <div className="space-y-2">
                   {rule.description && (
-                    <p className="text-sm text-gray-600">{rule.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{rule.description}</p>
                   )}
                   
                   {rule.ruleType === 'zone_cooldown' && (
