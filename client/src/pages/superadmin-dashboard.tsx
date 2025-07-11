@@ -78,7 +78,7 @@ interface Reserve {
   accessCode: string;
   codeActive: boolean;
   isActive: boolean;
-  managementType: 'standard_zones' | 'standard_random' | 'ca17_system' | 'quota_only' | 'custom';
+  managementType: 'standard_zones' | 'standard_random' | 'quota_only' | 'custom';
   numberOfZones?: number;
   createdAt: string;
   stats: {
@@ -752,14 +752,12 @@ export default function SuperAdminDashboard() {
                             className={`text-xs ${
                               reserve.managementType === 'standard_zones' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               reserve.managementType === 'standard_random' ? 'bg-green-50 text-green-700 border-green-200' :
-                              reserve.managementType === 'ca17_system' ? 'bg-orange-50 text-orange-700 border-orange-200' :
                               reserve.managementType === 'quota_only' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                               'bg-gray-50 text-gray-700 border-gray-200'
                             }`}
                           >
                             {reserve.managementType === 'standard_zones' ? 'Zone' :
                              reserve.managementType === 'standard_random' ? 'Capi' :
-                             reserve.managementType === 'ca17_system' ? 'CA17' :
                              reserve.managementType === 'quota_only' ? 'Quote' :
                              'Misto'}
                           </Badge>

@@ -359,7 +359,7 @@ export const huntReportsRelations = relations(huntReports, ({ one }) => ({
 export const insertReserveSchema = createInsertSchema(reserves).omit({
   createdAt: true,
 }).extend({
-  managementType: z.enum(['standard_zones', 'standard_random', 'ca17_system', 'quota_only', 'custom']),
+  managementType: z.enum(['standard_zones', 'standard_random', 'quota_only', 'custom']),
   huntingType: z.enum(['capo_assegnato', 'zone', 'misto']).optional(),
   assignmentMode: z.enum(['manual', 'random']).optional(),
   species: z.string().optional(), // JSON array come stringa
