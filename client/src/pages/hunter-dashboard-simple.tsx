@@ -20,7 +20,7 @@ export default function HunterDashboard() {
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<number | null>(null);
-  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer'>('all');
+  const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'roe_deer' | 'red_deer' | 'fallow_deer' | 'mouflon' | 'chamois'>('all');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -147,7 +147,7 @@ export default function HunterDashboard() {
 
             <div className="flex items-center gap-4 mb-4">
               <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   size="sm"
                   variant={selectedSpecies === 'all' ? 'default' : 'outline'}
@@ -172,6 +172,30 @@ export default function HunterDashboard() {
                 >
                   Cervo
                 </Button>
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'fallow_deer' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('fallow_deer')}
+                  className="h-8"
+                >
+                  Daino
+                </Button>
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'mouflon' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('mouflon')}
+                  className="h-8"
+                >
+                  Muflone
+                </Button>
+                <Button
+                  size="sm"
+                  variant={selectedSpecies === 'chamois' ? 'default' : 'outline'}
+                  onClick={() => setSelectedSpecies('chamois')}
+                  className="h-8"
+                >
+                  Camoscio
+                </Button>
               </div>
             </div>
 
@@ -195,9 +219,16 @@ export default function HunterDashboard() {
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
                           return q.roeDeerCategory || 'N/A';
-                        } else {
+                        } else if (q.species === 'red_deer') {
                           return q.redDeerCategory || 'N/A';
+                        } else if (q.species === 'fallow_deer') {
+                          return q.fallowDeerCategory || 'N/A';
+                        } else if (q.species === 'mouflon') {
+                          return q.mouflonCategory || 'N/A';
+                        } else if (q.species === 'chamois') {
+                          return q.chamoisCategory || 'N/A';
                         }
+                        return 'N/A';
                       };
 
                       const formatPeriod = (startDate: string | null, endDate: string | null, notes: string | null) => {
@@ -213,7 +244,12 @@ export default function HunterDashboard() {
                       return (
                         <TableRow key={quota.id}>
                           <TableCell className="font-medium">
-                            {quota.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                            {quota.species === 'roe_deer' ? 'Capriolo' : 
+                             quota.species === 'red_deer' ? 'Cervo' :
+                             quota.species === 'fallow_deer' ? 'Daino' :
+                             quota.species === 'mouflon' ? 'Muflone' :
+                             quota.species === 'chamois' ? 'Camoscio' : 
+                             'N/A'}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{getCategoryLabel(quota)}</Badge>
@@ -350,7 +386,14 @@ export default function HunterDashboard() {
                             <p className="text-sm font-medium text-gray-700">Dettagli Prelievo:</p>
                             <div className="mt-1 space-y-1">
                               <p className="text-sm text-gray-600">
-                                <span className="font-medium">Specie:</span> {report.species === 'roe_deer' ? 'Capriolo' : 'Cervo'}
+                                <span className="font-medium">Specie:</span> {
+                                  report.species === 'roe_deer' ? 'Capriolo' : 
+                                  report.species === 'red_deer' ? 'Cervo' :
+                                  report.species === 'fallow_deer' ? 'Daino' :
+                                  report.species === 'mouflon' ? 'Muflone' :
+                                  report.species === 'chamois' ? 'Camoscio' : 
+                                  'N/A'
+                                }
                               </p>
                               <p className="text-sm text-gray-600">
                                 <span className="font-medium">Sesso:</span> {report.sex === 'male' ? 'Maschio' : 'Femmina'}

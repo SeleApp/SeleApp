@@ -35,9 +35,20 @@ router.get("/", authenticateToken, async (req: AuthRequest, res) => {
       // Create quota structure for compatibility
       const quotas: Record<string, any> = {};
       regionalQuotas.forEach(quota => {
-        const key = quota.species === 'roe_deer' 
-          ? `roe_deer_${quota.roeDeerCategory}` 
-          : `red_deer_${quota.redDeerCategory}`;
+        let key = 'unknown';
+        
+        if (quota.species === 'roe_deer' && quota.roeDeerCategory) {
+          key = `roe_deer_${quota.roeDeerCategory}`;
+        } else if (quota.species === 'red_deer' && quota.redDeerCategory) {
+          key = `red_deer_${quota.redDeerCategory}`;
+        } else if (quota.species === 'fallow_deer' && quota.fallowDeerCategory) {
+          key = `fallow_deer_${quota.fallowDeerCategory}`;
+        } else if (quota.species === 'mouflon' && quota.mouflonCategory) {
+          key = `mouflon_${quota.mouflonCategory}`;
+        } else if (quota.species === 'chamois' && quota.chamoisCategory) {
+          key = `chamois_${quota.chamoisCategory}`;
+        }
+        
         quotas[key] = {
           harvested: quota.harvested,
           total: quota.totalQuota,

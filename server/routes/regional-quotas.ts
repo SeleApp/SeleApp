@@ -8,8 +8,14 @@ const router = Router();
 // Get all regional quotas with availability status
 router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const reserveId = req.user?.reserveId || 'cison-valmarino'; // Fallback per compatibilità
+    const reserveId = req.user?.reserveId;
+    if (!reserveId) {
+      return res.status(403).json({ message: "Utente non associato a una riserva" });
+    }
+    
+    console.log(`Fetching regional quotas for reserve: ${reserveId}`);
     const quotas = await storage.getRegionalQuotas(reserveId);
+    console.log(`Found ${quotas.length} quotas for reserve ${reserveId}`);
     res.json(quotas);
   } catch (error) {
     console.error("Error fetching regional quotas:", error);
@@ -22,7 +28,11 @@ router.patch("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRe
   try {
     const quotaId = parseInt(req.params.id);
     const updateData = req.body;
-    const reserveId = req.user?.reserveId || 'cison-valmarino'; // Fallback per compatibilità
+    const reserveId = req.user?.reserveId;
+    
+    if (!reserveId) {
+      return res.status(403).json({ message: "Utente non associato a una riserva" });
+    }
 
     const updatedQuota = await storage.updateRegionalQuota(quotaId, reserveId, updateData);
     
