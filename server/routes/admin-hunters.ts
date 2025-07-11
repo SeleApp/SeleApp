@@ -4,10 +4,18 @@ import { authenticateToken, requireRole, type AuthRequest } from "../middleware/
 
 const router = Router();
 
-// Get all hunters
+// Get all hunters for admin's reserve only
 router.get("/", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
-    const hunters = await storage.getAllHunters();
+    const adminUser = req.user;
+    
+    // Verifica che l'admin sia associato a una riserva
+    if (!adminUser?.reserveId) {
+      return res.status(403).json({ message: "Admin non associato a nessuna riserva" });
+    }
+    
+    // Recupera solo i cacciatori della riserva dell'admin
+    const hunters = await storage.getHuntersByReserve(adminUser.reserveId);
     res.json(hunters);
   } catch (error) {
     console.error("Error fetching hunters:", error);
@@ -15,36 +23,52 @@ router.get("/", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest
   }
 });
 
-// Update hunter status
+// Update hunter status (only for admin's reserve)
 router.patch("/:id/status", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
+    const adminUser = req.user;
     
-    const hunter = await storage.updateHunterStatus(parseInt(id), isActive);
-    if (!hunter) {
-      return res.status(404).json({ message: "Cacciatore non trovato" });
+    // Verifica che l'admin sia associato a una riserva
+    if (!adminUser?.reserveId) {
+      return res.status(403).json({ message: "Admin non associato a nessuna riserva" });
     }
     
-    res.json(hunter);
+    // Verifica che il cacciatore appartenga alla riserva dell'admin
+    const hunter = await storage.getHunterByIdAndReserve(parseInt(id), adminUser.reserveId);
+    if (!hunter) {
+      return res.status(404).json({ message: "Cacciatore non trovato nella tua riserva" });
+    }
+    
+    const updatedHunter = await storage.updateHunterStatus(parseInt(id), isActive, adminUser.reserveId);
+    res.json(updatedHunter);
   } catch (error) {
     console.error("Error updating hunter status:", error);
     res.status(500).json({ message: "Errore nell'aggiornamento dello stato" });
   }
 });
 
-// Update hunter data
+// Update hunter data (only for admin's reserve)
 router.patch("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const adminUser = req.user;
     
-    const hunter = await storage.updateHunter(parseInt(id), updateData);
-    if (!hunter) {
-      return res.status(404).json({ message: "Cacciatore non trovato" });
+    // Verifica che l'admin sia associato a una riserva
+    if (!adminUser?.reserveId) {
+      return res.status(403).json({ message: "Admin non associato a nessuna riserva" });
     }
     
-    res.json(hunter);
+    // Verifica che il cacciatore appartenga alla riserva dell'admin
+    const hunter = await storage.getHunterByIdAndReserve(parseInt(id), adminUser.reserveId);
+    if (!hunter) {
+      return res.status(404).json({ message: "Cacciatore non trovato nella tua riserva" });
+    }
+    
+    const updatedHunter = await storage.updateHunter(parseInt(id), updateData, adminUser.reserveId);
+    res.json(updatedHunter);
   } catch (error) {
     console.error("Error updating hunter:", error);
     res.status(500).json({ message: "Errore nell'aggiornamento del cacciatore" });
@@ -109,7 +133,7 @@ router.post("/", authenticateToken, requireRole('ADMIN'), async (req: AuthReques
   }
 });
 
-// Delete hunter
+// Delete hunter (only for admin's reserve)
 router.delete("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
@@ -119,7 +143,15 @@ router.delete("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthR
       return res.status(400).json({ message: "Admin non associato a nessuna riserva" });
     }
     
+    // Verifica che il cacciatore appartenga alla riserva dell'admin
+    const hunter = await storage.getHunterByIdAndReserve(parseInt(id), adminUser.reserveId);
+    if (!hunter) {
+      return res.status(404).json({ message: "Cacciatore non trovato nella tua riserva" });
+    }
+    
+    // Elimina il cacciatore dalla riserva
     await storage.deleteHunter(parseInt(id), adminUser.reserveId);
+    
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting hunter:", error);

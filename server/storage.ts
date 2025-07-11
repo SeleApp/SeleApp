@@ -119,7 +119,8 @@ export interface IStorage {
   }>;
 
   // Hunter Management (filtered by reserveId)
-  getAllHunters(reserveId: string): Promise<User[]>;
+  getHuntersByReserve(reserveId: string): Promise<User[]>;
+  getHunterByIdAndReserve(hunterId: number, reserveId: string): Promise<User | undefined>;
   updateHunterStatus(id: number, isActive: boolean, reserveId: string): Promise<User | undefined>;
   updateHunter(id: number, data: Partial<User>, reserveId: string): Promise<User | undefined>;
   createHunter(data: InsertUser): Promise<User>;
@@ -854,8 +855,10 @@ export class DatabaseStorage implements IStorage {
   /**
    * Ottiene tutte le quote regionali con stato disponibilità e periodo di caccia
    */
-  async getRegionalQuotas(reserveId?: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
-    const quotas = await db.select().from(regionalQuotas).orderBy(regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
+  async getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
+    const quotas = await db.select().from(regionalQuotas)
+      .where(eq(regionalQuotas.reserveId, reserveId))
+      .orderBy(regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
     const now = new Date();
     
     return quotas.map(quota => ({
@@ -1142,38 +1145,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Hunter Management Methods
-  async getAllHunters(): Promise<User[]> {
-    const results = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        password: users.password,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role,
-        isActive: users.isActive,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.role, 'HUNTER'))
-      .orderBy(users.lastName, users.firstName);
-    return results;
+  async getHuntersByReserve(reserveId: string): Promise<User[]> {
+    return await db.select().from(users).where(
+      and(
+        eq(users.role, 'HUNTER'),
+        eq(users.reserveId, reserveId)
+      )
+    );
   }
 
-  async updateHunterStatus(id: number, isActive: boolean): Promise<User | undefined> {
+  async getHunterByIdAndReserve(hunterId: number, reserveId: string): Promise<User | undefined> {
+    const [hunter] = await db.select().from(users).where(
+      and(
+        eq(users.id, hunterId),
+        eq(users.role, 'HUNTER'),
+        eq(users.reserveId, reserveId)
+      )
+    );
+    return hunter || undefined;
+  }
+
+  async updateHunterStatus(id: number, isActive: boolean, reserveId: string): Promise<User | undefined> {
     const [updated] = await db
       .update(users)
       .set({ isActive })
-      .where(eq(users.id, id))
+      .where(and(eq(users.id, id), eq(users.reserveId, reserveId)))
       .returning();
     return updated;
   }
 
-  async updateHunter(id: number, data: Partial<User>): Promise<User | undefined> {
+  async updateHunter(id: number, data: Partial<User>, reserveId: string): Promise<User | undefined> {
     const [updated] = await db
       .update(users)
       .set(data)
-      .where(eq(users.id, id))
+      .where(and(eq(users.id, id), eq(users.reserveId, reserveId)))
       .returning();
     return updated;
   }
