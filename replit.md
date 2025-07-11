@@ -415,6 +415,13 @@ Changelog:
   - **Database Integration**: Added assignment_mode column with backend support for unified reserve creation
   - **Simplified Interface**: Eliminated redundant fields, maintaining only essential unified management controls
   - **Clear Labels**: Management type badges show "Caccia per Zone", "Capo Assegnato", "Misto Zone+Capi" for clarity
+- July 11, 2025. **OFFICIAL SPECIES CLASSIFICATIONS**: Implemented official hunting species classifications for complete regulatory compliance
+  - **Muflone (Ovis musimon)**: 6 categories - MU-M-0, MU-M-I, MU-M-II, MU-F-0, MU-F-I, MU-F-II with sex and age class distinctions
+  - **Daino (Dama dama)**: 6 categories - DA-M-0, DA-M-I, DA-M-II, DA-F-0, DA-F-I, DA-F-II with official terminology (Fusone, Palanchino, Palcuto, Cerbiatta)
+  - **Camoscio Alpino (Rupicapra rupicapra)**: 8 categories - CA-M-0, CA-M-I, CA-M-II, CA-M-III, CA-F-0, CA-F-I, CA-F-II, CA-F-III with yearling and adult classifications
+  - **Database Schema**: Updated all enum types to match official classifications, removed obsolete categories
+  - **Automatic Initialization**: System now creates proper quotas using official categories during reserve setup
+  - **Complete Coverage**: All 5 hunting species (Capriolo, Cervo, Daino, Muflone, Camoscio) with 27 total official categories supported
 
 # User Preferences
 

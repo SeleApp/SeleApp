@@ -16,9 +16,9 @@ export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
 // Categorie specifiche per specie
 export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
-export const fallowDeerCategoryEnum = pgEnum('fallow_deer_category', ['D0', 'DA', 'DF', 'D1', 'DM']);
-export const mouflonCategoryEnum = pgEnum('mouflon_category', ['MU0', 'MUA', 'MUF', 'MU1', 'MUM']);
-export const chamoisCategoryEnum = pgEnum('chamois_category', ['CA0', 'CAA', 'CAF', 'CA1', 'CAM']);
+export const fallowDeerCategoryEnum = pgEnum('fallow_deer_category', ['DA-M-0', 'DA-M-I', 'DA-M-II', 'DA-F-0', 'DA-F-I', 'DA-F-II']);
+export const mouflonCategoryEnum = pgEnum('mouflon_category', ['MU-M-0', 'MU-M-I', 'MU-M-II', 'MU-F-0', 'MU-F-I', 'MU-F-II']);
+export const chamoisCategoryEnum = pgEnum('chamois_category', ['CA-M-0', 'CA-M-I', 'CA-M-II', 'CA-M-III', 'CA-F-0', 'CA-F-I', 'CA-F-II', 'CA-F-III']);
 export const reservationStatusEnum = pgEnum('reservation_status', ['active', 'completed', 'cancelled']);
 export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest']);
 // Tipologie di gestione delle riserve

@@ -266,13 +266,14 @@ export class DatabaseStorage implements IStorage {
             });
           }
         } else if (normalizedSpecies === 'daino') {
-          // Quote standard per Daino (5 categorie)
+          // Quote standard per Daino (6 categorie) - Classificazioni ufficiali
           const fallowDeerQuotas = [
-            { category: 'D0', quota: 6 },
-            { category: 'DA', quota: 8 },
-            { category: 'DF', quota: 10 },
-            { category: 'D1', quota: 4 },
-            { category: 'DM', quota: 3 }
+            { category: 'DA-M-0', quota: 4 }, // Fusone maschio
+            { category: 'DA-M-I', quota: 5 }, // Palanchino 2-4 anni
+            { category: 'DA-M-II', quota: 3 }, // Palcuto ≥5 anni
+            { category: 'DA-F-0', quota: 3 }, // Cerbiatta
+            { category: 'DA-F-I', quota: 4 }, // Giovane femmina 2-4 anni
+            { category: 'DA-F-II', quota: 6 } // Femmina adulta ≥5 anni
           ];
           
           for (const cat of fallowDeerQuotas) {
@@ -294,13 +295,14 @@ export class DatabaseStorage implements IStorage {
             });
           }
         } else if (normalizedSpecies === 'muflone') {
-          // Quote standard per Muflone (5 categorie)
+          // Quote standard per Muflone (6 categorie) - Classificazioni ufficiali
           const mouflonQuotas = [
-            { category: 'MU0', quota: 4 },
-            { category: 'MUA', quota: 6 },
-            { category: 'MUF', quota: 8 },
-            { category: 'MU1', quota: 3 },
-            { category: 'MUM', quota: 2 }
+            { category: 'MU-M-0', quota: 3 }, // Agnello maschio
+            { category: 'MU-M-I', quota: 4 }, // Giovane maschio 2-4 anni
+            { category: 'MU-M-II', quota: 2 }, // Adulto maschio ≥5 anni
+            { category: 'MU-F-0', quota: 2 }, // Agnella
+            { category: 'MU-F-I', quota: 3 }, // Giovane femmina 2-4 anni
+            { category: 'MU-F-II', quota: 4 } // Adulta femmina ≥5 anni
           ];
           
           for (const cat of mouflonQuotas) {
@@ -322,13 +324,16 @@ export class DatabaseStorage implements IStorage {
             });
           }
         } else if (normalizedSpecies === 'camoscio') {
-          // Quote standard per Camoscio (5 categorie)
+          // Quote standard per Camoscio (8 categorie) - Classificazioni ufficiali
           const chamoisQuotas = [
-            { category: 'CA0', quota: 3 },
-            { category: 'CAA', quota: 5 },
-            { category: 'CAF', quota: 7 },
-            { category: 'CA1', quota: 2 },
-            { category: 'CAM', quota: 1 }
+            { category: 'CA-M-0', quota: 2 }, // Capretto maschio
+            { category: 'CA-M-I', quota: 3 }, // Yearling maschio 1-2 anni
+            { category: 'CA-M-II', quota: 4 }, // Adulto maschio 2-6 anni
+            { category: 'CA-M-III', quota: 1 }, // Vecchio adulto maschio ≥7 anni
+            { category: 'CA-F-0', quota: 2 }, // Capretta
+            { category: 'CA-F-I', quota: 3 }, // Yearling femmina 1-2 anni
+            { category: 'CA-F-II', quota: 5 }, // Adulta femmina 2-6 anni
+            { category: 'CA-F-III', quota: 2 } // Vecchia adulta femmina ≥7 anni
           ];
           
           for (const cat of chamoisQuotas) {
