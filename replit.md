@@ -422,6 +422,13 @@ Changelog:
   - **Database Schema**: Updated all enum types to match official classifications, removed obsolete categories
   - **Automatic Initialization**: System now creates proper quotas using official categories during reserve setup
   - **Complete Coverage**: All 5 hunting species (Capriolo, Cervo, Daino, Muflone, Camoscio) with 27 total official categories supported
+- July 11, 2025. **ADMIN HUNTER CREATION BUG FIX**: Resolved critical password hashing issue preventing hunter login
+  - **Password Hashing**: Fixed createAdminSchema validation requiring role field for proper admin account creation
+  - **Hunter Creation**: Enhanced admin-hunters.ts endpoint to properly hash passwords using bcrypt with 12 rounds
+  - **Account Hierarchy**: Verified complete SuperAdmin → Admin → Hunter creation flow with proper authentication
+  - **Email Integration**: Confirmed welcome emails sent to new hunters with login credentials and instructions
+  - **Security Fix**: All passwords now properly hashed in database (60-character bcrypt hashes instead of plaintext)
+  - **Testing Verified**: Complete authentication flow tested and working - SuperAdmin creates Admin, Admin creates Hunter, Hunter can login
 
 # User Preferences
 

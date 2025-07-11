@@ -1179,6 +1179,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createHunter(data: InsertUser): Promise<User> {
+    // La password dovrebbe già essere hashata nel route handler
     const [hunter] = await db.insert(users).values(data).returning();
     return hunter;
   }
