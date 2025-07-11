@@ -75,6 +75,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint per ottenere informazioni riserva corrente (per utenti autenticati)
+  app.get("/api/current-reserve", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.reserveId) {
+        return res.status(400).json({ error: "Utente non associato a nessuna riserva" });
+      }
+
+      const reserve = await storage.getReserve(user.reserveId);
+      if (!reserve) {
+        return res.status(404).json({ error: "Riserva non trovata" });
+      }
+
+      res.json({
+        id: reserve.id,
+        name: reserve.name,
+        comune: reserve.comune,
+        species: JSON.parse(reserve.species || "[]"),
+        managementType: reserve.managementType,
+        huntingType: reserve.huntingType
+      });
+    } catch (error) {
+      console.error("Error fetching current reserve:", error);
+      res.status(500).json({ error: "Errore nel recupero delle informazioni della riserva" });
+    }
+  });
+
 
 
   // Endpoint per registrazione cacciatori con validazione codice d'accesso

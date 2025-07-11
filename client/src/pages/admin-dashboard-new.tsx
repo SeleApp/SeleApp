@@ -56,6 +56,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/hunters"],
   });
 
+  const { data: currentReserve } = useQuery({
+    queryKey: ["/api/current-reserve"],
+  });
+
   const cancelReservationMutation = useMutation({
     mutationFn: async (reservationId: number) => {
       return await apiRequest(`/api/reservations/${reservationId}`, {
@@ -206,6 +210,41 @@ export default function AdminDashboard() {
       return `${start} - ${end}`;
     }
     return "Non definito";
+  };
+
+  // Mappatura da nome italiano a codice specie
+  const getSpeciesCode = (italianName: string): string => {
+    const mapping: Record<string, string> = {
+      "Capriolo": "roe_deer",
+      "Cervo": "red_deer",
+      "Daino": "fallow_deer",
+      "Muflone": "mouflon",
+      "Camoscio": "chamois"
+    };
+    return mapping[italianName] || italianName;
+  };
+
+  // Ottieni le specie attive per questa riserva
+  const getActiveSpecies = (): string[] => {
+    if (!currentReserve?.species) return [];
+    return currentReserve.species.map((name: string) => getSpeciesCode(name));
+  };
+
+  // Genera i filtri dinamici basati sulle specie della riserva
+  const getSpeciesFilters = () => {
+    const activeSpecies = getActiveSpecies();
+    const allFilters = [
+      { code: 'all', label: 'Tutte' },
+      { code: 'roe_deer', label: 'Capriolo' },
+      { code: 'red_deer', label: 'Cervo' },
+      { code: 'fallow_deer', label: 'Daino' },
+      { code: 'mouflon', label: 'Muflone' },
+      { code: 'chamois', label: 'Camoscio' }
+    ];
+    
+    return allFilters.filter(filter => 
+      filter.code === 'all' || activeSpecies.includes(filter.code)
+    );
   };
 
   const getFilteredQuotas = () => {
@@ -501,44 +540,17 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('all')}
-                        onClick={() => setSelectedSpecies('all')}
-                        className="h-8"
-                      >
-                        Tutte
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('roe_deer')}
-                        onClick={() => setSelectedSpecies('roe_deer')}
-                        className="h-8"
-                      >Capriolo</Button>
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('red_deer')}
-                        onClick={() => setSelectedSpecies('red_deer')}
-                        className="h-8"
-                      >Cervo</Button>
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('fallow_deer')}
-                        onClick={() => setSelectedSpecies('fallow_deer')}
-                        className="h-8"
-                      >Daino</Button>
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('mouflon')}
-                        onClick={() => setSelectedSpecies('mouflon')}
-                        className="h-8"
-                      >Muflone</Button>
-                      <Button
-                        size="sm"
-                        variant={getSpeciesButtonVariant('chamois')}
-                        onClick={() => setSelectedSpecies('chamois')}
-                        className="h-8"
-                      >Camoscio</Button>
+                      {getSpeciesFilters().map((filter) => (
+                        <Button
+                          key={filter.code}
+                          size="sm"
+                          variant={getSpeciesButtonVariant(filter.code as any)}
+                          onClick={() => setSelectedSpecies(filter.code as any)}
+                          className="h-8"
+                        >
+                          {filter.label}
+                        </Button>
+                      ))}
                     </div>
                   </div>
                 </div>

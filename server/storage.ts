@@ -1100,7 +1100,7 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getAdminStats(): Promise<{
+  async getAdminStats(reserveId: string): Promise<{
     activeHunters: number;
     todayReservations: number;
     totalHarvested: number;
@@ -1114,7 +1114,11 @@ export class DatabaseStorage implements IStorage {
     const [activeHuntersResult] = await db
       .select({ count: count() })
       .from(users)
-      .where(and(eq(users.role, 'HUNTER'), eq(users.isActive, true)));
+      .where(and(
+        eq(users.role, 'HUNTER'), 
+        eq(users.isActive, true),
+        eq(users.reserveId, reserveId)
+      ));
 
     const [todayReservationsResult] = await db
       .select({ count: count() })
@@ -1123,18 +1127,23 @@ export class DatabaseStorage implements IStorage {
         and(
           sql`${reservations.huntDate} >= ${today}`,
           sql`${reservations.huntDate} < ${tomorrow}`,
-          eq(reservations.status, 'active')
+          eq(reservations.status, 'active'),
+          eq(reservations.reserveId, reserveId)
         )
       );
 
     const [totalHarvestedResult] = await db
-      .select({ total: sql<number>`sum(${wildlifeQuotas.harvested})` })
-      .from(wildlifeQuotas);
+      .select({ total: sql<number>`sum(${regionalQuotas.harvested})` })
+      .from(regionalQuotas)
+      .where(eq(regionalQuotas.reserveId, reserveId));
 
     const [lowQuotasResult] = await db
       .select({ count: count() })
-      .from(wildlifeQuotas)
-      .where(sql`${wildlifeQuotas.harvested} >= ${wildlifeQuotas.totalQuota} * 0.8`);
+      .from(regionalQuotas)
+      .where(and(
+        eq(regionalQuotas.reserveId, reserveId),
+        sql`${regionalQuotas.harvested} >= ${regionalQuotas.totalQuota} * 0.8`
+      ));
 
     return {
       activeHunters: activeHuntersResult.count,

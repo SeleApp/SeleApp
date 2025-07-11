@@ -11,7 +11,12 @@ const router = Router();
 // Admin statistics
 router.get("/stats", authenticateToken, requireRole('ADMIN'), async (req: AuthRequest, res) => {
   try {
-    const stats = await storage.getAdminStats();
+    const user = req.user;
+    if (!user?.reserveId) {
+      return res.status(400).json({ message: "Utente non associato a nessuna riserva" });
+    }
+    
+    const stats = await storage.getAdminStats(user.reserveId);
     res.json(stats);
   } catch (error) {
     console.error("Error fetching admin stats:", error);

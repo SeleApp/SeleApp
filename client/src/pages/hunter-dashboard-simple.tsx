@@ -40,6 +40,10 @@ export default function HunterDashboard() {
     queryKey: ["/api/reports"],
   });
 
+  const { data: currentReserve } = useQuery({
+    queryKey: ["/api/current-reserve"],
+  });
+
   const cancelReservationMutation = useMutation({
     mutationFn: async (reservationId: number) => {
       return await apiRequest(`/api/reservations/${reservationId}`, {
@@ -71,6 +75,41 @@ export default function HunterDashboard() {
   const handleReportHunt = (reservationId: number) => {
     setSelectedReservation(reservationId);
     setShowReportModal(true);
+  };
+
+  // Mappatura da nome italiano a codice specie
+  const getSpeciesCode = (italianName: string): string => {
+    const mapping: Record<string, string> = {
+      "Capriolo": "roe_deer",
+      "Cervo": "red_deer", 
+      "Daino": "fallow_deer",
+      "Muflone": "mouflon",
+      "Camoscio": "chamois"
+    };
+    return mapping[italianName] || italianName;
+  };
+
+  // Ottieni le specie attive per questa riserva
+  const getActiveSpecies = (): string[] => {
+    if (!currentReserve?.species) return [];
+    return currentReserve.species.map((name: string) => getSpeciesCode(name));
+  };
+
+  // Genera i filtri dinamici basati sulle specie della riserva
+  const getSpeciesFilters = () => {
+    const activeSpecies = getActiveSpecies();
+    const allFilters = [
+      { code: 'all', label: 'Tutte' },
+      { code: 'roe_deer', label: 'Capriolo' },
+      { code: 'red_deer', label: 'Cervo' },
+      { code: 'fallow_deer', label: 'Daino' },
+      { code: 'mouflon', label: 'Muflone' },
+      { code: 'chamois', label: 'Camoscio' }
+    ];
+    
+    return allFilters.filter(filter => 
+      filter.code === 'all' || activeSpecies.includes(filter.code)
+    );
   };
 
   const handleCancelReservation = (reservationId: number) => {
@@ -148,54 +187,17 @@ export default function HunterDashboard() {
             <div className="flex items-center gap-4 mb-4">
               <span className="text-sm font-medium text-gray-700">Filtra per specie:</span>
               <div className="flex gap-2 flex-wrap">
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'all' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('all')}
-                  className="h-8"
-                >
-                  Tutte
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'roe_deer' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('roe_deer')}
-                  className="h-8"
-                >
-                  Capriolo
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'red_deer' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('red_deer')}
-                  className="h-8"
-                >
-                  Cervo
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'fallow_deer' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('fallow_deer')}
-                  className="h-8"
-                >
-                  Daino
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'mouflon' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('mouflon')}
-                  className="h-8"
-                >
-                  Muflone
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selectedSpecies === 'chamois' ? 'default' : 'outline'}
-                  onClick={() => setSelectedSpecies('chamois')}
-                  className="h-8"
-                >
-                  Camoscio
-                </Button>
+                {getSpeciesFilters().map((filter) => (
+                  <Button
+                    key={filter.code}
+                    size="sm"
+                    variant={selectedSpecies === filter.code ? 'default' : 'outline'}
+                    onClick={() => setSelectedSpecies(filter.code as any)}
+                    className="h-8"
+                  >
+                    {filter.label}
+                  </Button>
+                ))}
               </div>
             </div>
 
