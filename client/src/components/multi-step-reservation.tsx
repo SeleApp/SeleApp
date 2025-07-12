@@ -101,6 +101,33 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
       return;
     }
     
+    if (!data.targetSpecies) {
+      toast({
+        title: "Errore",
+        description: "Seleziona una specie",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data.targetSpecies === "roe_deer" && !data.targetRoeDeerCategory) {
+      toast({
+        title: "Errore",
+        description: "Seleziona una categoria per il capriolo",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data.targetSpecies === "red_deer" && !data.targetRedDeerCategory) {
+      toast({
+        title: "Errore",
+        description: "Seleziona una categoria per il cervo",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     createReservationMutation.mutate(data);
   };
 
@@ -123,7 +150,10 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
       case 1: return watch("zoneId") > 0;
       case 2: return !!watch("huntDate") && isValidHuntingDate(watch("huntDate"));
       case 3: return !!watch("timeSlot");
-      case 4: return true;
+      case 4: return !!watch("targetSpecies") && (
+        (watch("targetSpecies") === "roe_deer" && !!watch("targetRoeDeerCategory")) ||
+        (watch("targetSpecies") === "red_deer" && !!watch("targetRedDeerCategory"))
+      );
       default: return true;
     }
   };
@@ -340,28 +370,10 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               <div className="space-y-6">
                 <div className="text-center mb-8">
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">Specie Target</h3>
-                  <p className="text-lg text-gray-600">Specifica il capo che intendi cacciare (opzionale)</p>
+                  <p className="text-lg text-gray-600">Seleziona la specie che intendi cacciare</p>
                 </div>
                 
                 <div className="max-w-2xl mx-auto space-y-8">
-                  <div className="text-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setValue("targetSpecies", undefined);
-                        setValue("targetRoeDeerCategory", undefined);
-                        setValue("targetRedDeerCategory", undefined);
-                        setValue("targetNotes", "");
-                      }}
-                      className="text-lg px-8 py-3"
-                    >
-                      Salta - Nessun capo specifico
-                    </Button>
-                  </div>
-
-                  <div className="text-center text-gray-500">oppure</div>
-
                   <div className="space-y-4">
                     <h4 className="text-xl font-semibold text-gray-900 text-center">Seleziona Specie</h4>
                     <div className="grid grid-cols-2 gap-6">
