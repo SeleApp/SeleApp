@@ -269,7 +269,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     let dateCount = 0;
                     let dayOffset = 1; // Inizio da domani, non da oggi
                     
-                    while (dateCount < 10 && dayOffset < 30) {
+                    while (dateCount < 15 && dayOffset < 30) {
                       // Crea data con calcolo più robusto
                       const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayOffset);
                       const dayOfWeek = currentDate.getDay();
@@ -277,7 +277,10 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                       console.log(`Debug data ${dayOffset}: ${currentDate.toDateString()}, giorno: ${dayOfWeek} (${currentDate.toLocaleDateString('it-IT', { weekday: 'long' })})`);
                       
                       // Skip Tuesday (2) and Friday (5) - silenzio venatorio
-                      if (dayOfWeek !== 2 && dayOfWeek !== 5) {
+                      const isValidDay = dayOfWeek !== 2 && dayOfWeek !== 5;
+                      console.log(`🔍 Giorno ${currentDate.getDate()} ${currentDate.toLocaleDateString('it-IT', { weekday: 'short' })}: ${isValidDay ? 'VALIDO' : 'BLOCCATO'} (dayOfWeek: ${dayOfWeek})`);
+                      
+                      if (isValidDay) {
                         const dateString = currentDate.toISOString().split('T')[0];
                         const dayName = currentDate.toLocaleDateString('it-IT', { weekday: 'short' });
                         const dayNumber = currentDate.getDate();
