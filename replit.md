@@ -448,6 +448,13 @@ Changelog:
   - **Simplified Options**: "Caccia per Capo Assegnato (Sistema Random)" became "Caccia per Capo Assegnato"
   - **Consistent Branding**: "Misto (Zone + Capo Assegnato)" simplified to "Misto"
   - **Badge Labels**: Table badges already clean with abbreviated names (Zone, Capi, Quote, Misto)
+- July 12, 2025. **HUNT REPORT SYSTEM OPTIMIZATION**: Complete resolution of photo upload issues and database schema errors
+  - **Photo Upload Made Optional**: Removed mandatory photo requirement for harvest reports to prevent submission blocks
+  - **Form Validation Fixed**: Added missing reserveId field to hunt report schema for proper validation
+  - **Database Schema Updated**: Added missing columns (fallow_deer_category, mouflon_category, chamois_category) to hunt_reports table
+  - **Date Calendar Debug**: Enhanced date selection logic with timezone handling and proper weekday calculation
+  - **Report System Simplified**: Streamlined workflow - hunters can submit reports with or without photos, admins receive complete notifications
+  - **Alternative Report Options**: Documented multiple report completion alternatives including WhatsApp backup and optional photo systems
 
 # User Preferences
 
