@@ -456,15 +456,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     </div>
                   )}
 
-                  {selectedSpecies && (
-                    <div className="space-y-4">
-                      <h4 className="text-xl font-semibold text-gray-900 text-center">Note</h4>
-                      <Textarea
-                        placeholder="Note sul capo target..."
-                        {...register("targetNotes")}
-                      />
-                    </div>
-                  )}
+
                 </div>
               </div>
             )}
