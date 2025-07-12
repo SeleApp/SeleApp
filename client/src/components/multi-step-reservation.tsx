@@ -179,7 +179,14 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
           ))}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form 
+          onSubmit={(e) => {
+            console.log("🔥 Form onSubmit evento attivato");
+            console.log("📊 Valori form correnti:", watch());
+            console.log("❌ Errori form:", errors);
+            handleSubmit(onSubmit)(e);
+          }}
+        >
           <div className="min-h-[400px] py-6">
             {/* STEP 1: ZONE */}
             {step === 1 && (
@@ -522,6 +529,11 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               <Button
                 type="submit"
                 disabled={createReservationMutation.isPending}
+                onClick={(e) => {
+                  console.log("🎯 Pulsante Conferma cliccato");
+                  console.log("📋 Dati correnti:", watch());
+                  console.log("⚠️ Errori attuali:", errors);
+                }}
               >
                 {createReservationMutation.isPending ? "Creazione..." : "Conferma"}
               </Button>
