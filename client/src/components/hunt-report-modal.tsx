@@ -31,6 +31,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     resolver: zodResolver(insertHuntReportSchema.omit({ reportedAt: true })),
     defaultValues: {
       reservationId: reservation.id,
+      reserveId: reservation.reserveId || "cison-valmarino",
       outcome: "no_harvest",
       species: undefined,
       roeDeerCategory: undefined,
@@ -240,6 +241,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     setKillCardPhoto("");
     form.reset({
       reservationId: reservation.id,
+      reserveId: reservation.reserveId || "cison-valmarino",
       outcome: "no_harvest",
       species: undefined,
       roeDeerCategory: undefined,

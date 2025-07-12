@@ -70,6 +70,7 @@ export interface CreateReservationRequest {
 
 export interface CreateHuntReportRequest {
   reservationId: number;
+  reserveId: string;
   outcome: 'no_harvest' | 'harvest';
   species?: 'roe_deer' | 'red_deer';
   roeDeerCategory?: 'M0' | 'F0' | 'FA' | 'M1' | 'MA';
