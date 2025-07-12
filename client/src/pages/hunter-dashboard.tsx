@@ -245,27 +245,88 @@ export default function HunterDashboard() {
             <h3 className="text-lg sm:text-2xl font-bold text-gray-900">I Miei Report di Caccia</h3>
             <div className="space-y-4">
               {completedReservations.length > 0 ? (
-                completedReservations.map((reservation) => (
-                  <Card key={reservation.id}>
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900">{reservation.zone.name}</h4>
-                          <p className="text-gray-600">
-                            {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
-                            {reservation.timeSlot === "morning" ? "Mattina" : "Pomeriggio"}
-                          </p>
-                          <Badge 
-                            variant="secondary" 
-                            className="mt-2"
-                          >
-                            Report Completato
-                          </Badge>
+                completedReservations.map((reservation) => {
+                  const report = reservation.huntReport;
+                  return (
+                    <Card key={reservation.id}>
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-900">{reservation.zone.name}</h4>
+                              <p className="text-gray-600">
+                                {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
+                                {reservation.timeSlot === "morning" ? "Mattina" : 
+                                 reservation.timeSlot === "afternoon" ? "Pomeriggio" : "Tutto il Giorno"}
+                              </p>
+                              <Badge 
+                                variant={report?.outcome === 'harvest' ? 'default' : 'secondary'}
+                                className={`mt-2 ${report?.outcome === 'harvest' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+                              >
+                                {report?.outcome === 'harvest' ? 'Prelievo Effettuato' : 'Nessun Prelievo'}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          {/* Dettagli del prelievo se presente */}
+                          {report?.outcome === 'harvest' && report.species && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <h5 className="font-medium text-green-900 mb-3">📋 Dettagli Prelievo:</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <span className="font-medium text-green-800">Specie:</span>
+                                  <span className="ml-2 text-green-700">
+                                    {report.species === 'roe_deer' ? 'Capriolo' : 
+                                     report.species === 'red_deer' ? 'Cervo' :
+                                     report.species === 'fallow_deer' ? 'Daino' :
+                                     report.species === 'mouflon' ? 'Muflone' :
+                                     report.species === 'chamois' ? 'Camoscio' : 'N/A'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-green-800">Categoria:</span>
+                                  <span className="ml-2 text-green-700">
+                                    {report.roeDeerCategory || report.redDeerCategory || report.fallowDeerCategory || report.mouflonCategory || report.chamoisCategory || 'N/A'}
+                                  </span>
+                                </div>
+                                {report.sex && (
+                                  <div>
+                                    <span className="font-medium text-green-800">Sesso:</span>
+                                    <span className="ml-2 text-green-700">
+                                      {report.sex === 'male' ? 'Maschio' : 'Femmina'}
+                                    </span>
+                                  </div>
+                                )}
+                                {report.ageClass && (
+                                  <div>
+                                    <span className="font-medium text-green-800">Età:</span>
+                                    <span className="ml-2 text-green-700">
+                                      {report.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              {report.notes && (
+                                <div className="mt-3 pt-3 border-t border-green-200">
+                                  <span className="font-medium text-green-800">Note:</span>
+                                  <p className="mt-1 text-green-700 text-sm">{report.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Note del report se presenti e non c'è prelievo */}
+                          {report?.notes && report.outcome === 'no_harvest' && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                              <h5 className="font-medium text-gray-900 mb-2">📝 Note:</h5>
+                              <p className="text-gray-700 text-sm">{report.notes}</p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  );
+                })
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <ClipboardList className="mx-auto mb-4" size={48} />
