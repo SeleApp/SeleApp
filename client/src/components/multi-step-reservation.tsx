@@ -264,13 +264,17 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                   {(() => {
                     const dates = [];
                     const today = new Date();
+                    // Forza il fuso orario italiano per evitare problemi di calcolo
+                    today.setHours(12, 0, 0, 0); // Mezzogiorno per evitare problemi di fuso orario
                     let dateCount = 0;
                     let dayOffset = 1; // Inizio da domani, non da oggi
                     
-                    while (dateCount < 10 && dayOffset < 20) {
-                      const currentDate = new Date(today);
-                      currentDate.setDate(today.getDate() + dayOffset);
+                    while (dateCount < 10 && dayOffset < 30) {
+                      // Crea data con calcolo più robusto
+                      const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayOffset);
                       const dayOfWeek = currentDate.getDay();
+                      
+                      console.log(`Debug data ${dayOffset}: ${currentDate.toDateString()}, giorno: ${dayOfWeek} (${currentDate.toLocaleDateString('it-IT', { weekday: 'long' })})`);
                       
                       // Skip Tuesday (2) and Friday (5) - silenzio venatorio
                       if (dayOfWeek !== 2 && dayOfWeek !== 5) {
@@ -285,6 +289,9 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                             type="button"
                             onClick={() => {
                               console.log('Cliccato su data:', dateString, dayName, dayNumber);
+                              console.log('Data completa:', currentDate.toString());
+                              console.log('Giorno settimana (0=dom, 1=lun):', dayOfWeek);
+                              console.log('Data ISO:', currentDate.toISOString());
                               setValue("huntDate", dateString);
                             }}
                             className={`p-4 rounded-xl border-2 text-center transition-all hover:bg-blue-50 ${
