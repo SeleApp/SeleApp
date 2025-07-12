@@ -130,9 +130,12 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
 
   const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log("📸 File selected:", file ? `${file.name} (${file.size} bytes)` : "None");
+    
     if (file) {
       // Validazione tipo file
       if (!file.type.startsWith('image/')) {
+        console.error("❌ Invalid file type:", file.type);
         toast({
           title: "Formato file non valido",
           description: "È possibile caricare solo immagini (JPG, PNG, GIF, etc.)",
@@ -142,6 +145,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
         return;
       }
 
+      console.log("✅ Valid image file, starting upload process");
       setIsLoading(true);
       
       try {
@@ -149,30 +153,41 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
         
         // Se il file è troppo grande, comprimi automaticamente
         if (file.size > 5 * 1024 * 1024) {
+          console.log("🔄 File too large, compressing...");
           toast({
             title: "Compressione in corso",
             description: "File troppo grande, compressione automatica...",
           });
           finalBase64 = await compressImage(file);
         } else {
+          console.log("📖 Reading file normally...");
           // Carica normalmente
           finalBase64 = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
-            reader.onerror = () => reject(new Error('Errore di lettura file'));
+            reader.onload = (e) => {
+              console.log("✅ File read successfully");
+              resolve(e.target?.result as string);
+            };
+            reader.onerror = () => {
+              console.error("❌ FileReader error");
+              reject(new Error('Errore di lettura file'));
+            };
             reader.readAsDataURL(file);
           });
         }
         
+        console.log("✅ Photo processed, setting state...");
         setKillCardPhoto(finalBase64);
         form.setValue("killCardPhoto", finalBase64);
+        console.log("✅ KillCardPhoto state updated");
+        
         toast({
           title: "Foto caricata",
           description: "La foto è stata caricata con successo",
         });
         
       } catch (error) {
-        console.error('Errore durante il caricamento della foto:', error);
+        console.error('❌ Error during photo upload:', error);
         toast({
           title: "Errore caricamento",
           description: "Si è verificato un errore durante il caricamento della foto",
@@ -437,6 +452,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 mb-4"
               disabled={isLoading}
               capture="environment"
+              key={killCardPhoto ? "photo-loaded" : "no-photo"}
             />
             <p className="text-xs text-gray-500 mt-1">
               Formati supportati: JPG, PNG, GIF. File grandi vengono compressi automaticamente
