@@ -263,22 +263,25 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                   {(() => {
                     const dates = [];
-                    const today = new Date();
-                    // Forza il fuso orario italiano per evitare problemi di calcolo
+                    // Forza data corrente come 12 luglio 2025 per consistenza
+                    const today = new Date(2025, 6, 12); // 12 luglio 2025
                     today.setHours(12, 0, 0, 0); // Mezzogiorno per evitare problemi di fuso orario
                     let dateCount = 0;
                     let dayOffset = 1; // Inizio da domani, non da oggi
+                    
+                    console.log('📅 BASE DATE:', today.toString());
+                    console.log('📊 Cercando 15 date valide (esclusi mar/ven)...');
                     
                     while (dateCount < 15 && dayOffset < 30) {
                       // Crea data con calcolo più robusto
                       const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dayOffset);
                       const dayOfWeek = currentDate.getDay();
                       
-                      console.log(`Debug data ${dayOffset}: ${currentDate.toDateString()}, giorno: ${dayOfWeek} (${currentDate.toLocaleDateString('it-IT', { weekday: 'long' })})`);
+                      const dayNames = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
                       
                       // Skip Tuesday (2) and Friday (5) - silenzio venatorio
                       const isValidDay = dayOfWeek !== 2 && dayOfWeek !== 5;
-                      console.log(`🔍 Giorno ${currentDate.getDate()} ${currentDate.toLocaleDateString('it-IT', { weekday: 'short' })}: ${isValidDay ? 'VALIDO' : 'BLOCCATO'} (dayOfWeek: ${dayOfWeek})`);
+                      console.log(`${dayOffset}. ${currentDate.getDate()}/${currentDate.getMonth()+1} (${dayNames[dayOfWeek]}): ${isValidDay ? '✅ AGGIUNTO' : '❌ SALTATO'} | Count: ${isValidDay ? dateCount + 1 : dateCount}`);
                       
                       if (isValidDay) {
                         const dateString = currentDate.toISOString().split('T')[0];
