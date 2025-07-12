@@ -3,6 +3,7 @@
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
 import { Switch, Route, Redirect } from "wouter";
+import { ComponentType } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,7 +17,7 @@ import NotFound from "@/pages/not-found";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
-  component: React.ComponentType; 
+  component: ComponentType; 
   requiredRole?: string;
 }) {
   if (!authService.isAuthenticated()) {
