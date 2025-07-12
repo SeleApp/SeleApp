@@ -45,9 +45,10 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   const selectedSpecies = watch("targetSpecies");
 
   const createReservationMutation = useMutation({
-    mutationFn: (data: CreateReservationInput) => {
+    mutationFn: async (data: CreateReservationInput) => {
       console.log("🚀 Sending reservation data:", data);
-      return apiRequest("/api/reservations", { method: "POST", body: data });
+      const response = await apiRequest("/api/reservations", { method: "POST", body: data });
+      return response.json();
     },
     onSuccess: (response) => {
       console.log("✅ Reservation created successfully:", response);

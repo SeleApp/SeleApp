@@ -23,7 +23,7 @@ export async function apiRequest(
   url: string,
   options?: {
     method?: string;
-    body?: string;
+    body?: any;
     headers?: Record<string, string>;
   },
 ): Promise<Response> {
@@ -34,10 +34,15 @@ export async function apiRequest(
     ...(options?.body ? { "Content-Type": "application/json" } : {}),
   };
 
+  // Properly stringify body if it's an object
+  const body = options?.body ? 
+    (typeof options.body === 'string' ? options.body : JSON.stringify(options.body)) : 
+    undefined;
+
   const res = await fetch(url, {
     method,
     headers,
-    body: options?.body,
+    body,
     credentials: "include",
   });
 
