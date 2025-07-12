@@ -186,6 +186,10 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
   };
 
   const onSubmit = async (data: CreateHuntReportRequest) => {
+    console.log("🚀 Submitting report with data:", data);
+    console.log("📸 KillCardPhoto:", killCardPhoto ? "Present" : "Missing");
+    console.log("🔍 ShowHarvestDetails:", showHarvestDetails);
+    
     // Validate that if harvest, we have species
     if (data.outcome === "harvest" && !data.species) {
       toast({
@@ -213,7 +217,10 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
         killCardPhoto: killCardPhoto || "",
         reservationId: Number(data.reservationId)
       };
+      console.log("🎯 Final submit data:", submitData);
       await createReport.mutateAsync(submitData);
+    } catch (error) {
+      console.error("❌ Submit error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -272,7 +279,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="no_harvest">Nessun prelievo</SelectItem>
-                <SelectItem value="harvest">🎯 Prelievo effettuato (per selezionare specie)</SelectItem>
+                <SelectItem value="harvest">Prelievo effettuato (per selezionare specie)</SelectItem>
               </SelectContent>
             </Select>
             {form.formState.errors.outcome && (
@@ -285,7 +292,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
           {!showHarvestDetails && (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p className="text-gray-600 text-center">
-                📝 Per selezionare la specie abbattuta, cambia l'esito in "Prelievo effettuato"
+                Per selezionare la specie abbattuta, cambia l'esito in "Prelievo effettuato"
               </p>
             </div>
           )}
@@ -316,8 +323,8 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                     <SelectValue placeholder="Seleziona la specie..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="roe_deer">🦌 Capriolo (Capreolus capreolus)</SelectItem>
-                    <SelectItem value="red_deer">🦌 Cervo (Cervus elaphus)</SelectItem>
+                    <SelectItem value="roe_deer">Capriolo (Capreolus capreolus)</SelectItem>
+                    <SelectItem value="red_deer">Cervo (Cervus elaphus)</SelectItem>
                   </SelectContent>
                 </Select>
                 {form.formState.errors.species && (
@@ -386,7 +393,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                 (form.watch("species") === "red_deer" && form.watch("redDeerCategory"))) && (
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                   <p className="text-green-800 font-medium">
-                    ✓ Capo selezionato: {form.watch("species") === "roe_deer" ? "Capriolo" : "Cervo"}{" "}
+                    Capo selezionato: {form.watch("species") === "roe_deer" ? "Capriolo" : "Cervo"}{" "}
                     {form.watch("species") === "roe_deer" 
                       ? form.watch("roeDeerCategory") 
                       : form.watch("redDeerCategory")}
@@ -405,7 +412,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             <Label className={`block text-lg font-medium mb-3 ${
               showHarvestDetails ? "text-amber-800" : "text-gray-700"
             }`}>
-              📸 Foto Scheda di Abbattimento {showHarvestDetails ? "*" : "(Opzionale)"}
+              Foto Scheda di Abbattimento {showHarvestDetails ? "*" : "(Opzionale)"}
             </Label>
             <p className={`text-sm mb-4 ${
               showHarvestDetails ? "text-amber-700" : "text-gray-600"
@@ -495,8 +502,14 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               type="submit"
               disabled={isLoading || (showHarvestDetails && !killCardPhoto)}
               className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700 order-1 sm:order-2"
+              onClick={() => {
+                console.log("🔘 Button clicked - isLoading:", isLoading);
+                console.log("🔘 showHarvestDetails:", showHarvestDetails);
+                console.log("🔘 killCardPhoto:", killCardPhoto ? "Present" : "Missing");
+                console.log("🔘 Button disabled:", isLoading || (showHarvestDetails && !killCardPhoto));
+              }}
             >
-              {isLoading ? "Invio..." : (showHarvestDetails && !killCardPhoto) ? "Carica la Foto" : "Invia Report"}
+              {isLoading ? "Invio..." : (showHarvestDetails && !killCardPhoto) ? "Carica Prima la Foto" : "Invia Report"}
             </Button>
           </div>
         </form>
