@@ -527,12 +527,17 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               </Button>
             ) : (
               <Button
-                type="submit"
+                type="button"
                 disabled={createReservationMutation.isPending}
                 onClick={(e) => {
                   console.log("🎯 Pulsante Conferma cliccato");
-                  console.log("📋 Dati correnti:", watch());
+                  const formData = watch();
+                  console.log("📋 Dati correnti:", formData);
                   console.log("⚠️ Errori attuali:", errors);
+                  
+                  // Chiamata diretta senza validazione form
+                  console.log("🚀 Chiamata diretta mutation");
+                  onSubmit(formData);
                 }}
               >
                 {createReservationMutation.isPending ? "Creazione..." : "Conferma"}
