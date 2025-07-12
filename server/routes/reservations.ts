@@ -183,10 +183,15 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
     res.status(201).json(reservation);
   } catch (error) {
-    console.error("Error creating reservation:", error);
+    console.error("❌ ERRORE CRITICO durante creazione prenotazione:", error);
+    console.error("❌ Stack trace:", error instanceof Error ? error.stack : "No stack trace");
+    console.error("❌ Dati richiesta:", JSON.stringify(req.body, null, 2));
+    console.error("❌ User info:", req.user);
+    
     res.status(500).json({ 
       message: "Errore nella creazione della prenotazione",
-      error: error instanceof Error ? error.message : "Unknown error"
+      error: error instanceof Error ? error.message : "Unknown error",
+      details: error instanceof Error ? error.stack : undefined
     });
   }
 });

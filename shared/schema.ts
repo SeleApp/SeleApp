@@ -451,19 +451,21 @@ export const createReservationSchema = insertReservationSchema.extend({
     // Block Tuesday (2) and Friday (5) - silenzio venatorio
     return day !== 2 && day !== 5;
   }, "Caccia non permessa nei giorni di silenzio venatorio (martedì e venerdì)"),
-  // Campi per selezione capo target (opzionali)
-  targetSpecies: z.enum(['roe_deer', 'red_deer']).optional(),
+  // Campi per selezione capo target (ora obbligatori)
+  targetSpecies: z.enum(['roe_deer', 'red_deer'], {
+    required_error: "Selezione specie obbligatoria"
+  }),
   targetRoeDeerCategory: z.enum(['M0', 'F0', 'FA', 'M1', 'MA']).optional(),
   targetRedDeerCategory: z.enum(['CL0', 'FF', 'MM', 'MCL1']).optional(),
   targetSex: z.enum(['male', 'female']).optional(),
   targetAgeClass: z.enum(['adult', 'young']).optional(),
   targetNotes: z.string().optional(),
 }).refine((data) => {
-  // Se viene specificata una categoria, deve essere specificata anche la specie corrispondente
-  if (data.targetRoeDeerCategory && data.targetSpecies !== 'roe_deer') {
+  // Se viene specificata una specie, deve essere specificata anche la categoria corrispondente
+  if (data.targetSpecies === 'roe_deer' && !data.targetRoeDeerCategory) {
     return false;
   }
-  if (data.targetRedDeerCategory && data.targetSpecies !== 'red_deer') {
+  if (data.targetSpecies === 'red_deer' && !data.targetRedDeerCategory) {
     return false;
   }
   // Se viene specificata una categoria di capriolo, non può essere specificata una categoria di cervo
@@ -472,7 +474,7 @@ export const createReservationSchema = insertReservationSchema.extend({
   }
   return true;
 }, {
-  message: "Categoria non compatibile con la specie selezionata",
+  message: "Categoria obbligatoria per la specie selezionata",
   path: ["targetSpecies"],
 });
 
