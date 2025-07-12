@@ -72,9 +72,13 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     },
   });
 
+  const outcome = form.watch("outcome");
+  
   useEffect(() => {
-    const outcome = form.watch("outcome");
+    console.log("🔍 Outcome changed:", outcome);
     setShowHarvestDetails(outcome === "harvest");
+    console.log("🎯 ShowHarvestDetails set to:", outcome === "harvest");
+    
     if (outcome === "no_harvest") {
       form.setValue("species", undefined);
       form.setValue("sex", undefined);
@@ -82,7 +86,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       form.setValue("roeDeerCategory", undefined);
       form.setValue("redDeerCategory", undefined);
     }
-  }, [form]);
+  }, [outcome, form]);
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -258,14 +262,17 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             </Label>
             <Select
               value={form.watch("outcome")}
-              onValueChange={(value) => form.setValue("outcome", value as "no_harvest" | "harvest")}
+              onValueChange={(value) => {
+                console.log("🎯 Changing outcome to:", value);
+                form.setValue("outcome", value as "no_harvest" | "harvest");
+              }}
             >
               <SelectTrigger className="h-12 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="no_harvest">Nessun prelievo</SelectItem>
-                <SelectItem value="harvest">Prelievo effettuato</SelectItem>
+                <SelectItem value="harvest">🎯 Prelievo effettuato (per selezionare specie)</SelectItem>
               </SelectContent>
             </Select>
             {form.formState.errors.outcome && (
@@ -274,6 +281,14 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               </p>
             )}
           </div>
+
+          {!showHarvestDetails && (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p className="text-gray-600 text-center">
+                📝 Per selezionare la specie abbattuta, cambia l'esito in "Prelievo effettuato"
+              </p>
+            </div>
+          )}
 
           {showHarvestDetails && (
             <div className="space-y-4">
