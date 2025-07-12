@@ -215,15 +215,8 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       return;
     }
 
-    // Validate photo upload solo per i prelievi
-    if (data.outcome === "harvest" && !killCardPhoto) {
-      toast({
-        title: "Foto mancante",
-        description: "È obbligatorio caricare la foto della scheda di abbattimento per i prelievi",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Foto opzionale - rimossa validazione obbligatoria
+    console.log("📸 Foto opzionale - continuando con l'invio...");
 
     setIsLoading(true);
     try {
@@ -434,15 +427,12 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             <Label className={`block text-lg font-medium mb-3 ${
               showHarvestDetails ? "text-amber-800" : "text-gray-700"
             }`}>
-              Foto Scheda di Abbattimento {showHarvestDetails ? "*" : "(Opzionale)"}
+              Foto Scheda di Abbattimento (Opzionale)
             </Label>
             <p className={`text-sm mb-4 ${
               showHarvestDetails ? "text-amber-700" : "text-gray-600"
             }`}>
-              {showHarvestDetails 
-                ? "È obbligatorio caricare una foto della scheda di abbattimento compilata per i prelievi"
-                : "Puoi caricare una foto della scheda di abbattimento compilata (facoltativo per nessun prelievo)"
-              }
+              Puoi caricare una foto della scheda di abbattimento compilata (opzionale). L'admin potrà richiederla successivamente se necessario.
             </p>
             
             <input
@@ -523,7 +513,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || (showHarvestDetails && !killCardPhoto)}
+              disabled={isLoading}
               className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700 order-1 sm:order-2"
               onClick={() => {
                 console.log("🔘 Button clicked - isLoading:", isLoading);
@@ -534,7 +524,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                 console.log("🔘 Form errors:", form.formState.errors);
               }}
             >
-              {isLoading ? "Invio..." : (showHarvestDetails && !killCardPhoto) ? "Carica Prima la Foto" : "Invia Report"}
+              {isLoading ? "Invio..." : "Invia Report"}
             </Button>
           </div>
         </form>
