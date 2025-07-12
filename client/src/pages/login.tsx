@@ -41,7 +41,7 @@ export default function LoginPage() {
         navigate("/hunter");
       }
     }
-  }, [navigate]);
+  }, []); // Empty dependency array - only run once on mount
 
   const onLogin = async (data: LoginRequest) => {
     setIsLoading(true);
