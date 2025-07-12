@@ -30,7 +30,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
     resolver: zodResolver(createReservationSchema),
     defaultValues: {
       huntDate: "",
-      zoneId: 0,
+      zoneId: 1, // Default to zone 1 instead of 0
       timeSlot: "morning",
       targetSpecies: undefined,
       targetRoeDeerCategory: undefined,
@@ -45,9 +45,12 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   const selectedSpecies = watch("targetSpecies");
 
   const createReservationMutation = useMutation({
-    mutationFn: (data: CreateReservationInput) => 
-      apiRequest("/api/reservations", { method: "POST", body: data }),
-    onSuccess: () => {
+    mutationFn: (data: CreateReservationInput) => {
+      console.log("🚀 Sending reservation data:", data);
+      return apiRequest("/api/reservations", { method: "POST", body: data });
+    },
+    onSuccess: (response) => {
+      console.log("✅ Reservation created successfully:", response);
       toast({
         title: "Successo",
         description: "Prenotazione creata con successo!",
@@ -56,6 +59,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
       handleClose();
     },
     onError: (error: any) => {
+      console.error("❌ Error creating reservation:", error);
       toast({
         title: "Errore",
         description: error.message || "Errore durante la creazione della prenotazione",
@@ -65,8 +69,37 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   });
 
   const onSubmit = (data: CreateReservationInput) => {
-    console.log('🚀 Form submitted with data:', data);
-    console.log('📝 Form errors:', errors);
+    console.log("📝 Form submitted with data:", data);
+    console.log("🔍 Form errors:", errors);
+    
+    // Validate required fields manually
+    if (!data.huntDate) {
+      toast({
+        title: "Errore",
+        description: "Seleziona una data di caccia",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.zoneId || data.zoneId <= 0) {
+      toast({
+        title: "Errore", 
+        description: "Seleziona una zona",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.timeSlot) {
+      toast({
+        title: "Errore",
+        description: "Seleziona un orario",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     createReservationMutation.mutate(data);
   };
 
@@ -86,7 +119,7 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
 
   const canProceed = (): boolean => {
     switch (step) {
-      case 1: return !!watch("zoneId");
+      case 1: return watch("zoneId") > 0;
       case 2: return !!watch("huntDate") && isValidHuntingDate(watch("huntDate"));
       case 3: return !!watch("timeSlot");
       case 4: return true;
@@ -489,11 +522,6 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
               <Button
                 type="submit"
                 disabled={createReservationMutation.isPending}
-                onClick={() => {
-                  console.log('🎯 Submit button clicked');
-                  console.log('📊 Current form values:', watch());
-                  console.log('❌ Form errors:', errors);
-                }}
               >
                 {createReservationMutation.isPending ? "Creazione..." : "Conferma"}
               </Button>
