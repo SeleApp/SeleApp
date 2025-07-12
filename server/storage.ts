@@ -764,7 +764,12 @@ export class DatabaseStorage implements IStorage {
     
     // Se è stato dichiarato un prelievo, aggiorna la quota regionale
     if (report.outcome === 'harvest' && report.species) {
-      await this.updateRegionalQuotaAfterHarvest(report.species, report.sex, report.ageClass);
+      await this.updateRegionalQuotaAfterHarvestByCategory(
+        report.species, 
+        report.roeDeerCategory, 
+        report.redDeerCategory, 
+        report.reserveId
+      );
     }
     
     // Marca la prenotazione come completata
@@ -777,34 +782,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Aggiorna le quote regionali dopo un prelievo
-   * Identifica la categoria corretta e decrementa la quota disponibile
+   * Aggiorna le quote regionali dopo un prelievo usando le categorie specifiche
+   * Decrementa direttamente la quota della categoria selezionata
    */
-  private async updateRegionalQuotaAfterHarvest(
+  private async updateRegionalQuotaAfterHarvestByCategory(
     species: 'roe_deer' | 'red_deer',
-    sex?: 'male' | 'female' | null,
-    ageClass?: 'adult' | 'young' | null
+    roeDeerCategory?: string | null,
+    redDeerCategory?: string | null,
+    reserveId?: string
   ): Promise<void> {
     let categoryToUpdate: string | null = null;
     
-    // Determina la categoria basata su specie, sesso ed età
-    if (species === 'roe_deer' && sex && ageClass) {
-      // Capriolo: M0, F0, FA, M1, MA
-      if (sex === 'male' && ageClass === 'young') categoryToUpdate = 'M0';
-      else if (sex === 'female' && ageClass === 'young') categoryToUpdate = 'F0';
-      else if (sex === 'female' && ageClass === 'adult') categoryToUpdate = 'FA';
-      else if (sex === 'male' && ageClass === 'adult') categoryToUpdate = 'MA';
-    } else if (species === 'red_deer' && sex && ageClass) {
-      // Cervo: CL0, FF, MM, MCL1
-      if (ageClass === 'young') categoryToUpdate = 'CL0';
-      else if (sex === 'female' && ageClass === 'adult') categoryToUpdate = 'FF';
-      else if (sex === 'male' && ageClass === 'adult') categoryToUpdate = 'MM';
+    // Usa direttamente la categoria specifica fornita dal form
+    if (species === 'roe_deer' && roeDeerCategory) {
+      categoryToUpdate = roeDeerCategory;
+    } else if (species === 'red_deer' && redDeerCategory) {
+      categoryToUpdate = redDeerCategory;
     }
     
     if (!categoryToUpdate) {
-      console.warn('Impossibile determinare la categoria per il prelievo:', { species, sex, ageClass });
+      console.warn('Categoria non specificata per il prelievo:', { species, roeDeerCategory, redDeerCategory });
       return;
     }
+    
+    console.log(`🎯 Aggiornamento quota: ${species} categoria ${categoryToUpdate} per riserva ${reserveId}`);
     
     // Trova e aggiorna la quota regionale
     const quotaCondition = species === 'roe_deer' 
@@ -817,11 +818,13 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(regionalQuotas.species, species),
+          eq(regionalQuotas.reserveId, reserveId || 'cison-valmarino'),
           quotaCondition
         )
       );
     
     if (quotaToUpdate && quotaToUpdate.harvested < quotaToUpdate.totalQuota) {
+      console.log(`✅ Quota trovata - Incremento harvested da ${quotaToUpdate.harvested} a ${quotaToUpdate.harvested + 1}`);
       await db
         .update(regionalQuotas)
         .set({ 
