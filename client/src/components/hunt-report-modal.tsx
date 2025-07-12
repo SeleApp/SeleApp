@@ -262,7 +262,14 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
           </p>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.log("❌ Form validation errors:", errors);
+          toast({
+            title: "Errori nel form",
+            description: "Controlla i campi richiesti",
+            variant: "destructive",
+          });
+        })} className="space-y-4 sm:space-y-6">
           <div>
             <Label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
               Esito Caccia
@@ -507,6 +514,8 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
                 console.log("🔘 showHarvestDetails:", showHarvestDetails);
                 console.log("🔘 killCardPhoto:", killCardPhoto ? "Present" : "Missing");
                 console.log("🔘 Button disabled:", isLoading || (showHarvestDetails && !killCardPhoto));
+                console.log("🔘 Form values:", form.getValues());
+                console.log("🔘 Form errors:", form.formState.errors);
               }}
             >
               {isLoading ? "Invio..." : (showHarvestDetails && !killCardPhoto) ? "Carica Prima la Foto" : "Invia Report"}
