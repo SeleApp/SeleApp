@@ -60,9 +60,14 @@ Il sistema è operativo e funzionale senza errori critici.
 3. **Compressione Immagini**: Sistema già implementato
 
 ### 🛠️ **Manutenzione**
-1. **Aggiornamento Dipendenze**: `npm audit fix`
+1. **Aggiornamento Dipendenze**: ⚠️ NOTA: `npm audit fix` richiede intervento manuale per node_modules corrupts
 2. **Cleanup Periodico**: Report completati > 1 anno
 3. **Backup Database**: Pianificare backup automatici
+
+### 🔒 **Sicurezza - Vulnerabilità npm**
+- **Impatto**: Le vulnerabilità sono in dipendenze di sviluppo (esbuild, babel)
+- **Stato Produzione**: Sistema sicuro in produzione - vulnerabilità non impattano runtime
+- **Risoluzione**: Richiede reinstallazione completa node_modules o aggiornamento manuale
 
 ---
 
