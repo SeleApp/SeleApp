@@ -284,7 +284,12 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                       console.log(`${dayOffset}. ${currentDate.getDate()}/${currentDate.getMonth()+1} (${dayNames[dayOfWeek]}): ${isValidDay ? '✅ AGGIUNTO' : '❌ SALTATO'} | Count: ${isValidDay ? dateCount + 1 : dateCount}`);
                       
                       if (isValidDay) {
-                        const dateString = currentDate.toISOString().split('T')[0];
+                        // Fix: calcola dateString con fuso orario italiano per evitare offset
+                        const year = currentDate.getFullYear();
+                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(currentDate.getDate()).padStart(2, '0');
+                        const dateString = `${year}-${month}-${day}`;
+                        
                         const dayName = currentDate.toLocaleDateString('it-IT', { weekday: 'short' });
                         const dayNumber = currentDate.getDate();
                         const monthName = currentDate.toLocaleDateString('it-IT', { month: 'short' });
@@ -294,10 +299,9 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                             key={dateString}
                             type="button"
                             onClick={() => {
-                              console.log('Cliccato su data:', dateString, dayName, dayNumber);
-                              console.log('Data completa:', currentDate.toString());
-                              console.log('Giorno settimana (0=dom, 1=lun):', dayOfWeek);
-                              console.log('Data ISO:', currentDate.toISOString());
+                              console.log('✅ CLICK CORRETTO:', dateString, dayName, dayNumber);
+                              console.log('📅 Data completa:', currentDate.toString());
+                              console.log('📊 Componenti date: Anno:', year, 'Mese:', month, 'Giorno:', day);
                               setValue("huntDate", dateString);
                             }}
                             className={`p-4 rounded-xl border-2 text-center transition-all hover:bg-blue-50 ${
