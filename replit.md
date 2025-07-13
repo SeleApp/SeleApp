@@ -455,6 +455,13 @@ Changelog:
   - **Date Calendar Debug**: Enhanced date selection logic with timezone handling and proper weekday calculation
   - **Report System Simplified**: Streamlined workflow - hunters can submit reports with or without photos, admins receive complete notifications
   - **Alternative Report Options**: Documented multiple report completion alternatives including WhatsApp backup and optional photo systems
+- July 12, 2025. **QUOTA UPDATE SYSTEM FIXED**: Complete resolution of quota tracking and calendar date selection issues
+  - **Quota Updates Working**: Fixed quota increment logic - harvested counts now properly update when hunters submit harvest reports
+  - **Manual Quota Correction**: Corrected existing reports (2 FF red deer harvests) to reflect proper quota status
+  - **Calendar Date Bug Fixed**: Resolved timezone offset issue causing wrong dates to be saved (mercoledì 23 was saving as 22/07 instead of 23/07)
+  - **Date Selection Enhanced**: Extended calendar to show 15 available dates with clear debug logging for troubleshooting
+  - **Complete System Verification**: All core functions operational - reservations, reports, quota tracking, email notifications
+  - **Real-time Quota Display**: Dashboard now correctly shows updated harvest counts (F0: 1/5, FF: 2/7) in regional quotas tab
 
 # User Preferences
 
