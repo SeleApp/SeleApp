@@ -21,6 +21,67 @@ router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// PUT /api/reports/:id - Admin può modificare report esistenti
+router.put("/:id", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    if (req.user?.role !== 'ADMIN') {
+      return res.status(403).json({ message: "Solo gli amministratori possono modificare report" });
+    }
+
+    const reportId = parseInt(req.params.id);
+    if (isNaN(reportId)) {
+      return res.status(400).json({ message: "ID report non valido" });
+    }
+
+    // Verifica che il report esista nella riserva dell'admin
+    const reports = await storage.getHuntReports(req.user.reserveId);
+    const existingReport = reports.find(r => r.id === reportId);
+    
+    if (!existingReport) {
+      return res.status(404).json({ message: "Report non trovato nella tua riserva" });
+    }
+
+    // Aggiungi reserveId ai dati di aggiornamento
+    const updateData = {
+      ...req.body,
+      reserveId: req.user.reserveId,
+      killCardPhoto: req.body.killCardPhoto || ""
+    };
+    
+    const reportData = insertHuntReportSchema.partial().parse(updateData);
+
+    // Aggiorna il report
+    const updatedReport = await storage.updateHuntReport(reportId, req.user.reserveId, reportData);
+    
+    if (!updatedReport) {
+      return res.status(404).json({ message: "Errore nell'aggiornamento del report" });
+    }
+
+    // Invia email di notifica modifica
+    try {
+      await EmailService.sendAccountChangeNotification(
+        existingReport.reservation.hunter.email,
+        existingReport.reservation.hunter.firstName,
+        "Report di caccia modificato dall'amministratore"
+      );
+    } catch (emailError) {
+      console.warn("Email notification failed:", emailError);
+    }
+
+    res.json({
+      message: "Report aggiornato con successo",
+      report: updatedReport
+    });
+
+  } catch (error) {
+    console.error("Error updating hunt report:", error);
+    res.status(500).json({ 
+      message: "Errore nell'aggiornamento del report",
+      error: error instanceof Error ? error.message : "Errore sconosciuto"
+    });
+  }
+});
+
 router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
     if (req.user?.role !== 'HUNTER') {

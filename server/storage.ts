@@ -960,6 +960,60 @@ export class DatabaseStorage implements IStorage {
    * Elimina un report di caccia e ripristina automaticamente le quote regionali
    * Solo per prelievi (harvest), incrementa la quota disponibile
    */
+  /**
+   * Aggiorna un report di caccia esistente (solo ADMIN)
+   */
+  async updateHuntReport(id: number, reserveId: string, data: Partial<InsertHuntReport>): Promise<HuntReport | undefined> {
+    try {
+      // Prima ottieni il report esistente per confrontare le quote
+      const [existingReport] = await db
+        .select()
+        .from(huntReports)
+        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)));
+      
+      if (!existingReport) {
+        return undefined;
+      }
+
+      // Aggiorna il report
+      const [updatedReport] = await db
+        .update(huntReports)
+        .set({ 
+          ...data, 
+          updatedAt: new Date() 
+        })
+        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)))
+        .returning();
+
+      // Gestisci aggiornamento quote se necessario
+      if (data.outcome !== undefined || data.species !== undefined || 
+          data.roeDeerCategory !== undefined || data.redDeerCategory !== undefined) {
+        
+        // Se il report precedente era un prelievo, ripristina la quota
+        if (existingReport.outcome === 'harvest' && existingReport.species) {
+          const oldCategory = existingReport.species === 'roe_deer' 
+            ? existingReport.roeDeerCategory! 
+            : existingReport.redDeerCategory!;
+          await this.restoreRegionalQuotaAfterDelete(existingReport.species, oldCategory, reserveId);
+        }
+
+        // Se il nuovo report è un prelievo, aggiorna la quota
+        if (updatedReport.outcome === 'harvest' && updatedReport.species) {
+          const newCategory = updatedReport.species === 'roe_deer' 
+            ? updatedReport.roeDeerCategory! 
+            : updatedReport.redDeerCategory!;
+          await this.updateRegionalQuotaOnHarvest(updatedReport.species, newCategory, reserveId);
+        }
+      }
+
+      console.log(`Report ${id} aggiornato con successo`);
+      return updatedReport;
+    } catch (error) {
+      console.error("Errore aggiornamento report:", error);
+      throw error;
+    }
+  }
+
   async deleteHuntReport(id: number, reserveId: string): Promise<void> {
     try {
       // Prima di eliminare, ottieni i dettagli del report per ripristinare le quote
