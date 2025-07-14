@@ -522,24 +522,24 @@ export default function AdminDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="w-full overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 min-w-max">
-              <TabsTrigger value="quotas" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-                <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 min-w-max h-14 sm:h-16 p-2">
+              <TabsTrigger value="quotas" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-medium">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden xs:inline">Quote</span>
                 <span className="xs:hidden">Q</span>
               </TabsTrigger>
-              <TabsTrigger value="reservations" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TabsTrigger value="reservations" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-medium">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden xs:inline">Prenotazioni</span>
                 <span className="xs:hidden">P</span>
               </TabsTrigger>
-              <TabsTrigger value="reports" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TabsTrigger value="reports" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-medium">
+                <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden xs:inline">Report</span>
                 <span className="xs:hidden">R</span>
               </TabsTrigger>
-              <TabsTrigger value="rules" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TabsTrigger value="rules" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-3 sm:py-4 font-medium">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden xs:inline">Limitazioni</span>
                 <span className="xs:hidden">L</span>
               </TabsTrigger>

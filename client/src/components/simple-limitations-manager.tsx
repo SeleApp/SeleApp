@@ -170,56 +170,56 @@ export function SimpleLimitationsManager() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2"> Gestione Limitazioni Semplice</h2>
-        <p className="text-gray-600 text-lg">
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">🎯 Gestione Limitazioni Semplice</h2>
+        <p className="text-gray-600 text-xl sm:text-2xl">
           Configura facilmente le regole per la tua riserva
         </p>
       </div>
       {/* Category Filter */}
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+        <CardHeader className="pb-6">
+          <CardTitle className="text-xl sm:text-2xl flex items-center gap-3">
+            <Settings className="h-6 w-6 sm:h-7 sm:w-7" />
             Filtra per Categoria
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Button
               variant={selectedCategory === 'tutte' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('tutte')}
-              className="h-12 text-sm"
+              className="h-16 sm:h-20 text-lg sm:text-xl font-semibold"
             >
               Tutte
             </Button>
             <Button
               variant={selectedCategory === 'prenotazioni' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('prenotazioni')}
-              className="h-12 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700"
+              className="h-16 sm:h-20 text-lg sm:text-xl font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700"
             >
               Prenotazioni
             </Button>
             <Button
               variant={selectedCategory === 'zone' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('zone')}
-              className="h-12 text-sm bg-green-50 hover:bg-green-100 text-green-700"
+              className="h-16 sm:h-20 text-lg sm:text-xl font-semibold bg-green-50 hover:bg-green-100 text-green-700"
             >
               Zone
             </Button>
             <Button
               variant={selectedCategory === 'cacciatori' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('cacciatori')}
-              className="h-12 text-sm bg-purple-50 hover:bg-purple-100 text-purple-700"
+              className="h-16 sm:h-20 text-lg sm:text-xl font-semibold bg-purple-50 hover:bg-purple-100 text-purple-700"
             >
               Cacciatori
             </Button>
             <Button
               variant={selectedCategory === 'capi' ? 'default' : 'outline'}
               onClick={() => setSelectedCategory('capi')}
-              className="h-12 text-sm bg-orange-50 hover:bg-orange-100 text-orange-700"
+              className="h-16 sm:h-20 text-lg sm:text-xl font-semibold bg-orange-50 hover:bg-orange-100 text-orange-700"
             >
               Capi
             </Button>
@@ -227,63 +227,66 @@ export function SimpleLimitationsManager() {
         </CardContent>
       </Card>
       {/* Limitations List */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredLimitations.map((limitation) => {
           const Icon = limitation.icon;
           return (
-            <Card key={limitation.id} className="relative">
-              <CardHeader className="pb-3">
+            <Card key={limitation.id} className="relative border-2">
+              <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${getCategoryColor(limitation.category)}`}>
-                      <Icon className="h-5 w-5" />
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-lg ${getCategoryColor(limitation.category)}`}>
+                      <Icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">{limitation.title}</CardTitle>
-                      <Badge variant="outline" className="mt-1 text-xs">
+                      <CardTitle className="text-lg sm:text-xl">{limitation.title}</CardTitle>
+                      <Badge variant="outline" className="mt-2 text-sm">
                         {limitation.category}
                       </Badge>
                     </div>
                   </div>
-                  <Switch
-                    checked={limitation.enabled}
-                    onCheckedChange={() => toggleLimitation(limitation.id)}
-                  />
+                  <div className="flex flex-col items-end gap-2">
+                    <Switch
+                      checked={limitation.enabled}
+                      onCheckedChange={() => toggleLimitation(limitation.id)}
+                      className="scale-125"
+                    />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <CardDescription className="text-sm mb-4">
+                <CardDescription className="text-base sm:text-lg mb-6">
                   {limitation.description}
                 </CardDescription>
                 
                 {limitation.enabled && (
-                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg">
-                    <Label className="text-sm font-medium">Valore Limite</Label>
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                    <Label className="text-base sm:text-lg font-medium">Valore Limite</Label>
+                    <div className="flex items-center gap-3">
                       <Input
                         type="number"
                         min="1"
                         value={limitation.value}
                         onChange={(e) => updateLimitationValue(limitation.id, parseInt(e.target.value) || 1)}
-                        className="w-20 text-center font-semibold"
+                        className="w-24 h-12 text-center font-semibold text-lg"
                       />
-                      <span className="text-sm text-gray-600 font-medium">
+                      <span className="text-base sm:text-lg text-gray-600 font-medium">
                         {limitation.unit}
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-4 flex items-center gap-3">
                   {limitation.enabled ? (
                     <>
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-green-600 font-medium">Attiva</span>
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="text-base sm:text-lg text-green-600 font-medium">Attiva</span>
                     </>
                   ) : (
                     <>
-                      <XCircle className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-400 font-medium">Disattivata</span>
+                      <XCircle className="h-5 w-5 text-gray-400" />
+                      <span className="text-base sm:text-lg text-gray-400 font-medium">Disattivata</span>
                     </>
                   )}
                 </div>
@@ -316,7 +319,7 @@ export function SimpleLimitationsManager() {
             <Button
               onClick={saveLimitations}
               disabled={saveLimitationsMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 text-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-xl sm:text-2xl font-bold h-16 sm:h-20"
             >
               {saveLimitationsMutation.isPending ? "Salvando..." : "💾 Salva Impostazioni"}
             </Button>
