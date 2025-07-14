@@ -15,6 +15,7 @@ import RegionalQuotaManager from "@/components/regional-quota-manager";
 import HunterManagementModal from "@/components/hunter-management-modal";
 import AdminReportModal from "@/components/admin-report-modal";
 import { AdminRulesManager } from "@/components/admin-rules-manager";
+import { AdminLimitationsConfig } from "@/components/admin-limitations-config";
 import { authService } from "@/lib/auth";
 
 export default function AdminDashboard() {
@@ -89,6 +90,8 @@ export default function AdminDashboard() {
 
   const updateRegionalQuotaMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      console.log(`Updating quota ${id} with:`, data);
+      
       const response = await fetch(`/api/regional-quotas/${id}`, {
         method: "PATCH",
         headers: {
@@ -99,13 +102,16 @@ export default function AdminDashboard() {
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log('Quota update successful:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       refetchQuotas(); // Force immediate refresh
       toast({ title: "Quota regionale aggiornata con successo" });
       setEditingQuota(null);
@@ -440,6 +446,16 @@ export default function AdminDashboard() {
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Gestione Cacciatori</span>
               <span className="sm:hidden">Cacciatori</span>
+            </Button>
+            <Button
+              onClick={() => setActiveTab("rules")}
+              variant="outline"
+              className="flex items-center justify-center gap-2 text-xs sm:text-sm border-orange-200 text-orange-700 hover:bg-orange-50"
+              size="sm"
+            >
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Configurazione</span>
+              <span className="sm:hidden">Config</span>
             </Button>
           </div>
         </div>
@@ -1179,7 +1195,13 @@ export default function AdminDashboard() {
 
           {/* Rules Management Tab */}
           <TabsContent value="rules">
-            <AdminRulesManager />
+            <div className="space-y-6">
+              <AdminLimitationsConfig />
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">Gestione Avanzata Regole</h3>
+                <AdminRulesManager />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

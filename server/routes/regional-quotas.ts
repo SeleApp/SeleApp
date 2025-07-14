@@ -34,12 +34,23 @@ router.patch("/:id", authenticateToken, requireRole('ADMIN'), async (req: AuthRe
       return res.status(403).json({ message: "Utente non associato a una riserva" });
     }
 
+    console.log(`Admin updating quota ${quotaId} with data:`, updateData);
+
+    // Validate data types
+    if (updateData.totalQuota !== undefined) {
+      updateData.totalQuota = parseInt(updateData.totalQuota);
+    }
+    if (updateData.harvested !== undefined) {
+      updateData.harvested = parseInt(updateData.harvested);
+    }
+
     const updatedQuota = await storage.updateRegionalQuota(quotaId, reserveId, updateData);
     
     if (!updatedQuota) {
       return res.status(404).json({ message: "Quota non trovata" });
     }
 
+    console.log(`Successfully updated quota:`, updatedQuota);
     res.json(updatedQuota);
   } catch (error) {
     console.error("Error updating regional quota:", error);

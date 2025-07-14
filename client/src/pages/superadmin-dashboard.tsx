@@ -165,12 +165,15 @@ export default function SuperAdminDashboard() {
       return response.json();
     },
     onSuccess: () => {
+      // Force refresh di tutte le query correlate
       queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
+      queryClient.refetchQueries({ queryKey: ["/api/reserves"] });
+      
       setCreateReserveOpen(false);
       reserveForm.reset();
       toast({
-        title: "Successo",
-        description: "Riserva creata con successo",
+        title: "Riserva creata",
+        description: "La nuova riserva è stata creata con successo. Riassunti aggiornati.",
       });
     },
     onError: (error: any) => {
@@ -249,13 +252,16 @@ export default function SuperAdminDashboard() {
       return response.json();
     },
     onSuccess: () => {
+      // Force refresh di tutte le query correlate
       queryClient.invalidateQueries({ queryKey: ["/api/reserves"] });
+      queryClient.refetchQueries({ queryKey: ["/api/reserves"] });
+      
       setCreateReserveOpen(false);
       setEditingReserve(null);
       reserveForm.reset();
       toast({
-        title: "Successo",
-        description: "Riserva aggiornata con successo",
+        title: "Riserva aggiornata",
+        description: "La riserva è stata aggiornata con successo. Riassunti aggiornati.",
       });
     },
     onError: (error: any) => {

@@ -47,7 +47,14 @@ router.post("/", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthR
     });
 
     const reserve = await storage.createReserve(validatedData);
-    res.status(201).json(reserve);
+    
+    // Force refresh stats after creation
+    const stats = await storage.getReserveStats(reserve.id);
+    
+    res.status(201).json({
+      ...reserve,
+      stats
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ message: "Dati non validi", errors: error.errors });
