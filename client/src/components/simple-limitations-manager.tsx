@@ -173,14 +173,11 @@ export function SimpleLimitationsManager() {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          🎯 Gestione Limitazioni Semplice
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2"> Gestione Limitazioni Semplice</h2>
         <p className="text-gray-600 text-lg">
           Configura facilmente le regole per la tua riserva
         </p>
       </div>
-
       {/* Category Filter */}
       <Card>
         <CardHeader className="pb-4">
@@ -229,7 +226,6 @@ export function SimpleLimitationsManager() {
           </div>
         </CardContent>
       </Card>
-
       {/* Limitations List */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredLimitations.map((limitation) => {
@@ -296,7 +292,6 @@ export function SimpleLimitationsManager() {
           );
         })}
       </div>
-
       {/* Summary and Save */}
       <Card className="border-2 border-blue-200 bg-blue-50">
         <CardContent className="pt-6">
@@ -328,7 +323,6 @@ export function SimpleLimitationsManager() {
           </div>
         </CardContent>
       </Card>
-
       {/* Help Section */}
       <Card className="bg-green-50 border-green-200">
         <CardContent className="pt-6">
