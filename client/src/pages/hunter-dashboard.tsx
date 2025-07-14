@@ -31,6 +31,16 @@ export default function HunterDashboard() {
     queryKey: ["/api/regional-quotas"],
   });
 
+  // Query per le quote di gruppo (solo se il sistema è "Zone & gruppi")
+  const { data: groupQuotas = [] } = useQuery({
+    queryKey: ["/api/group-quotas"],
+  });
+
+  // Query per informazioni sulla riserva corrente
+  const { data: currentReserve } = useQuery({
+    queryKey: ["/api/current-reserve"],
+  });
+
   const user = authService.getUser();
   const activeReservations = reservations.filter(r => r.status === 'active');
   const completedReservations = reservations.filter(r => r.status === 'completed');
@@ -96,7 +106,18 @@ export default function HunterDashboard() {
 
           <TabsContent value="quotas" className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <h3 className="text-lg sm:text-2xl font-bold text-gray-900">Piani di Abbattimento Regionali</h3>
+              <div>
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-900">
+                  {currentReserve?.managementType === 'zones_groups' 
+                    ? `Quote Gruppo ${user?.hunterGroup || 'N/A'}` 
+                    : 'Piani di Abbattimento Regionali'}
+                </h3>
+                {currentReserve?.managementType === 'zones_groups' && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Sistema "Zone & gruppi" - Quote specifiche per il tuo gruppo
+                  </p>
+                )}
+              </div>
               <Button
                 onClick={() => setShowReservationModal(true)}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
@@ -118,10 +139,13 @@ export default function HunterDashboard() {
                         <TableHead className="text-xs sm:text-sm">Prelevati</TableHead>
                         <TableHead className="text-xs sm:text-sm">Disponibili</TableHead>
                         <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Periodo</TableHead>
+                        {currentReserve?.managementType === 'zones_groups' && (
+                          <TableHead className="text-xs sm:text-sm">Gruppo</TableHead>
+                        )}
                       </TableRow>
                     </TableHeader>
                   <TableBody>
-                    {regionalQuotas.map((quota: any) => {
+                    {(currentReserve?.managementType === 'zones_groups' ? groupQuotas : regionalQuotas).map((quota: any) => {
                       const available = quota.totalQuota - quota.harvested;
                       const getCategoryLabel = (q: any) => {
                         if (q.species === 'roe_deer') {
@@ -137,6 +161,11 @@ export default function HunterDashboard() {
                         }
                         return 'N/A';
                       };
+
+                      // Per sistema "Zone & gruppi", filtra solo le quote del gruppo del cacciatore
+                      if (currentReserve?.managementType === 'zones_groups' && quota.hunterGroup !== user?.hunterGroup) {
+                        return null;
+                      }
 
                       const formatPeriod = (startDate: string | null, endDate: string | null, notes: string | null) => {
                         if (notes) return notes;
@@ -170,9 +199,16 @@ export default function HunterDashboard() {
                           <TableCell className="text-xs sm:text-sm hidden sm:table-cell">
                             {formatPeriod(quota.huntingStartDate, quota.huntingEndDate, quota.notes)}
                           </TableCell>
+                          {currentReserve?.managementType === 'zones_groups' && (
+                            <TableCell className="text-xs sm:text-sm">
+                              <Badge variant="secondary" className="text-xs px-2 py-1">
+                                {quota.hunterGroup}
+                              </Badge>
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
-                    })}
+                    }).filter(Boolean)}
                   </TableBody>
                   </Table>
                 </div>

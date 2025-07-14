@@ -13,6 +13,8 @@ export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon', 'full_d
 export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer', 'fallow_deer', 'mouflon', 'chamois']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
 export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
+// Gruppi cacciatori per sistema "Zone & gruppi"
+export const hunterGroupEnum = pgEnum('hunter_group', ['A', 'B', 'C', 'D']);
 // Categorie specifiche per specie
 export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
@@ -24,6 +26,7 @@ export const huntOutcomeEnum = pgEnum('hunt_outcome', ['no_harvest', 'harvest'])
 // Tipologie di gestione delle riserve
 export const managementTypeEnum = pgEnum('management_type', [
   'standard_zones', // Standard con prenotazione zone (es. Cison)
+  'zones_groups', // Zone & gruppi per Cison - zone globali + quote per gruppo
   'standard_random', // Standard con assegnazione random capi (es. Pederobba)
   'quota_only', // Solo gestione quote senza zone
   'custom' // Personalizzato per esigenze specifiche
@@ -164,6 +167,8 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default('HUNTER'),
   isActive: boolean("is_active").notNull().default(true),
   reserveId: text("reserve_id"), // NULL for SUPERADMIN, required for other roles
+  // Gruppo per sistema "Zone & gruppi" (solo per riserve con managementType = 'zones_groups')
+  hunterGroup: hunterGroupEnum("hunter_group"),
   // Campi specifici per sistema CA17
   isSelezionatore: boolean("is_selezionatore").notNull().default(false),
   isEsperto: boolean("is_esperto").notNull().default(false),
@@ -223,6 +228,28 @@ export const wildlifeQuotas = pgTable("wildlife_quotas", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Group quotas table (per sistema "Zone & gruppi")
+export const groupQuotas = pgTable("group_quotas", {
+  id: serial("id").primaryKey(),
+  reserveId: text("reserve_id").notNull(),
+  hunterGroup: hunterGroupEnum("hunter_group").notNull(),
+  species: speciesEnum("species").notNull(),
+  roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
+  redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"),
+  mouflonCategory: mouflonCategoryEnum("mouflon_category"),
+  chamoisCategory: chamoisCategoryEnum("chamois_category"),
+  totalQuota: integer("total_quota").notNull().default(0),
+  harvested: integer("harvested").notNull().default(0),
+  season: text("season").notNull().default("2024-2025"),
+  huntingStartDate: timestamp("hunting_start_date"),
+  huntingEndDate: timestamp("hunting_end_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Reservations table
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
@@ -269,6 +296,7 @@ export const reservesRelations = relations(reserves, ({ many, one }) => ({
   users: many(users),
   zones: many(zones),
   regionalQuotas: many(regionalQuotas),
+  groupQuotas: many(groupQuotas),
   reservations: many(reservations),
   huntReports: many(huntReports),
   settings: one(reserveSettings),
@@ -349,6 +377,13 @@ export const regionalQuotasRelations = relations(regionalQuotas, ({ one, many })
   huntReports: many(huntReports),
 }));
 
+export const groupQuotasRelations = relations(groupQuotas, ({ one }) => ({
+  reserve: one(reserves, {
+    fields: [groupQuotas.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
 export const wildlifeQuotasRelations = relations(wildlifeQuotas, ({ one }) => ({
   zone: one(zones, {
     fields: [wildlifeQuotas.zoneId],
@@ -390,7 +425,7 @@ export const huntReportsRelations = relations(huntReports, ({ one }) => ({
 export const insertReserveSchema = createInsertSchema(reserves).omit({
   createdAt: true,
 }).extend({
-  managementType: z.enum(['standard_zones', 'standard_random', 'quota_only', 'custom']),
+  managementType: z.enum(['standard_zones', 'zones_groups', 'standard_random', 'quota_only', 'custom']),
   huntingType: z.enum(['capo_assegnato', 'zone', 'misto']).optional(),
   assignmentMode: z.enum(['manual', 'random']).optional(),
   species: z.string().optional(), // JSON array come stringa
@@ -406,6 +441,7 @@ export const registerHunterSchema = insertUserSchema.extend({
   confirmPassword: z.string(),
   reserveId: z.string().min(1, "La selezione della riserva è obbligatoria"),
   accessCode: z.string().min(1, "Il codice d'accesso è obbligatorio"),
+  hunterGroup: z.enum(['A', 'B', 'C', 'D']).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Le password non coincidono",
   path: ["confirmPassword"],
@@ -418,6 +454,7 @@ export const registerHunterBackendSchema = z.object({
   lastName: z.string().min(1, "Cognome richiesto"),
   reserveId: z.string().min(1, "La selezione della riserva è obbligatoria"),
   accessCode: z.string().min(1, "Il codice d'accesso è obbligatorio"),
+  hunterGroup: z.enum(['A', 'B', 'C', 'D']).optional(),
 });
 
 export const createAdminSchema = insertUserSchema.extend({

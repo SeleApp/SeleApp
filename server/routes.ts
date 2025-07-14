@@ -73,6 +73,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
   
+  // Group quotas routes (per sistema "Zone & gruppi")
+  const groupQuotasRoutes = await import("./routes/group-quotas");
+  app.use("/api/group-quotas", groupQuotasRoutes.default);
+  
   // SuperAdmin reserves management routes
   app.use("/api/superadmin/reserves", reservesRoutes);
   
@@ -159,12 +163,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash della password
       const hashedPassword = await bcrypt.hash(data.password, 12);
       
+      // Per riserve "Zone & gruppi", verifica che il gruppo sia specificato
+      if (reserve.managementType === 'zones_groups' && !data.hunterGroup) {
+        return res.status(400).json({ 
+          error: "Per questa riserva è obbligatorio specificare il gruppo di appartenenza (A, B, C, D)." 
+        });
+      }
+
       const user = await storage.createUser({
         email: data.email,
         password: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName,
         reserveId: data.reserveId,
+        hunterGroup: data.hunterGroup, // Campo gruppo per sistema "Zone & gruppi"
         role: 'HUNTER',
         isActive: true,
       }, data.reserveId);

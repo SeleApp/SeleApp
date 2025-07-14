@@ -135,6 +135,13 @@ export interface IStorage {
   checkZoneCooldown(reserveId: string, userId: number, zoneId: number): Promise<{ allowed: boolean; waitUntil?: Date; reason?: string }>;
   checkHarvestLimits(reserveId: string, userId: number, species: string): Promise<{ allowed: boolean; current: number; limit: number; reason?: string }>;
 
+  // Group Quotas Management (for zones_groups management type)
+  getGroupQuotas(reserveId: string): Promise<GroupQuota[]>;
+  createGroupQuota(quota: InsertGroupQuota): Promise<GroupQuota>;
+  updateGroupQuota(id: number, data: Partial<GroupQuota>): Promise<GroupQuota | undefined>;
+  deleteGroupQuota(id: number): Promise<void>;
+  bulkUpdateGroupQuotas(quotasUpdate: Array<{ hunterGroup: string; species: string; category: string; totalQuota: number }>, reserveId: string): Promise<void>;
+
   // Reserve Validation and Admin Management (SUPERADMIN only)
   validateActiveReserve(reserveName: string): Promise<boolean>;
   getActiveReserves(): Promise<Reserve[]>;
@@ -169,12 +176,16 @@ export class DatabaseStorage implements IStorage {
     
     try {
       // 1. Crea le zone specificate se managementType include zone
-      if (reserve.managementType === 'standard_zones' || reserve.managementType === 'custom') {
+      if (reserve.managementType === 'standard_zones' || reserve.managementType === 'zones_groups' || reserve.managementType === 'custom') {
         await this.createStandardZones(reserve.id, reserve.numberOfZones || 16);
       }
       
-      // 2. Crea le quote regionali basate sulle specie selezionate
-      await this.createQuotasForSelectedSpecies(reserve.id, reserve.species);
+      // 2. Crea le quote appropriate al tipo di gestione
+      if (reserve.managementType === 'zones_groups') {
+        await this.createGroupQuotasForSelectedSpecies(reserve.id, reserve.species);
+      } else {
+        await this.createQuotasForSelectedSpecies(reserve.id, reserve.species);
+      }
       
       // 3. Crea impostazioni di default per la riserva
       await this.createReserveSettings({
@@ -412,6 +423,88 @@ export class DatabaseStorage implements IStorage {
 
     await db.insert(regionalQuotas).values(quotasToCreate);
     console.log(`Created ${quotaCategories.length} standard regional quotas for reserve ${reserveId}`);
+  }
+
+  private async createGroupQuotasForSelectedSpecies(reserveId: string, speciesJson: string): Promise<void> {
+    try {
+      const selectedSpecies: string[] = JSON.parse(speciesJson || '[]');
+      console.log(`Creating group quotas for selected species: ${selectedSpecies.join(', ')}`);
+      
+      const groupsQuotasToCreate: any[] = [];
+      const currentYear = new Date().getFullYear();
+      const groups = ['A', 'B', 'C', 'D'] as const;
+      
+      // Crea quote per ogni gruppo e ogni specie selezionata
+      for (const group of groups) {
+        for (const species of selectedSpecies) {
+          const normalizedSpecies = species.toLowerCase();
+          
+          if (normalizedSpecies === 'capriolo') {
+            // Quote standard per Capriolo per gruppo (5 categorie)
+            const roeDeerQuotas = [
+              { category: 'M0', quota: 3 },
+              { category: 'F0', quota: 2 },
+              { category: 'FA', quota: 3 },
+              { category: 'M1', quota: 2 },
+              { category: 'MA', quota: 1 }
+            ];
+            
+            for (const cat of roeDeerQuotas) {
+              groupsQuotasToCreate.push({
+                reserveId,
+                hunterGroup: group,
+                species: 'roe_deer',
+                roeDeerCategory: cat.category,
+                redDeerCategory: null,
+                fallowDeerCategory: null,
+                mouflonCategory: null,
+                chamoisCategory: null,
+                totalQuota: cat.quota,
+                harvested: 0,
+                season: currentYear.toString(),
+                isActive: true,
+                notes: `Quote ${species} - Gruppo ${group}`
+              });
+            }
+          } else if (normalizedSpecies === 'cervo') {
+            // Quote standard per Cervo per gruppo (4 categorie)
+            const redDeerQuotas = [
+              { category: 'CL0', quota: 1 },
+              { category: 'FF', quota: 2 },
+              { category: 'MM', quota: 1 },
+              { category: 'MCL1', quota: 1 }
+            ];
+            
+            for (const cat of redDeerQuotas) {
+              groupsQuotasToCreate.push({
+                reserveId,
+                hunterGroup: group,
+                species: 'red_deer',
+                roeDeerCategory: null,
+                redDeerCategory: cat.category,
+                fallowDeerCategory: null,
+                mouflonCategory: null,
+                chamoisCategory: null,
+                totalQuota: cat.quota,
+                harvested: 0,
+                season: currentYear.toString(),
+                isActive: true,
+                notes: `Quote ${species} - Gruppo ${group}`
+              });
+            }
+          }
+        }
+      }
+      
+      if (groupsQuotasToCreate.length > 0) {
+        await db.insert(groupQuotas).values(groupsQuotasToCreate);
+        console.log(`Created ${groupsQuotasToCreate.length} group quotas for selected species in reserve ${reserveId}`);
+      } else {
+        console.log(`No group quotas created - no valid species found for reserve ${reserveId}`);
+      }
+    } catch (error) {
+      console.error(`Error creating group quotas for selected species:`, error);
+    }
   }
 
   async updateReserve(id: string, data: Partial<Reserve>): Promise<Reserve | undefined> {
@@ -2078,6 +2171,71 @@ export class DatabaseStorage implements IStorage {
       current: currentHarvests, 
       limit: harvestRules[0]?.maxHarvestPerSeason || 999 
     };
+  }
+
+  // Group Quotas Management (for zones_groups management type)
+  async getGroupQuotas(reserveId: string): Promise<GroupQuota[]> {
+    return await db.select().from(groupQuotas).where(eq(groupQuotas.reserveId, reserveId));
+  }
+
+  async createGroupQuota(quota: InsertGroupQuota): Promise<GroupQuota> {
+    const [newQuota] = await db.insert(groupQuotas).values(quota).returning();
+    return newQuota;
+  }
+
+  async updateGroupQuota(id: number, data: Partial<GroupQuota>): Promise<GroupQuota | undefined> {
+    const [updatedQuota] = await db.update(groupQuotas)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(groupQuotas.id, id))
+      .returning();
+    return updatedQuota || undefined;
+  }
+
+  async deleteGroupQuota(id: number): Promise<void> {
+    await db.delete(groupQuotas).where(eq(groupQuotas.id, id));
+  }
+
+  async bulkUpdateGroupQuotas(quotasUpdate: Array<{ hunterGroup: string; species: string; category: string; totalQuota: number }>, reserveId: string): Promise<void> {
+    for (const update of quotasUpdate) {
+      // Trova la quota esistente per gruppo, specie e categoria
+      const existingQuota = await db.select().from(groupQuotas).where(
+        and(
+          eq(groupQuotas.reserveId, reserveId),
+          eq(groupQuotas.hunterGroup, update.hunterGroup as any),
+          eq(groupQuotas.species, update.species as any),
+          update.species === 'roe_deer' 
+            ? eq(groupQuotas.roeDeerCategory, update.category as any)
+            : eq(groupQuotas.redDeerCategory, update.category as any)
+        )
+      );
+
+      if (existingQuota.length > 0) {
+        // Aggiorna quota esistente
+        await db.update(groupQuotas)
+          .set({ 
+            totalQuota: update.totalQuota,
+            updatedAt: new Date()
+          })
+          .where(eq(groupQuotas.id, existingQuota[0].id));
+      } else {
+        // Crea nuova quota
+        await db.insert(groupQuotas).values({
+          reserveId,
+          hunterGroup: update.hunterGroup as any,
+          species: update.species as any,
+          roeDeerCategory: update.species === 'roe_deer' ? update.category as any : null,
+          redDeerCategory: update.species === 'red_deer' ? update.category as any : null,
+          fallowDeerCategory: null,
+          mouflonCategory: null,
+          chamoisCategory: null,
+          totalQuota: update.totalQuota,
+          harvested: 0,
+          season: new Date().getFullYear().toString(),
+          isActive: true,
+          notes: `Quota gruppo ${update.hunterGroup} - ${update.species}`
+        });
+      }
+    }
   }
 }
 

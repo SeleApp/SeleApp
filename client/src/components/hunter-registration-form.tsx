@@ -21,6 +21,7 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
   const [showPassword, setShowPassword] = useState(false);
   const [activeReserves, setActiveReserves] = useState<Reserve[]>([]);
   const [loadingReserves, setLoadingReserves] = useState(true);
+  const [selectedReserve, setSelectedReserve] = useState<Reserve | null>(null);
   const [reserveValidation, setReserveValidation] = useState<{
     checking: boolean;
     valid: boolean | null;
@@ -38,6 +39,7 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
       lastName: "",
       reserveId: "",
       accessCode: "",
+      hunterGroup: undefined,
     },
   });
 
@@ -232,6 +234,34 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
               </div>
             )}
           </div>
+
+          {/* Selezione gruppo per riserve "Zone & gruppi" */}
+          {selectedReserve?.managementType === 'zones_groups' && (
+            <div className="space-y-2">
+              <Label htmlFor="hunterGroup">Gruppo di Appartenenza</Label>
+              <Select
+                value={form.watch("hunterGroup") || ""}
+                onValueChange={(value) => form.setValue("hunterGroup", value as 'A' | 'B' | 'C' | 'D')}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona il tuo gruppo (A, B, C, D)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">Gruppo A</SelectItem>
+                  <SelectItem value="B">Gruppo B</SelectItem>
+                  <SelectItem value="C">Gruppo C</SelectItem>
+                  <SelectItem value="D">Gruppo D</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.formState.errors.hunterGroup && (
+                <p className="text-sm text-red-600">{form.formState.errors.hunterGroup.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Questa riserva utilizza il sistema "Zone & gruppi". Ogni cacciatore deve appartenere a un gruppo specifico.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>

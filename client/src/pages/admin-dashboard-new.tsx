@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
 import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX, ClipboardList, Plus, MapPin, BarChart3, XCircle } from "lucide-react";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
+import GroupQuotasManager from "@/components/group-quotas-manager";
 import HunterManagementModal from "@/components/hunter-management-modal";
 import AdminReportModal from "@/components/admin-report-modal";
 import { AdminRulesManager } from "@/components/admin-rules-manager";
@@ -54,6 +55,12 @@ export default function AdminDashboard() {
     queryKey: ["/api/regional-quotas"],
     refetchOnWindowFocus: true,
     refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  // Query per le quote di gruppo (solo se il sistema è "Zone & gruppi")
+  const { data: groupQuotas = [] } = useQuery({
+    queryKey: ["/api/group-quotas"],
+    enabled: currentReserve?.managementType === 'zones_groups'
   });
 
   const { data: reservations = [], isLoading: isLoadingReservations } = useQuery({
@@ -581,7 +588,11 @@ export default function AdminDashboard() {
               <CardContent className="p-3 sm:p-6">
                 <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">Quote Regionali di Caccia</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                      {currentReserve?.managementType === 'zones_groups' 
+                        ? 'Quote per Gruppo di Caccia' 
+                        : 'Quote Regionali di Caccia'}
+                    </h3>
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="flex items-center gap-1 sm:gap-2">
                         <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
@@ -612,7 +623,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {isLoadingQuotas ? (
+                {currentReserve?.managementType === 'zones_groups' ? (
+                  <GroupQuotasManager reserveId={currentReserve?.id} />
+                ) : isLoadingQuotas ? (
                   <div className="text-center py-8">Caricamento quote regionali...</div>
                 ) : (
                   <div className="overflow-x-auto">

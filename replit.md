@@ -470,6 +470,16 @@ Changelog:
   - **Database Integration**: Real-time counting of seasonal harvests with proper species category tracking (M0,F0,FA,M1,MA for roe deer; CL0,FF,MM,MCL1 for red deer)
   - **API Endpoints**: Added /api/limitations/check-species for real-time limit verification during booking process
   - **Senior-Friendly Design**: Enlarged buttons (h-16/h-20), text (text-3xl/text-4xl), and simplified navigation for elderly users
+- July 14, 2025. **"ZONE & GRUPPI" MANAGEMENT SYSTEM**: Complete implementation of hybrid group-based quota management for Cison reserve
+  - **New Management Type**: Added "zones_groups" management type to reserves table for hybrid zone-group system
+  - **Group Quotas Table**: Created wildlife_quotas_groups table with hunterGroup field (A,B,C,D) and proper category support
+  - **Hunter Group Selection**: Enhanced registration form with group selector for reserves using zones_groups management
+  - **Dual Dashboard System**: Admin sees all groups' quotas with GroupQuotasManager component, hunters see only their group quotas
+  - **API Routes**: Added /api/group-quotas endpoints for complete CRUD operations on group-specific quotas
+  - **Database Seeds**: Automatic creation of 4 groups × 9 categories = 36 quotas when zones_groups reserve is created
+  - **Quota Distribution**: Default quotas per group - Capriolo: M0(3), F0(2), FA(3), M1(2), MA(1); Cervo: CL0(1), FF(2), MM(1), MCL1(1)
+  - **Zone Independence**: Physical zones remain global and accessible to all groups while quotas are group-specific
+  - **Complete Integration**: Full workflow from SuperAdmin reserve creation → Admin hunter registration → Group quota management
 
 # User Preferences
 
