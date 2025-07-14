@@ -42,8 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin limitations routes
   const limitationsRoutes = await import("./routes/limitations");
-  app.post("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.saveLimitations);
-  app.get("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.getLimitations);
+  app.post("/api/admin/limitations", authenticateToken, limitationsRoutes.saveLimitations);
+  app.get("/api/admin/limitations", authenticateToken, limitationsRoutes.getLimitations);
   
   // Endpoint per verificare limiti stagionali di specie
   app.get("/api/limitations/check-species/:species/:hunterId", authenticateToken, async (req: AuthRequest, res: Response) => {

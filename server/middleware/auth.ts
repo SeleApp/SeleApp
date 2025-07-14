@@ -52,13 +52,14 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   }
 }
 
-export function requireRole(role: string) {
+export function requireRole(roles: string | string[]) {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: "Autenticazione richiesta" });
     }
 
-    if (req.user.role !== role) {
+    const allowedRoles = Array.isArray(roles) ? roles : [roles];
+    if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({ message: "Permessi insufficienti" });
     }
 

@@ -462,6 +462,14 @@ Changelog:
   - **Date Selection Enhanced**: Extended calendar to show 15 available dates with clear debug logging for troubleshooting
   - **Complete System Verification**: All core functions operational - reservations, reports, quota tracking, email notifications
   - **Real-time Quota Display**: Dashboard now correctly shows updated harvest counts (F0: 1/5, FF: 2/7) in regional quotas tab
+- July 14, 2025. **SEASONAL SPECIES LIMITATIONS SYSTEM**: Implemented strict seasonal hunting limits for elderly-friendly wildlife management
+  - **Rigid Species Limits**: Added configurable seasonal limits - default 2 roe deer and 1 red deer per hunter per season
+  - **Customizable Interface**: Admin can modify limits directly in dashboard (0-10 caprioli, 0-5 cervi) with real-time save
+  - **Automated Enforcement**: System automatically blocks reservations when seasonal limits reached using hunt_reports database integration
+  - **Enhanced UI**: Large, accessible interface elements optimized for users over 50 with clear visual indicators
+  - **Database Integration**: Real-time counting of seasonal harvests with proper species category tracking (M0,F0,FA,M1,MA for roe deer; CL0,FF,MM,MCL1 for red deer)
+  - **API Endpoints**: Added /api/limitations/check-species for real-time limit verification during booking process
+  - **Senior-Friendly Design**: Enlarged buttons (h-16/h-20), text (text-3xl/text-4xl), and simplified navigation for elderly users
 
 # User Preferences
 
