@@ -54,13 +54,23 @@ const defaultLimitations: SimpleLimitation[] = [
     category: 'cacciatori'
   },
   {
-    id: 'monthly_harvest_limit',
-    title: 'Capi per Mese',
-    description: 'Massimo numero di capi che un cacciatore può abbattere in un mese',
+    id: 'booking_time_limit',
+    title: 'Limitazione Oraria',
+    description: 'Orario limite entro cui i cacciatori possono effettuare prenotazioni (formato 24h, es: 18 = ore 18:00)',
+    icon: Clock,
+    enabled: false,
+    value: 18,
+    unit: 'ore',
+    category: 'prenotazioni'
+  },
+  {
+    id: 'species_limitations',
+    title: 'Limitazioni per Specie',
+    description: 'Configurazione limitazioni specifiche per ogni specie presente nella riserva',
     icon: Target,
     enabled: false,
-    value: 3,
-    unit: 'capi',
+    value: 0,
+    unit: 'specie',
     category: 'capi'
   },
   {
@@ -261,19 +271,79 @@ export function SimpleLimitationsManager() {
                 
                 {limitation.enabled && (
                   <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                    <Label className="text-base sm:text-lg font-medium">Valore Limite</Label>
-                    <div className="flex items-center gap-3">
-                      <Input
-                        type="number"
-                        min="1"
-                        value={limitation.value}
-                        onChange={(e) => updateLimitationValue(limitation.id, parseInt(e.target.value) || 1)}
-                        className="w-24 h-12 text-center font-semibold text-lg"
-                      />
-                      <span className="text-base sm:text-lg text-gray-600 font-medium">
-                        {limitation.unit}
-                      </span>
-                    </div>
+                    {limitation.id === 'booking_time_limit' ? (
+                      <div className="space-y-3">
+                        <Label className="text-base sm:text-lg font-medium text-amber-700">Orario Limite Prenotazioni</Label>
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={limitation.value}
+                            onChange={(e) => updateLimitationValue(limitation.id, parseInt(e.target.value) || 18)}
+                            className="w-24 h-12 text-center font-semibold text-lg"
+                            placeholder="18"
+                          />
+                          <span className="text-base sm:text-lg text-amber-700 font-medium">:00</span>
+                        </div>
+                        <div className="p-3 bg-amber-100 rounded-lg border border-amber-300">
+                          <p className="text-sm text-amber-800">
+                            <strong>Effetto:</strong> I cacciatori potranno prenotare solo entro le ore {limitation.value}:00. 
+                            Dopo questo orario le prenotazioni saranno bloccate.
+                          </p>
+                        </div>
+                      </div>
+                    ) : limitation.id === 'species_limitations' ? (
+                      <div className="space-y-3">
+                        <Label className="text-base sm:text-lg font-medium text-green-700">Configurazione Specie</Label>
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="p-3 border border-green-200 rounded-lg bg-green-50">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-green-800">Capriolo (Capreolus capreolus)</h4>
+                                <p className="text-sm text-green-600">5 categorie disponibili</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm font-medium text-green-700">M0, F0, FA, M1, MA</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-3 border border-red-200 rounded-lg bg-red-50">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-red-800">Cervo (Cervus elaphus)</h4>
+                                <p className="text-sm text-red-600">4 categorie disponibili</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm font-medium text-red-700">CL0, FF, MM, MCL1</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-blue-100 rounded-lg border border-blue-300">
+                          <p className="text-sm text-blue-800">
+                            <strong>Gestione automatica:</strong> Le limitazioni sono applicate automaticamente 
+                            in base alle quote regionali attive per ogni specie e categoria.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <Label className="text-base sm:text-lg font-medium">Valore Limite</Label>
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="number"
+                            min="1"
+                            value={limitation.value}
+                            onChange={(e) => updateLimitationValue(limitation.id, parseInt(e.target.value) || 1)}
+                            className="w-24 h-12 text-center font-semibold text-lg"
+                          />
+                          <span className="text-base sm:text-lg text-gray-600 font-medium">
+                            {limitation.unit}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
