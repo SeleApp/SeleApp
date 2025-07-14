@@ -134,7 +134,7 @@ export async function saveLimitations(req: AuthRequest, res: Response) {
     
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN')) {
       console.log('🚫 Access denied - User role:', user?.role);
-      return res.status(403).json({ error: "Accesso negato - Solo ADMIN e SUPERADMIN" });
+      return res.status(403).json({ message: "Permessi insufficienti" });
     }
 
     const userId = user.id;
@@ -194,7 +194,7 @@ export async function getLimitations(req: AuthRequest, res: Response) {
         email: user?.email,
         reserveId: user?.reserveId 
       });
-      return res.status(403).json({ error: "Accesso negato - Solo ADMIN e SUPERADMIN" });
+      return res.status(403).json({ message: "Permessi insufficienti" });
     }
 
     const reserveId = user.reserveId;

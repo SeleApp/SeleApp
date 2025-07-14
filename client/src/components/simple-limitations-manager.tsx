@@ -20,6 +20,20 @@ interface SimpleLimitation {
   value: number;
   unit: string;
   category: 'prenotazioni' | 'zone' | 'cacciatori' | 'capi';
+  metadata?: {
+    timeLimit?: number;
+    speciesConfig?: {
+      [species: string]: {
+        enabled: boolean;
+        limits: { 
+          seasonal_max?: number;
+          description?: string;
+          categories?: string[];
+          [key: string]: any;
+        };
+      };
+    };
+  };
 }
 
 const defaultLimitations: SimpleLimitation[] = [
@@ -140,6 +154,36 @@ export function SimpleLimitationsManager() {
         limit.id === id ? { ...limit, enabled: !limit.enabled } : limit
       )
     );
+  };
+
+  // Funzione per aggiornare i limiti per specie
+  const updateSpeciesLimit = (species: 'roe_deer' | 'red_deer', newLimit: number) => {
+    setLimitations(prev => 
+      prev.map(limit => {
+        if (limit.id === 'seasonal_species_limits') {
+          const updatedMetadata = {
+            ...limit.metadata,
+            speciesConfig: {
+              ...limit.metadata?.speciesConfig,
+              [species]: {
+                ...limit.metadata?.speciesConfig?.[species],
+                limits: {
+                  ...limit.metadata?.speciesConfig?.[species]?.limits,
+                  seasonal_max: newLimit
+                }
+              }
+            }
+          };
+          return { ...limit, metadata: updatedMetadata, value: newLimit };
+        }
+        return limit;
+      })
+    );
+    
+    // Auto-salva le modifiche
+    setTimeout(() => {
+      saveLimitationsMutation.mutate(limitations);
+    }, 500);
   };
 
   const updateLimitationValue = (id: string, value: number) => {
@@ -295,7 +339,7 @@ export function SimpleLimitationsManager() {
                       </div>
                     ) : limitation.id === 'seasonal_species_limits' ? (
                       <div className="space-y-4">
-                        <Label className="text-base sm:text-lg font-medium text-red-700">Limiti Stagionali Rigidi</Label>
+                        <Label className="text-base sm:text-lg font-medium text-red-700">Limiti Stagionali Personalizzabili</Label>
                         
                         <div className="grid grid-cols-1 gap-4">
                           <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50">
@@ -304,9 +348,20 @@ export function SimpleLimitationsManager() {
                                 <h4 className="font-bold text-green-800 text-lg">🦌 Capriolo</h4>
                                 <p className="text-sm text-green-600">Capreolus capreolus</p>
                               </div>
-                              <div className="text-right">
-                                <span className="text-2xl font-bold text-green-700">MAX 2</span>
-                                <p className="text-xs text-green-600">per stagione</p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-green-700">MAX</span>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="10"
+                                  value={limitation.metadata?.speciesConfig?.roe_deer?.limits?.seasonal_max || 2}
+                                  onChange={(e) => {
+                                    const newValue = parseInt(e.target.value) || 0;
+                                    updateSpeciesLimit('roe_deer', newValue);
+                                  }}
+                                  className="w-16 h-10 text-center text-lg font-bold text-green-700 border-green-300"
+                                />
+                                <span className="text-sm text-green-700">per stagione</span>
                               </div>
                             </div>
                             <div className="text-sm text-green-700">
@@ -320,9 +375,20 @@ export function SimpleLimitationsManager() {
                                 <h4 className="font-bold text-red-800 text-lg">🦌 Cervo</h4>
                                 <p className="text-sm text-red-600">Cervus elaphus</p>
                               </div>
-                              <div className="text-right">
-                                <span className="text-2xl font-bold text-red-700">MAX 1</span>
-                                <p className="text-xs text-red-600">per stagione</p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-red-700">MAX</span>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="5"
+                                  value={limitation.metadata?.speciesConfig?.red_deer?.limits?.seasonal_max || 1}
+                                  onChange={(e) => {
+                                    const newValue = parseInt(e.target.value) || 0;
+                                    updateSpeciesLimit('red_deer', newValue);
+                                  }}
+                                  className="w-16 h-10 text-center text-lg font-bold text-red-700 border-red-300"
+                                />
+                                <span className="text-sm text-red-700">per stagione</span>
                               </div>
                             </div>
                             <div className="text-sm text-red-700">
@@ -337,6 +403,7 @@ export function SimpleLimitationsManager() {
                             <li>• Il sistema blocca automaticamente le prenotazioni quando il limite è raggiunto</li>
                             <li>• Il conteggio viene resettato all'inizio di ogni nuova stagione</li>
                             <li>• Controllo in tempo reale sui report di abbattimento</li>
+                            <li>• <strong>Modifica i valori sopra</strong> per personalizzare i limiti per specie</li>
                           </ul>
                         </div>
                       </div>
