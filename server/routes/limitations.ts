@@ -89,25 +89,29 @@ const defaultLimitations: LimitationConfig[] = [
     }
   },
   {
-    id: 'species_limitations',
-    title: 'Limitazioni per Specie',
-    description: 'Configurazione limitazioni specifiche per ogni specie presente nella riserva',
+    id: 'seasonal_species_limits',
+    title: 'Limiti Stagionali per Specie',
+    description: 'Massimo numero di capi per specie che un cacciatore può abbattere in una stagione',
     enabled: false,
-    value: 0,
-    unit: 'specie',
+    value: 3,
+    unit: 'capi totali',
     category: 'capi',
     metadata: {
       speciesConfig: {
         'roe_deer': {
           enabled: true,
           limits: {
-            'M0': 10, 'F0': 15, 'FA': 20, 'M1': 8, 'MA': 5
+            'seasonal_max': 2,
+            'description': 'Massimo 2 caprioli per stagione (tutte le categorie)',
+            'categories': ['M0', 'F0', 'FA', 'M1', 'MA']
           }
         },
         'red_deer': {
           enabled: true,
           limits: {
-            'CL0': 3, 'FF': 5, 'MM': 2, 'MCL1': 4
+            'seasonal_max': 1,
+            'description': 'Massimo 1 cervo per stagione (tutte le categorie)',
+            'categories': ['CL0', 'FF', 'MM', 'MCL1']
           }
         }
       }
@@ -184,7 +188,12 @@ export async function getLimitations(req: AuthRequest, res: Response) {
     const user = req.user;
     
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN')) {
-      console.log('🚫 Get limitations access denied - User role:', user?.role);
+      console.log('🚫 Get limitations access denied - User:', { 
+        exists: !!user, 
+        role: user?.role, 
+        email: user?.email,
+        reserveId: user?.reserveId 
+      });
       return res.status(403).json({ error: "Accesso negato - Solo ADMIN e SUPERADMIN" });
     }
 
@@ -227,11 +236,11 @@ export async function checkLimitationViolation(
   
   const limitations = limitationsStorage[reserveId];
   
-  if (!limitations || !limitations.limitations) {
+  if (!limitations) {
     return { violated: false };
   }
 
-  const activeLimitations = limitations.limitations.filter((l: any) => l.enabled);
+  const activeLimitations = limitations.filter((l: any) => l.enabled);
   
   for (const limitation of activeLimitations) {
     // Controlla violazioni specifiche
@@ -244,4 +253,91 @@ export async function checkLimitationViolation(
   }
 
   return { violated: false };
+}
+
+// Nuova funzione per controllare limiti stagionali per specie
+export async function checkSeasonalSpeciesLimit(
+  reserveId: string,
+  hunterId: number,
+  species: 'roe_deer' | 'red_deer',
+  season: string = '2024-2025'
+): Promise<{ canHunt: boolean; currentCount: number; maxAllowed: number; message?: string }> {
+  
+  // Ottieni le limitazioni attive per questa riserva
+  const limitations = limitationsStorage[reserveId];
+  if (!limitations) {
+    return { canHunt: true, currentCount: 0, maxAllowed: 999 };
+  }
+
+  // Trova la limitazione per i limiti stagionali delle specie
+  const seasonalLimits = limitations.find((l: any) => l.id === 'seasonal_species_limits' && l.enabled);
+  if (!seasonalLimits?.metadata?.speciesConfig?.[species]) {
+    return { canHunt: true, currentCount: 0, maxAllowed: 999 };
+  }
+
+  const maxAllowed = seasonalLimits.metadata.speciesConfig[species].limits.seasonal_max;
+
+  // Qui dovremmo contare i prelievi del cacciatore per questa specie nella stagione corrente
+  // Per ora simuliamo il conteggio - in produzione integrare con il database dei report
+  const currentCount = await getHunterSeasonalHarvest(hunterId, species, season);
+
+  const canHunt = currentCount < maxAllowed;
+  
+  if (!canHunt) {
+    const speciesName = species === 'roe_deer' ? 'caprioli' : 'cervi';
+    return {
+      canHunt: false,
+      currentCount,
+      maxAllowed,
+      message: `Limite stagionale raggiunto: hai già abbattuto ${currentCount}/${maxAllowed} ${speciesName} in questa stagione`
+    };
+  }
+
+  return { canHunt: true, currentCount, maxAllowed };
+}
+
+// Integro il conteggio reale dei prelievi stagionali con il database
+async function getHunterSeasonalHarvest(
+  hunterId: number, 
+  species: 'roe_deer' | 'red_deer', 
+  season: string
+): Promise<number> {
+  try {
+    // Calcolo date di inizio e fine stagione (settembre-gennaio tipicamente)
+    const seasonYear = parseInt(season.split('-')[0]);
+    const seasonStart = new Date(`${seasonYear}-09-01`);
+    const seasonEnd = new Date(`${seasonYear + 1}-01-31`);
+    
+    // Importo il database per fare la query reale
+    const { db } = await import('../db.js');
+    const { huntReports, reservations } = await import('../../shared/schema.js');
+    const { eq, and, gte, lte, sql } = await import('drizzle-orm');
+    
+    // Query per contare i prelievi della specie specifica per il cacciatore nella stagione
+    const speciesColumn = species === 'roe_deer' ? 'roeDeerCategory' : 'redDeerCategory';
+    
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(huntReports)
+      .innerJoin(reservations, eq(huntReports.reservationId, reservations.id))
+      .where(
+        and(
+          eq(reservations.hunterId, hunterId),
+          eq(huntReports.outcome, 'harvest'),
+          // Controlla che la categoria della specie non sia null (indica che è stata abbattuta)
+          sql`${huntReports[speciesColumn]} IS NOT NULL`,
+          gte(huntReports.reportedAt, seasonStart),
+          lte(huntReports.reportedAt, seasonEnd)
+        )
+      );
+    
+    const harvestCount = result[0]?.count || 0;
+    
+    console.log(`🎯 Conteggio prelievi stagionali - Cacciatore ${hunterId}, Specie ${species}: ${harvestCount}`);
+    return harvestCount;
+    
+  } catch (error) {
+    console.error('Errore nel conteggio prelievi stagionali:', error);
+    return 0; // In caso di errore, permetti la caccia
+  }
 }

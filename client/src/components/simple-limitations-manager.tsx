@@ -64,13 +64,13 @@ const defaultLimitations: SimpleLimitation[] = [
     category: 'prenotazioni'
   },
   {
-    id: 'species_limitations',
-    title: 'Limitazioni per Specie',
-    description: 'Configurazione limitazioni specifiche per ogni specie presente nella riserva',
+    id: 'seasonal_species_limits',
+    title: 'Limiti Stagionali per Specie',
+    description: 'Massimo numero di capi per specie che un cacciatore può abbattere in una stagione completa',
     icon: Target,
     enabled: false,
-    value: 0,
-    unit: 'specie',
+    value: 3,
+    unit: 'capi totali',
     category: 'capi'
   },
   {
@@ -293,38 +293,51 @@ export function SimpleLimitationsManager() {
                           </p>
                         </div>
                       </div>
-                    ) : limitation.id === 'species_limitations' ? (
-                      <div className="space-y-3">
-                        <Label className="text-base sm:text-lg font-medium text-green-700">Configurazione Specie</Label>
-                        <div className="grid grid-cols-1 gap-3">
-                          <div className="p-3 border border-green-200 rounded-lg bg-green-50">
-                            <div className="flex items-center justify-between">
+                    ) : limitation.id === 'seasonal_species_limits' ? (
+                      <div className="space-y-4">
+                        <Label className="text-base sm:text-lg font-medium text-red-700">Limiti Stagionali Rigidi</Label>
+                        
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="p-4 border-2 border-green-300 rounded-lg bg-green-50">
+                            <div className="flex items-center justify-between mb-3">
                               <div>
-                                <h4 className="font-medium text-green-800">Capriolo (Capreolus capreolus)</h4>
-                                <p className="text-sm text-green-600">5 categorie disponibili</p>
+                                <h4 className="font-bold text-green-800 text-lg">🦌 Capriolo</h4>
+                                <p className="text-sm text-green-600">Capreolus capreolus</p>
                               </div>
                               <div className="text-right">
-                                <span className="text-sm font-medium text-green-700">M0, F0, FA, M1, MA</span>
+                                <span className="text-2xl font-bold text-green-700">MAX 2</span>
+                                <p className="text-xs text-green-600">per stagione</p>
                               </div>
                             </div>
+                            <div className="text-sm text-green-700">
+                              <strong>Categorie incluse:</strong> M0, F0, FA, M1, MA
+                            </div>
                           </div>
-                          <div className="p-3 border border-red-200 rounded-lg bg-red-50">
-                            <div className="flex items-center justify-between">
+                          
+                          <div className="p-4 border-2 border-red-300 rounded-lg bg-red-50">
+                            <div className="flex items-center justify-between mb-3">
                               <div>
-                                <h4 className="font-medium text-red-800">Cervo (Cervus elaphus)</h4>
-                                <p className="text-sm text-red-600">4 categorie disponibili</p>
+                                <h4 className="font-bold text-red-800 text-lg">🦌 Cervo</h4>
+                                <p className="text-sm text-red-600">Cervus elaphus</p>
                               </div>
                               <div className="text-right">
-                                <span className="text-sm font-medium text-red-700">CL0, FF, MM, MCL1</span>
+                                <span className="text-2xl font-bold text-red-700">MAX 1</span>
+                                <p className="text-xs text-red-600">per stagione</p>
                               </div>
+                            </div>
+                            <div className="text-sm text-red-700">
+                              <strong>Categorie incluse:</strong> CL0, FF, MM, MCL1
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg border border-blue-300">
-                          <p className="text-sm text-blue-800">
-                            <strong>Gestione automatica:</strong> Le limitazioni sono applicate automaticamente 
-                            in base alle quote regionali attive per ogni specie e categoria.
-                          </p>
+                        
+                        <div className="p-4 bg-orange-100 rounded-lg border border-orange-300">
+                          <h5 className="font-bold text-orange-800 mb-2">⚠️ Controllo Automatico</h5>
+                          <ul className="text-sm text-orange-800 space-y-1">
+                            <li>• Il sistema blocca automaticamente le prenotazioni quando il limite è raggiunto</li>
+                            <li>• Il conteggio viene resettato all'inizio di ogni nuova stagione</li>
+                            <li>• Controllo in tempo reale sui report di abbattimento</li>
+                          </ul>
                         </div>
                       </div>
                     ) : (

@@ -45,6 +45,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.saveLimitations);
   app.get("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.getLimitations);
   
+  // Endpoint per verificare limiti stagionali di specie
+  app.get("/api/limitations/check-species/:species/:hunterId", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const { species, hunterId } = req.params;
+      const user = req.user;
+      
+      if (!user?.reserveId) {
+        return res.status(400).json({ error: "Riserva non identificata" });
+      }
+      
+      const result = await limitationsRoutes.checkSeasonalSpeciesLimit(
+        user.reserveId, 
+        parseInt(hunterId), 
+        species as 'roe_deer' | 'red_deer'
+      );
+      
+      console.log(`🎯 Controllo limiti specie ${species} per cacciatore ${hunterId}:`, result);
+      res.json(result);
+    } catch (error: any) {
+      console.error('Errore controllo limiti specie:', error);
+      res.status(500).json({ error: 'Errore interno del server' });
+    }
+  });
+  
   // Access codes routes (SUPERADMIN only)
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
