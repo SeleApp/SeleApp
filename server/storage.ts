@@ -1014,6 +1014,50 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async deleteHuntReport(id: number, reserveId: string): Promise<boolean> {
+    try {
+      console.log(`🗑️ Deleting hunt report ${id} for reserve ${reserveId}`);
+      
+      // Ottieni il report prima di eliminarlo per gestire il ripristino quote
+      const [reportToDelete] = await db
+        .select()
+        .from(huntReports)
+        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)));
+
+      if (!reportToDelete) {
+        console.log(`❌ Report ${id} not found in reserve ${reserveId}`);
+        return false;
+      }
+
+      // Se era un prelievo, ripristina la quota prima dell'eliminazione
+      if (reportToDelete.outcome === 'harvest' && reportToDelete.species) {
+        console.log(`♻️ Restoring quota for deleted harvest: ${reportToDelete.species}`);
+        const category = reportToDelete.species === 'roe_deer' 
+          ? reportToDelete.roeDeerCategory! 
+          : reportToDelete.redDeerCategory!;
+        await this.restoreRegionalQuotaAfterDelete(reportToDelete.species, category, reserveId);
+      }
+
+      // Elimina il report
+      const deleteResult = await db
+        .delete(huntReports)
+        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)))
+        .returning();
+
+      if (deleteResult.length > 0) {
+        console.log(`✅ Report ${id} deleted successfully`);
+        return true;
+      } else {
+        console.log(`❌ Failed to delete report ${id}`);
+        return false;
+      }
+
+    } catch (error) {
+      console.error("❌ Error deleting hunt report:", error);
+      throw error;
+    }
+  }
+
   async deleteHuntReport(id: number, reserveId: string): Promise<void> {
     try {
       // Prima di eliminare, ottieni i dettagli del report per ripristinare le quote

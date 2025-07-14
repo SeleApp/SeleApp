@@ -40,6 +40,12 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteReport = (reportId: number, hunterName: string, zoneName: string) => {
+    if (window.confirm(`Sei sicuro di voler eliminare il report di ${hunterName} per la zona ${zoneName}? Questa azione ripristinerà automaticamente le quote regionali se era un prelievo.`)) {
+      deleteReportMutation.mutate(reportId);
+    }
+  };
+
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["/api/admin/stats"],
   });
@@ -60,6 +66,10 @@ export default function AdminDashboard() {
 
   const { data: currentReserve } = useQuery({
     queryKey: ["/api/current-reserve"],
+  });
+
+  const { data: reports = [], isLoading: isLoadingReports } = useQuery({
+    queryKey: ["/api/reports"],
   });
 
   const cancelReservationMutation = useMutation({
@@ -84,8 +94,27 @@ export default function AdminDashboard() {
     },
   });
 
-  const { data: reports = [] } = useQuery({
-    queryKey: ["/api/reports"],
+  const deleteReportMutation = useMutation({
+    mutationFn: async (reportId: number) => {
+      return await apiRequest(`/api/reports/${reportId}`, {
+        method: "DELETE"
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Report eliminato",
+        description: "Il report è stato eliminato con successo e le quote sono state ripristinate.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/regional-quotas"] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: error.message || "Errore nell'eliminazione del report",
+      });
+    },
   });
 
   const updateRegionalQuotaMutation = useMutation({
@@ -1044,6 +1073,7 @@ export default function AdminDashboard() {
                           <TableHead>Dettagli Prelievo</TableHead>
                           <TableHead>Foto</TableHead>
                           <TableHead>Note</TableHead>
+                          <TableHead>Azioni</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1115,6 +1145,23 @@ export default function AdminDashboard() {
                               <div className="max-w-[200px] truncate text-sm text-gray-600">
                                 {report.notes || '-'}
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteReport(
+                                  report.id, 
+                                  `${report.reservation?.hunter?.firstName} ${report.reservation?.hunter?.lastName}`,
+                                  report.reservation?.zone?.name || `Zona ${report.reservation?.zoneId}`
+                                )}
+                                className="text-xs px-2 py-1 h-7"
+                                disabled={deleteReportMutation.isPending}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                <span className="hidden sm:inline">Elimina</span>
+                                <span className="sm:hidden">X</span>
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}

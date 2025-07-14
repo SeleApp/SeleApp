@@ -224,4 +224,60 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// DELETE /api/reports/:id - Solo ADMIN può eliminare report
+router.delete("/:id", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    if (req.user?.role !== 'ADMIN' && req.user?.role !== 'SUPERADMIN') {
+      return res.status(403).json({ 
+        message: "Solo gli amministratori possono eliminare report" 
+      });
+    }
+
+    const reportId = parseInt(req.params.id);
+    if (isNaN(reportId)) {
+      return res.status(400).json({ 
+        message: "ID report non valido" 
+      });
+    }
+
+    console.log(`🗑️ Admin ${req.user.email} sta eliminando report ${reportId}`);
+
+    // Ottieni il report prima di eliminarlo per verifica e logging
+    const reports = await storage.getHuntReports(req.user.reserveId);
+    const reportToDelete = reports.find(r => r.id === reportId);
+    
+    if (!reportToDelete) {
+      return res.status(404).json({ 
+        message: "Report non trovato" 
+      });
+    }
+
+    // Elimina il report dal database
+    const deleteResult = await storage.deleteHuntReport(reportId, req.user.reserveId);
+    
+    if (!deleteResult) {
+      return res.status(500).json({ 
+        message: "Errore nell'eliminazione del report" 
+      });
+    }
+
+    console.log(`✅ Report ${reportId} eliminato con successo. Outcome era: ${reportToDelete.outcome}`);
+
+    res.json({ 
+      success: true,
+      message: "Report eliminato con successo",
+      info: reportToDelete.outcome === 'harvest' 
+        ? "Le quote regionali sono state ripristinate automaticamente"
+        : "Nessuna quota da ripristinare (report senza prelievo)"
+    });
+
+  } catch (error) {
+    console.error("❌ Errore nell'eliminazione del report:", error);
+    res.status(500).json({ 
+      message: "Errore nell'eliminazione del report",
+      error: error instanceof Error ? error.message : "Errore sconosciuto"
+    });
+  }
+});
+
 export default router;
