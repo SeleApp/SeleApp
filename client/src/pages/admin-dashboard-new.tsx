@@ -1196,7 +1196,38 @@ export default function AdminDashboard() {
           {/* Rules Management Tab */}
           <TabsContent value="rules">
             <div className="space-y-6">
-              <AdminLimitationsConfig />
+              <div className="p-6 bg-white rounded-lg shadow">
+                <h2 className="text-xl font-bold mb-4">🔧 Configurazione Limitazioni</h2>
+                <p className="text-gray-600 mb-6">
+                  Sistema di gestione limitazioni per i cacciatori della riserva
+                </p>
+                
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold text-blue-700">Cooldown Zone</h3>
+                    <p className="text-sm text-gray-600">Tempo di attesa prima di riprenotare la stessa zona</p>
+                    <Badge variant="outline" className="mt-2">Configurabile</Badge>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold text-green-700">Limiti di Prelievo</h3>
+                    <p className="text-sm text-gray-600">Massimo capi per stagione/mese/settimana</p>
+                    <Badge variant="outline" className="mt-2">Configurabile</Badge>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold text-purple-700">Restrizioni Temporali</h3>
+                    <p className="text-sm text-gray-600">Limitazioni in periodi specifici</p>
+                    <Badge variant="outline" className="mt-2">Configurabile</Badge>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-blue-800 font-medium">✨ Sistema Limitazioni Avanzato</p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    Usa il sistema di regole avanzato qui sotto per configurare limitazioni personalizzate
+                  </p>
+                </div>
+              </div>
+              
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Gestione Avanzata Regole</h3>
                 <AdminRulesManager />

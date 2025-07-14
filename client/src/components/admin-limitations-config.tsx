@@ -16,7 +16,7 @@ interface LimitationConfig {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: any;
   category: 'zone' | 'harvest' | 'temporal';
   enabled: boolean;
   settings: Record<string, any>;
