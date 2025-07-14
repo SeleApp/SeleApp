@@ -22,25 +22,35 @@ let limitationsStorage: Record<string, any> = {};
 
 export async function saveLimitations(req: AuthRequest, res: Response) {
   try {
-    const userId = req.user?.id;
-    const reserveId = req.user?.reserveId;
+    const user = req.user;
     
-    if (!userId || !reserveId) {
-      return res.status(401).json({ error: "Non autorizzato" });
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN')) {
+      console.log('🚫 Access denied - User role:', user?.role);
+      return res.status(403).json({ error: "Accesso negato - Solo ADMIN e SUPERADMIN" });
     }
+
+    const userId = user.id;
+    const reserveId = user.reserveId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: "Utente non identificato" });
+    }
+
+    console.log('✅ Limitations access granted for user:', { userId, role: user.role, reserveId });
 
     // Valida i dati in input
     const validatedData = limitationsRequestSchema.parse(req.body);
     
-    // Salva le limitazioni per questa riserva
-    limitationsStorage[reserveId] = {
-      reserveId,
+    // Salva le limitazioni per questa riserva (usa un ID di default se SUPERADMIN senza reserveId)
+    const storageKey = reserveId || `superadmin_${userId}`;
+    limitationsStorage[storageKey] = {
+      reserveId: storageKey,
       limitations: validatedData.limitations,
       updatedAt: new Date().toISOString(),
       updatedBy: userId
     };
 
-    console.log(`Limitazioni salvate per riserva ${reserveId}:`, {
+    console.log(`Limitazioni salvate per riserva ${storageKey}:`, {
       activeLimitations: validatedData.limitations.filter(l => l.enabled).length,
       totalLimitations: validatedData.limitations.length
     });
@@ -48,7 +58,7 @@ export async function saveLimitations(req: AuthRequest, res: Response) {
     res.json({
       success: true,
       message: "Limitazioni salvate con successo",
-      data: limitationsStorage[reserveId]
+      data: limitationsStorage[storageKey]
     });
 
   } catch (error: any) {
@@ -70,14 +80,19 @@ export async function saveLimitations(req: AuthRequest, res: Response) {
 
 export async function getLimitations(req: AuthRequest, res: Response) {
   try {
-    const reserveId = req.user?.reserveId;
+    const user = req.user;
     
-    if (!reserveId) {
-      return res.status(401).json({ error: "Non autorizzato" });
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN')) {
+      console.log('🚫 Get limitations access denied - User role:', user?.role);
+      return res.status(403).json({ error: "Accesso negato - Solo ADMIN e SUPERADMIN" });
     }
 
-    // Recupera le limitazioni per questa riserva
-    const limitations = limitationsStorage[reserveId];
+    const reserveId = user.reserveId;
+    console.log('✅ Get limitations access granted for user:', { userId: user.id, role: user.role, reserveId });
+
+    // Recupera le limitazioni per questa riserva (usa un ID di default se SUPERADMIN senza reserveId)
+    const storageKey = reserveId || `superadmin_${user.id}`;
+    const limitations = limitationsStorage[storageKey];
     
     if (!limitations) {
       return res.json({
