@@ -40,6 +40,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const adminRulesRoutes = await import("./routes/admin-rules");
   app.use("/api/admin/rules", adminRulesRoutes.default);
   
+  // Admin limitations routes
+  const limitationsRoutes = await import("./routes/limitations");
+  app.post("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.saveLimitations);
+  app.get("/api/admin/limitations", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), limitationsRoutes.getLimitations);
+  
   // Access codes routes (SUPERADMIN only)
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
