@@ -455,7 +455,7 @@ export default function AdminDashboard() {
             >
               <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Configurazione</span>
-              <span className="sm:hidden">Config</span>
+              <span className="sm:hidden">Configurazione Limitazioni</span>
             </Button>
           </div>
         </div>
