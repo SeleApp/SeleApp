@@ -222,6 +222,32 @@ export default function AccessCodeRegistration({ onSuccess, onCancel }: AccessCo
             </p>
           </div>
 
+          {/* Selezione Gruppo (solo per Cison di Valmarino) */}
+          {form.watch("reserveId") === "cison-valmarino" && (
+            <div>
+              <Label htmlFor="hunterGroup">Gruppo di Appartenenza</Label>
+              <Select value={form.watch("hunterGroup") || ""} onValueChange={(value) => form.setValue("hunterGroup", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona il tuo gruppo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">Gruppo A</SelectItem>
+                  <SelectItem value="B">Gruppo B</SelectItem>
+                  <SelectItem value="C">Gruppo C</SelectItem>
+                  <SelectItem value="D">Gruppo D</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-600 mt-1">
+                Per la riserva di Cison di Valmarino è obbligatorio specificare il gruppo di appartenenza
+              </p>
+              {form.formState.errors.hunterGroup && (
+                <p className="text-sm text-red-600 mt-1">
+                  {form.formState.errors.hunterGroup.message}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Password */}
           <div>
             <Label htmlFor="password">Password</Label>
