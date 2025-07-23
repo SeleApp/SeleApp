@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Users, Target, Settings, Save } from "lucide-react";
+import { Users, Target, Settings, Save, Plus, Minus } from "lucide-react";
 
 interface GroupQuota {
   id: number;
@@ -375,16 +375,36 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                               {currentQuota}
                             </div>
                           ) : (
-                            <div className="col-span-3">
+                            <div className="col-span-3 flex items-center gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0 flex-shrink-0"
+                                disabled={updateQuotasMutation.isPending || displayQuota <= 0}
+                                onClick={() => handleQuotaChange(species, category, String(Math.max(0, displayQuota - 1)))}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
                               <Input
                                 type="number"
                                 min="0"
                                 max="99"
                                 value={displayQuota}
                                 onChange={(e) => handleQuotaChange(species, category, e.target.value)}
-                                className={`text-center ${pendingChange !== undefined ? 'border-blue-500 bg-blue-50' : ''}`}
+                                className={`text-center flex-1 ${pendingChange !== undefined ? 'border-blue-500 bg-blue-50' : ''}`}
                                 disabled={updateQuotasMutation.isPending}
                               />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0 flex-shrink-0"
+                                disabled={updateQuotasMutation.isPending}
+                                onClick={() => handleQuotaChange(species, category, String(displayQuota + 1))}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
                             </div>
                           )}
                           
