@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Plus, Edit, Save, Upload, FileText, AlertCircle, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import ImportRegionalQuotas from "@/components/import-regional-quotas";
 
 interface SuperAdminRegionalQuotasProps {
   reserves: Array<{
