@@ -163,7 +163,9 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reserves.map(reserve => {
+              {reserves
+                .filter(reserve => reserve.id !== 'valle-demo') // Escludi riserva demo
+                .map(reserve => {
                 const reserveQuotas = quotasByReserve[reserve.id] || [];
                 const speciesCount = new Set(reserveQuotas.map((q: any) => q.species)).size;
                 const totalQuotas = reserveQuotas.reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
@@ -270,6 +272,78 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
                   </TableRow>
                 );
               })}
+              
+              {/* Riga totali */}
+              {(() => {
+                // Calcola totali escludendo valle-demo
+                const validReserves = reserves.filter(r => r.id !== 'valle-demo');
+                const totalRoeDeer = allQuotas
+                  .filter((q: any) => q.species === 'roe_deer' && q.reserveId !== 'valle-demo')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                const totalRedDeer = allQuotas
+                  .filter((q: any) => q.species === 'red_deer' && q.reserveId !== 'valle-demo')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                const totalFallowDeer = allQuotas
+                  .filter((q: any) => q.species === 'fallow_deer' && q.reserveId !== 'valle-demo')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                const totalMouflon = allQuotas
+                  .filter((q: any) => q.species === 'mouflon' && q.reserveId !== 'valle-demo')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                const totalChamois = allQuotas
+                  .filter((q: any) => q.species === 'chamois' && q.reserveId !== 'valle-demo')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                const grandTotal = totalRoeDeer + totalRedDeer + totalFallowDeer + totalMouflon + totalChamois;
+                
+                return (
+                  <TableRow className="bg-blue-50 border-t-2 border-blue-200 font-bold">
+                    <TableCell className="font-bold text-blue-900">
+                      🎯 TOTALI PIANO VENATORIO 2025-2026
+                      <div className="text-xs font-normal text-blue-700 mt-1">
+                        Regione Veneto - Tutte le Riserve
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-blue-900">
+                      {validReserves.length} riserve
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-blue-900">
+                      5 specie
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-blue-900 text-lg">
+                      {grandTotal}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-amber-200 text-amber-900 font-bold text-base px-3 py-1">
+                        {totalRoeDeer}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-red-200 text-red-900 font-bold text-base px-3 py-1">
+                        {totalRedDeer}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-green-200 text-green-900 font-bold text-base px-3 py-1">
+                        {totalFallowDeer}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-blue-200 text-blue-900 font-bold text-base px-3 py-1">
+                        {totalMouflon}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-purple-200 text-purple-900 font-bold text-base px-3 py-1">
+                        {totalChamois}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-green-200 text-green-900 font-bold">
+                        UFFICIALI
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })()}
             </TableBody>
           </Table>
         </div>
