@@ -577,6 +577,11 @@ Changelog:
   - **Frontend Support**: Extended login.tsx and demo-indicator.tsx to handle tecnico-faunistico demo sessions
   - **Complete Workflow**: Full demo system integration - startTecnicoFaunisticoDemo() → demo.tecnico-faunistico@seleapp.demo → /fauna dashboard
 
+- July 23, 2025. **REGIONAL QUOTAS CATEGORIES FIX**: Fixed category mapping between regional and group quotas for Cison
+  - **Category Alignment**: Corrected roe deer categories from PDF format (M1,M2,F1_FF,PM,PF) to system format (M0,F0,FA,M1,MA)
+  - **Database Update**: Removed constraint and updated regional_quotas table with correct categories
+  - **Frontend Fix**: Green totals now display for all categories with proper regional quota matching
+  - **Senior-Friendly Interface**: Enhanced with larger buttons, bigger text, and always-visible quota totals
 - July 23, 2025. **GROUP QUOTAS RESET FOR CISON**: Reset all group quotas to zero for Cison di Valmarino reserve
   - **Administrative Reset**: All 36 quotas (4 groups × 9 categories) set to 0 for fresh redistribution
   - **Admin Control**: Allows reserve administrator to distribute regional quotas according to specific hunting group needs
