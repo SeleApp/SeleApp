@@ -22,11 +22,6 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
   const [activeReserves, setActiveReserves] = useState<Reserve[]>([]);
   const [loadingReserves, setLoadingReserves] = useState(true);
   const [selectedReserve, setSelectedReserve] = useState<Reserve | null>(null);
-  const [reserveValidation, setReserveValidation] = useState<{
-    checking: boolean;
-    valid: boolean | null;
-    message: string;
-  }>({ checking: false, valid: null, message: "" });
   const { toast } = useToast();
 
   const form = useForm<RegisterHunterRequest>({
@@ -72,50 +67,17 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
     fetchActiveReserves();
   }, [toast]);
 
-  // Validazione riserva in tempo reale
-  const validateReserve = async (reserveName: string) => {
-    if (!reserveName.trim()) {
-      setReserveValidation({ checking: false, valid: null, message: "" });
-      return;
-    }
 
-    setReserveValidation({ checking: true, valid: null, message: "Verifica in corso..." });
-    
-    try {
-      const response = await fetch(`/api/validate-reserve/${encodeURIComponent(reserveName)}`);
-      const data = await response.json();
-      
-      if (data.valid) {
-        setReserveValidation({ 
-          checking: false, 
-          valid: true, 
-          message: "Riserva verificata e attiva" 
-        });
-      } else {
-        setReserveValidation({ 
-          checking: false, 
-          valid: false, 
-          message: "Riserva non trovata o non attiva" 
-        });
-      }
-    } catch (error) {
-      setReserveValidation({ 
-        checking: false, 
-        valid: false, 
-        message: "Errore nella verifica della riserva" 
-      });
-    }
-  };
 
   const onSubmit = async (data: RegisterHunterRequest) => {
     try {
       setIsLoading(true);
       
-      // Verifica finale della riserva
-      if (!reserveValidation.valid) {
+      // Verifica che sia stata selezionata una riserva
+      if (!selectedReserve) {
         toast({
           title: "Errore",
-          description: "La riserva deve essere verificata prima di procedere",
+          description: "Devi selezionare una riserva prima di procedere",
           variant: "destructive",
         });
         return;
@@ -138,7 +100,7 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
       });
 
       form.reset();
-      setReserveValidation({ checking: false, valid: null, message: "" });
+      setSelectedReserve(null);
       onSuccess();
     } catch (error: any) {
       toast({
@@ -206,30 +168,41 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reserveName">Nome Riserva</Label>
-            <Input
-              id="reserveName"
-              {...form.register("reserveName")}
-              placeholder="Inserisci il nome della tua riserva"
-              disabled={isLoading}
-              onBlur={(e) => validateReserve(e.target.value)}
-            />
-            {form.formState.errors.reserveName && (
-              <p className="text-sm text-red-600">{form.formState.errors.reserveName.message}</p>
+            <Label htmlFor="reserveId">Riserva di Caccia</Label>
+            <Select
+              value={form.watch("reserveId") || ""}
+              onValueChange={(value) => {
+                form.setValue("reserveId", value);
+                // Trova la riserva selezionata per mostrare la selezione gruppo
+                const reserve = activeReserves.find(r => r.id === value);
+                setSelectedReserve(reserve || null);
+              }}
+              disabled={isLoading || loadingReserves}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingReserves ? "Caricamento riserve..." : "Seleziona la tua riserva"} />
+              </SelectTrigger>
+              <SelectContent>
+                {activeReserves.map(reserve => (
+                  <SelectItem key={reserve.id} value={reserve.id}>
+                    {reserve.name} - {reserve.comune}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.formState.errors.reserveId && (
+              <p className="text-sm text-red-600">{form.formState.errors.reserveId.message}</p>
             )}
             
-            {/* Indicatore validazione riserva */}
-            {reserveValidation.message && (
+            {/* Indicatore riserva selezionata */}
+            {selectedReserve && (
               <div className="flex items-center gap-2 text-sm">
-                {reserveValidation.checking && <Loader2 className="h-4 w-4 animate-spin" />}
-                {reserveValidation.valid === true && <CheckCircle className="h-4 w-4 text-green-600" />}
-                {reserveValidation.valid === false && <XCircle className="h-4 w-4 text-red-600" />}
-                <span className={`${
-                  reserveValidation.valid === true ? "text-green-600" : 
-                  reserveValidation.valid === false ? "text-red-600" : 
-                  "text-gray-600"
-                }`}>
-                  {reserveValidation.message}
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span className="text-green-600">
+                  {selectedReserve.managementType === 'zones_groups' ? 
+                    `Riserva con sistema "Zone & gruppi" selezionata` :
+                    `Riserva selezionata`
+                  }
                 </span>
               </div>
             )}
@@ -241,7 +214,7 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
               <Label htmlFor="hunterGroup">Gruppo di Appartenenza</Label>
               <Select
                 value={form.watch("hunterGroup") || ""}
-                onValueChange={(value) => form.setValue("hunterGroup", value as 'A' | 'B' | 'C' | 'D')}
+                onValueChange={(value) => form.setValue("hunterGroup", value as 'A' | 'B' | 'C' | 'D' | 'E' | 'F')}
                 disabled={isLoading}
               >
                 <SelectTrigger>
