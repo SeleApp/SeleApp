@@ -19,6 +19,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { authService } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import AccessCodeManager from "@/components/access-code-manager";
+import SuperAdminRegionalQuotas from "@/components/superadmin-regional-quotas";
 
 // Componente per la selezione specie
 function SpeciesCheckboxes({ value, onChange }: { value: string; onChange: (value: string) => void }) {
@@ -101,6 +102,8 @@ export default function SuperAdminDashboard() {
   const [createAdminOpen, setCreateAdminOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [editingReserve, setEditingReserve] = useState<Reserve | null>(null);
+  const [selectedReserveForQuotas, setSelectedReserveForQuotas] = useState<string | null>(null);
+  const [showRegionalQuotasModal, setShowRegionalQuotasModal] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -441,8 +444,9 @@ export default function SuperAdminDashboard() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <Tabs defaultValue="reserves" className="space-y-4 sm:space-y-6">
           <div className="w-full overflow-x-auto px-1 sm:px-0">
-            <TabsList className="flex w-full min-w-max flex-row gap-1 sm:grid sm:grid-cols-6 sm:gap-0">
+            <TabsList className="flex w-full min-w-max flex-row gap-1 sm:grid sm:grid-cols-7 sm:gap-0">
               <TabsTrigger value="reserves" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Riserve</TabsTrigger>
+              <TabsTrigger value="quotas" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Quote Regionali</TabsTrigger>
               <TabsTrigger value="admins" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Amministratori</TabsTrigger>
               <TabsTrigger value="settings" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Impostazioni</TabsTrigger>
               <TabsTrigger value="support" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Supporto</TabsTrigger>
@@ -852,6 +856,11 @@ export default function SuperAdminDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Tab Quote Regionali */}
+          <TabsContent value="quotas" className="space-y-4 sm:space-y-6">
+            <SuperAdminRegionalQuotas reserves={reserves} />
           </TabsContent>
 
           {/* Tab Amministratori */}

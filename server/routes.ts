@@ -73,6 +73,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const accessCodesRoutes = await import("./routes/access-codes");
   app.use("/api/superadmin/access-codes", accessCodesRoutes.default);
   
+  // SuperAdmin regional quotas routes (SUPERADMIN only)
+  const superAdminRegionalQuotasRoutes = await import("./routes/superadmin/regionalQuotas");
+  app.use("/api/superadmin/regional-quotas", superAdminRegionalQuotasRoutes.default);
+  
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);

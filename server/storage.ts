@@ -96,6 +96,9 @@ export interface IStorage {
   // Regional Quotas Management (filtered by reserveId)
   getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
   updateRegionalQuota(id: number, reserveId: string, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
+  // SuperAdmin specific methods
+  createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
+  deleteRegionalQuota(id: number): Promise<boolean>;
   createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
   isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string, reserveId: string): Promise<boolean>;
   
@@ -1115,48 +1118,32 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteHuntReport(id: number, reserveId: string): Promise<boolean> {
-    try {
-      console.log(`🗑️ Deleting hunt report ${id} for reserve ${reserveId}`);
-      
-      // Ottieni il report prima di eliminarlo per gestire il ripristino quote
-      const [reportToDelete] = await db
-        .select()
-        .from(huntReports)
-        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)));
 
-      if (!reportToDelete) {
-        console.log(`❌ Report ${id} not found in reserve ${reserveId}`);
-        return false;
-      }
 
-      // Se era un prelievo, ripristina la quota prima dell'eliminazione
-      if (reportToDelete.outcome === 'harvest' && reportToDelete.species) {
-        console.log(`♻️ Restoring quota for deleted harvest: ${reportToDelete.species}`);
-        const category = reportToDelete.species === 'roe_deer' 
-          ? reportToDelete.roeDeerCategory! 
-          : reportToDelete.redDeerCategory!;
-        await this.restoreRegionalQuotaAfterDelete(reportToDelete.species, category, reserveId);
-      }
+  /**
+   * SUPERADMIN: Crea nuova quota regionale per una riserva
+   */
+  async createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota> {
+    const [newQuota] = await db
+      .insert(regionalQuotas)
+      .values(quota)
+      .returning();
+    return newQuota;
+  }
 
-      // Elimina il report
-      const deleteResult = await db
-        .delete(huntReports)
-        .where(and(eq(huntReports.id, id), eq(huntReports.reserveId, reserveId)))
-        .returning();
+  /**
+   * SUPERADMIN: Aggiorna quota regionale esistente (firma semplificata per SuperAdmin)
+   * Overload per supportare sia admin che superadmin
+   */
 
-      if (deleteResult.length > 0) {
-        console.log(`✅ Report ${id} deleted successfully`);
-        return true;
-      } else {
-        console.log(`❌ Failed to delete report ${id}`);
-        return false;
-      }
-
-    } catch (error) {
-      console.error("❌ Error deleting hunt report:", error);
-      throw error;
-    }
+  /**
+   * SUPERADMIN: Elimina quota regionale
+   */
+  async deleteRegionalQuota(id: number): Promise<boolean> {
+    const result = await db
+      .delete(regionalQuotas)
+      .where(eq(regionalQuotas.id, id));
+    return result.changes > 0;
   }
 
   async deleteHuntReport(id: number, reserveId: string): Promise<void> {
