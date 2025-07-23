@@ -115,6 +115,8 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
   }, {});
 
   console.log('Quotas grouped by reserve:', Object.keys(quotasByReserve).length, 'reserves');
+  console.log('Reserve IDs in quotas:', Object.keys(quotasByReserve));
+  console.log('Reserve IDs in reserves list:', reserves.map(r => r.id));
 
   return (
     <Card>
@@ -150,10 +152,12 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
                 const speciesCount = new Set(reserveQuotas.map((q: any) => q.species)).size;
                 const totalQuotas = reserveQuotas.reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
                 
-                // Debug logging
-                if (reserveQuotas.length > 0) {
-                  console.log(`Reserve ${reserve.id} has ${reserveQuotas.length} quotas, total: ${totalQuotas}`);
-                }
+                // Debug logging EXTRA per trovare il problema
+                console.log(`Checking reserve ${reserve.id}:`, {
+                  quotasFound: reserveQuotas.length,
+                  totalQuotas: totalQuotas,
+                  availableInQuotasByReserve: !!quotasByReserve[reserve.id]
+                });
                 
                 // Calcola totali per specie
                 const roeDeerTotal = reserveQuotas
