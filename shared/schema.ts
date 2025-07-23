@@ -229,9 +229,9 @@ export const wildlifeQuotas = pgTable("wildlife_quotas", {
 });
 
 // Group quotas table (per sistema "Zone & gruppi")
-export const groupQuotas = pgTable("group_quotas", {
+export const groupQuotas = pgTable("wildlife_quotas_groups", {
   id: serial("id").primaryKey(),
-  reserveId: text("reserve_id").notNull(),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
   hunterGroup: hunterGroupEnum("hunter_group").notNull(),
   species: speciesEnum("species").notNull(),
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
@@ -249,6 +249,15 @@ export const groupQuotas = pgTable("group_quotas", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const insertGroupQuotaSchema = createInsertSchema(groupQuotas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type GroupQuota = typeof groupQuotas.$inferSelect;
+export type InsertGroupQuota = z.infer<typeof insertGroupQuotaSchema>;
 
 // Reservations table
 export const reservations = pgTable("reservations", {

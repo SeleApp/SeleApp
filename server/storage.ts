@@ -3,7 +3,7 @@
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
 import { 
-  users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves,
+  users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves, groupQuotas,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
   lotteries, lotteryParticipations, reserveRules,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
@@ -13,7 +13,7 @@ import {
   type SupportTicket, type InsertSupportTicket, type Billing, type InsertBilling,
   type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
   type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation,
-  type ReserveRule, type InsertReserveRule
+  type ReserveRule, type InsertReserveRule, type GroupQuota, type InsertGroupQuota
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
