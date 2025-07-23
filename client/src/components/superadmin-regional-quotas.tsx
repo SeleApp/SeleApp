@@ -72,18 +72,9 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
     queryKey: ['/api/superadmin/regional-quotas'],
     queryFn: async () => {
       console.log('Fetching regional quotas for SuperAdmin table...');
-      const response = await fetch('/api/superadmin/regional-quotas', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await apiRequest('/api/superadmin/regional-quotas', {
+        method: 'GET'
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const data = await response.json();
       console.log('Regional quotas RAW response:', data);
       console.log('Is array?', Array.isArray(data));
