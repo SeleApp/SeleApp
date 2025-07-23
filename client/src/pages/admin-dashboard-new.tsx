@@ -55,6 +55,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/stats"],
   });
 
+  const { data: currentReserve = {} } = useQuery({
+    queryKey: ["/api/current-reserve"],
+  });
+
   const { data: regionalQuotas = [], isLoading: isLoadingQuotas, refetch: refetchQuotas } = useQuery({
     queryKey: ["/api/regional-quotas"],
     refetchOnWindowFocus: true,
@@ -74,10 +78,6 @@ export default function AdminDashboard() {
 
   const { data: hunters = [] } = useQuery({
     queryKey: ["/api/admin/hunters"],
-  });
-
-  const { data: currentReserve = {} } = useQuery({
-    queryKey: ["/api/current-reserve"],
   });
 
   const { data: reports = [], isLoading: isLoadingReports } = useQuery({
