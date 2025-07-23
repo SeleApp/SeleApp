@@ -13,6 +13,7 @@ import { Target, Plus, Edit, Save, Upload, FileText, AlertCircle, BarChart3 } fr
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import ImportRegionalQuotas from "@/components/import-regional-quotas";
+import WildlifeManagementReports from "@/components/wildlife-management-reports";
 
 interface SuperAdminRegionalQuotasProps {
   reserves: Array<{
@@ -129,6 +130,11 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
                 const reserveQuotas = quotasByReserve[reserve.id] || [];
                 const speciesCount = new Set(reserveQuotas.map((q: any) => q.species)).size;
                 const totalQuotas = reserveQuotas.reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                // Debug logging
+                if (reserveQuotas.length > 0) {
+                  console.log(`Reserve ${reserve.id} has ${reserveQuotas.length} quotas, total: ${totalQuotas}`);
+                }
                 
                 // Calcola totali per specie
                 const roeDeerTotal = reserveQuotas
@@ -369,10 +375,11 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
       </Card>
 
       <Tabs defaultValue="summary" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="summary">Tabella Riassuntiva</TabsTrigger>
           <TabsTrigger value="manage">Gestione Manuale</TabsTrigger>
           <TabsTrigger value="import">Importa da PDF</TabsTrigger>
+          <TabsTrigger value="wildlife">Report Gestione Faunistica</TabsTrigger>
         </TabsList>
 
         {/* Tab Tabella Riassuntiva */}
@@ -432,6 +439,11 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
               }
             }}
           />
+        </TabsContent>
+
+        {/* Tab Report Gestione Faunistica */}
+        <TabsContent value="wildlife" className="space-y-4">
+          <WildlifeManagementReports reserves={reserves} />
         </TabsContent>
       </Tabs>
 

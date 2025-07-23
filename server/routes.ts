@@ -89,6 +89,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const populateMissingSpeciesRoutes = await import("./routes/superadmin/populateMissingSpecies");
   app.post("/api/superadmin/populate-missing-species", ...populateMissingSpeciesRoutes.default);
   
+  // SuperAdmin harvest reports for biological analysis (SUPERADMIN only)
+  const harvestReportsRoutes = await import("./routes/superadmin/harvestReports");
+  app.use("/api/superadmin/harvest-reports", harvestReportsRoutes.default);
+  
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);
