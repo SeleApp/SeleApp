@@ -2,7 +2,6 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
@@ -12,7 +11,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
-        console.log('SW registered: ', registration);
+        console.log('SW registered');
       })
       .catch((registrationError) => {
         console.log('SW registration failed: ', registrationError);
@@ -20,8 +19,4 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+createRoot(document.getElementById("root")!).render(<App />);
