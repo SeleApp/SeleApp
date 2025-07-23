@@ -585,6 +585,14 @@ Changelog:
   - **Production Ready**: All 4 species (capriolo, cervo, camoscio, muflone) import endpoints now fully operational
   - **Complete Coverage**: Official Regione Veneto 2025-2026 quota data can now be imported via SuperAdmin dashboard
 
+- July 23, 2025. **CRITICAL TABLE DISPLAY BUG RESOLUTION**: Fixed SuperAdmin regional quotas table showing empty data despite 333 quotas in database
+  - **Root Cause**: JWT token expiration causing 403 authentication errors instead of data retrieval
+  - **Authentication Issue**: /api/superadmin/regional-quotas returned "Token non valido" blocking table population
+  - **Complete Resolution**: SuperAdmin logout/login cycle resolved authentication and restored full table functionality
+  - **Data Verification**: Confirmed all 333 official quotas display correctly with accurate totals per reserve
+  - **Production Status**: System fully operational - CA TV28 Cison (44 quotas), CA TV01 Cordignano (52 quotas), all reserves functioning
+  - **Official Compliance**: All data matches official Regione Veneto Piano Venatorio 2025-2026 PDF specifications
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
