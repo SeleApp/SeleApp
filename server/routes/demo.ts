@@ -27,6 +27,14 @@ const DEMO_ACCOUNTS = {
     role: "ADMIN" as const,
     reserveId: "valle-demo"
   },
+  biologo: {
+    email: "demo.biologo@seleapp.demo",
+    password: "demo123",
+    firstName: "Biologo",
+    lastName: "Demo",
+    role: "BIOLOGO" as const,
+    reserveId: null
+  },
   superadmin: {
     email: "demo.superadmin@seleapp.demo",
     password: "demo123", 
@@ -44,7 +52,7 @@ export async function startDemoSession(req: Request, res: Response) {
     // Verifica che il tipo demo sia valido
     if (!demoType || !Object.keys(DEMO_ACCOUNTS).includes(demoType)) {
       return res.status(400).json({ 
-        message: "Tipo demo non valido. Usa: hunter, admin, superadmin" 
+        message: "Tipo demo non valido. Usa: hunter, admin, biologo, superadmin" 
       });
     }
 
@@ -263,6 +271,16 @@ function getDemoFeatures(demoType: string): string[] {
         "Gestione prenotazioni attive", 
         "Statistiche complete riserva",
         "Correzione report errati"
+      ];
+
+    case 'biologo':
+      return [
+        "Registrazione osservazioni faunistiche",
+        "Gestione dati biometrici",
+        "Analisi statistiche popolazioni",
+        "Grafici scientifici avanzati",
+        "Export dati per ricerca",
+        "Monitoraggio GPS territoriale"
       ];
     
     case 'superadmin':

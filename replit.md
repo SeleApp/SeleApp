@@ -568,6 +568,15 @@ Changelog:
   - **Data Verification**: Confirmed 308 total quotas loading correctly (Capriolo, Cervo, Daino, Muflone, Camoscio categories)
   - **React Error Fix**: Resolved dispatcher.useRef errors by adding proper React imports to multiple components
 
+- July 23, 2025. **BIOLOGO DEMO SYSTEM**: Complete implementation of biologist/fauna technician demo functionality
+  - **Landing Page Demo**: Added third demo card for "SONO UN BIOLOGO" with purple gradient and scientific icon
+  - **Demo Authentication**: Added biologo account to DEMO_ACCOUNTS with BIOLOGO role and demo credentials
+  - **Backend Support**: Enhanced demo system to support biologo type with /app?demo=biologo URL parameter
+  - **Demo Features**: Added scientific features list including GPS observations, biometric data, population analysis
+  - **Visual Integration**: Updated demo layout from 2-column to 3-column grid for hunter/admin/biologo options
+  - **Frontend Support**: Extended login.tsx and demo-indicator.tsx to handle biologo demo sessions
+  - **Complete Workflow**: Full demo system integration - startBiologistDemo() → demo.biologo@seleapp.demo → /fauna dashboard
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
