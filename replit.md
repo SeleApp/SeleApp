@@ -559,6 +559,14 @@ Changelog:
   - **Protected Access**: Routes protected for BIOLOGO/PROVINCIA roles only with JWT authentication
   - **Scientific Fields**: Complete biometric data collection (weight, mandible length, antler measurements, reproductive status, body condition)
   - **GPS Integration**: Geographical coordinates support for distribution mapping and habitat analysis
+  - **Test Data**: Created 7 sample observations and biologo@seleapp.info test account (password: biologo123)
+
+- July 23, 2025. **REGIONAL QUOTAS TABLE FIX**: Resolved critical SuperAdmin dashboard display issue showing empty regional quotas table
+  - **API Endpoint**: Created GET /api/superadmin/regional-quotas endpoint to fetch all quotas across all reserves
+  - **Database Method**: Implemented getAllRegionalQuotas() method in storage to return all 308 regional quotas
+  - **SuperAdmin Dashboard**: Fixed table to display complete Piano Venatorio 2025-2026 data from all CA TV01-TV38 reserves
+  - **Data Verification**: Confirmed 308 total quotas loading correctly (Capriolo, Cervo, Daino, Muflone, Camoscio categories)
+  - **React Error Fix**: Resolved dispatcher.useRef errors by adding proper React imports to multiple components
 
 # User Preferences
 
