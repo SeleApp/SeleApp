@@ -55,6 +55,12 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get current reserve info for dynamic group configuration
+  const { data: currentReserve } = useQuery({
+    queryKey: ['/api/reserves/current'],
+    enabled: !!reserveId
+  });
+
   // Carica le quote per gruppo
   const { data: groupQuotas = [], isLoading } = useQuery({
     queryKey: ['/api/group-quotas'],
@@ -86,6 +92,10 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
       });
     }
   });
+
+  // Get active groups from reserve config or default to first 4
+  const activeGroups = currentReserve?.activeGroups || ['A', 'B', 'C', 'D'];
+  const numberOfGroups = currentReserve?.numberOfGroups || 4;
 
   // Filtra le quote per il gruppo attivo
   const activeGroupQuotas = groupQuotas.filter((quota: GroupQuota) => quota.hunterGroup === activeGroup);
@@ -149,9 +159,9 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
         )}
       </div>
 
-      <Tabs value={activeGroup} onValueChange={(value) => setActiveGroup(value as 'A' | 'B' | 'C' | 'D')}>
-        <TabsList className="grid w-full grid-cols-4">
-          {GROUPS.map(group => (
+      <Tabs value={activeGroup} onValueChange={(value) => setActiveGroup(value as 'A' | 'B' | 'C' | 'D' | 'E' | 'F')}>
+        <TabsList className={`grid w-full ${numberOfGroups === 2 ? 'grid-cols-2' : numberOfGroups === 3 ? 'grid-cols-3' : numberOfGroups === 5 ? 'grid-cols-5' : numberOfGroups === 6 ? 'grid-cols-6' : 'grid-cols-4'}`}>
+          {activeGroups.map(group => (
             <TabsTrigger key={group} value={group} className="gap-2">
               <Users className="h-4 w-4" />
               Gruppo {group}
@@ -159,7 +169,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
           ))}
         </TabsList>
 
-        {GROUPS.map(group => (
+        {activeGroups.map(group => (
           <TabsContent key={group} value={group} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(SPECIES_CONFIG).map(([species, config]) => (
