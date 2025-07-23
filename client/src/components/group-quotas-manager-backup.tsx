@@ -2,15 +2,18 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Users, Target, Save, Plus, Minus } from "lucide-react";
+import { Users, Target, Settings, Save, Plus, Minus } from "lucide-react";
 
 interface GroupQuota {
   id: number;
@@ -31,6 +34,7 @@ interface GroupQuotasManagerProps {
   readonly?: boolean;
 }
 
+const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 const SPECIES_CONFIG = {
   roe_deer: {
     name: 'Capriolo',
@@ -47,6 +51,7 @@ const SPECIES_CONFIG = {
 export default function GroupQuotasManager({ reserveId, readonly = false }: GroupQuotasManagerProps) {
   const [activeGroup, setActiveGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>('A');
   const [quotaChanges, setQuotaChanges] = useState<Record<string, number>>({});
+  const [editingQuota, setEditingQuota] = useState<number | null>(null);
   const [savingGroup, setSavingGroup] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -114,28 +119,33 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   const activeGroups = (currentReserve as any)?.activeGroups || ['A', 'B', 'C', 'D'];
   const numberOfGroups = (currentReserve as any)?.numberOfGroups || 4;
 
-  // Calcola i totali regionali per confronto
-  const getRegionalTotals = () => {
-    const totals: Record<string, { total: number; harvested: number }> = {};
-    if (Array.isArray(regionalQuotas)) {
-      regionalQuotas.forEach((quota: any) => {
-        const key = quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory;
-        if (key) {
-          totals[`${quota.species}-${key}`] = {
-            total: quota.totalQuota,
-            harvested: quota.harvested
-          };
-        }
-      });
-    }
-    return totals;
-  };
+  // Filtra le quote per il gruppo attivo
+  const activeGroupQuotas = (groupQuotas as GroupQuota[]).filter((quota: GroupQuota) => quota.hunterGroup === activeGroup);
 
-  const regionalTotals = getRegionalTotals();
+  // Organizza le quote per specie e categoria
+  const organizedQuotas = Object.entries(SPECIES_CONFIG).reduce((acc, [species, config]) => {
+    acc[species] = config.categories.map(category => {
+      const quota = activeGroupQuotas.find((q: GroupQuota) => 
+        q.species === species && 
+        (q.roeDeerCategory === category || q.redDeerCategory === category)
+      );
+      return {
+        category,
+        quota: quota?.totalQuota || 0,
+        harvested: quota?.harvested || 0,
+        available: (quota?.totalQuota || 0) - (quota?.harvested || 0),
+        id: quota?.id
+      };
+    });
+    return acc;
+  }, {} as Record<string, any[]>);
 
   const handleQuotaChange = (species: string, category: string, value: string) => {
     const numValue = parseInt(value) || 0;
     const key = `${activeGroup}-${species}-${category}`;
+    
+    // Ottieni i totali regionali prima di usarli
+    const regionalTotals = getRegionalTotals();
     
     // Validazione: verifica che la somma di tutti i gruppi non superi la quota regionale
     const regionalKey = `${species}-${category}`;
@@ -211,6 +221,25 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   if (!groupQuotas || !Array.isArray(groupQuotas) || groupQuotas.length === 0) {
     return <div className="p-4 text-center">Nessuna quota trovata per questa riserva</div>;
   }
+
+  // Calcola i totali regionali per confronto
+  const getRegionalTotals = () => {
+    const totals: Record<string, { total: number; harvested: number }> = {};
+    if (Array.isArray(regionalQuotas)) {
+      regionalQuotas.forEach((quota: any) => {
+        const key = quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory;
+        if (key) {
+          totals[`${quota.species}-${key}`] = {
+            total: quota.totalQuota,
+            harvested: quota.harvested
+          };
+        }
+      });
+    }
+    return totals;
+  };
+
+  const regionalTotals = getRegionalTotals();
 
   return (
     <div className="space-y-6">
@@ -482,6 +511,129 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
             </TabsContent>
           );
         })}
+      </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+                              <div className="text-xs">
+                                {(() => {
+                                  const groupSum = (groupQuotas as GroupQuota[])
+                                    .filter(q => q.species === species && 
+                                      (q.roeDeerCategory === category || q.redDeerCategory === category))
+                                    .reduce((sum, q) => sum + q.totalQuota, 0);
+                                  const regional = regionalTotals[`${species}-${category}`]?.total || 0;
+                                  const isOverLimit = groupSum > regional && regional > 0;
+                                  const hasRegional = regional > 0;
+                                  
+                                  if (hasRegional) {
+                                    return (
+                                      <span className={isOverLimit ? "text-red-600 font-bold" : "text-green-600 font-medium"}>
+                                        {isOverLimit ? "⚠️ " : "✓ "}Totale: {groupSum}/{regional}
+                                      </span>
+                                    );
+                                  } else {
+                                    return (
+                                      <span className="text-gray-500 font-medium">
+                                        Totale: {groupSum}/0 (nessuna quota regionale)
+                                      </span>
+                                    );
+                                  }
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {readonly ? (
+                            <div className="col-span-3 text-center font-medium">
+                              {currentQuota}
+                            </div>
+                          ) : (
+                            <div className="col-span-3 flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                className="h-12 w-12 p-0 flex-shrink-0 text-xl font-bold"
+                                disabled={updateQuotasMutation.isPending || displayQuota <= 0}
+                                onClick={() => handleQuotaChange(species, category, String(Math.max(0, displayQuota - 1)))}
+                              >
+                                -
+                              </Button>
+                              <div className="flex-1 text-center">
+                                <div className={`text-2xl font-bold py-2 px-3 rounded border-2 ${pendingChange !== undefined ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                                  {displayQuota}
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                className="h-12 w-12 p-0 flex-shrink-0 text-xl font-bold"
+                                disabled={updateQuotasMutation.isPending}
+                                onClick={() => handleQuotaChange(species, category, String(displayQuota + 1))}
+                              >
+                                +
+                              </Button>
+                            </div>
+                          )}
+                          
+                          <div className="col-span-2 text-center text-sm text-gray-600">
+                            -{harvested}
+                          </div>
+                          
+                          <div className="col-span-1 text-center">=</div>
+                          
+                          <div className="col-span-3">
+                            <div className="space-y-1">
+                              <Badge 
+                                variant={available > 0 ? "default" : "destructive"}
+                                className="w-full justify-center"
+                              >
+                                {(pendingChange !== undefined ? pendingChange : currentQuota) - harvested}
+                              </Badge>
+                              {regionalTotals[`${species}-${category}`] && (
+                                <div className="text-xs text-gray-500 text-center">
+                                  Piano: {regionalTotals[`${species}-${category}`].total - regionalTotals[`${species}-${category}`].harvested}/{regionalTotals[`${species}-${category}`].total}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    <Separator />
+                    
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <div className="grid grid-cols-12 gap-2 font-medium">
+                        <div className="col-span-3">Categoria</div>
+                        <div className="col-span-3 text-center">Quota</div>
+                        <div className="col-span-2 text-center">Prelevati</div>
+                        <div className="col-span-1"></div>
+                        <div className="col-span-3 text-center">Disponibili</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {!readonly && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-sm text-blue-800">
+                    <Settings className="h-4 w-4" />
+                    <span>
+                      Le quote assegnate al <strong>Gruppo {group}</strong> sono indipendenti dagli altri gruppi. 
+                      Le zone rimangono globali e accessibili a tutti i cacciatori.
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        ))}
       </Tabs>
         </CardContent>
       </Card>
