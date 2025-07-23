@@ -511,6 +511,7 @@ Changelog:
   - **Data Integrity**: All quotas now properly aligned with official Regione Veneto CA TV structure
   - **Standardized Format**: All 40 reserves now use uniform naming (CA TV## - Nome) and identical configurations
   - **Uniform Settings**: All CA TV reserves configured with standard_zones, caccia_per_zone, 16 zones, 1 group
+  - **Advanced Filtering**: Added status filter (active/inactive) and numerical sorting (CA TV01-TV38) in SuperAdmin dashboard
 
 # User Preferences
 

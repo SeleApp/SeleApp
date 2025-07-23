@@ -104,6 +104,7 @@ export default function SuperAdminDashboard() {
   const [editingReserve, setEditingReserve] = useState<Reserve | null>(null);
   const [selectedReserveForQuotas, setSelectedReserveForQuotas] = useState<string | null>(null);
   const [showRegionalQuotasModal, setShowRegionalQuotasModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -740,13 +741,33 @@ export default function SuperAdminDashboard() {
               </Dialog>
             </div>
 
-            {/* Tabella Riserve */}
+            {/* Filtri Riserve */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">Elenco Riserve</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
                   {reserves.length} riserve totali nel sistema
                 </CardDescription>
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-gray-600" />
+                    <Select value={statusFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setStatusFilter(value)}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Filtra per stato" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tutte le riserve</SelectItem>
+                        <SelectItem value="active">Solo attive</SelectItem>
+                        <SelectItem value="inactive">Solo disattivate</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="text-sm text-gray-500 flex items-center">
+                    {statusFilter === 'all' && `${reserves.length} riserve totali`}
+                    {statusFilter === 'active' && `${reserves.filter(r => r.isActive).length} riserve attive`}
+                    {statusFilter === 'inactive' && `${reserves.filter(r => !r.isActive).length} riserve disattivate`}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-2 sm:p-6">
                 <div className="w-full overflow-x-auto">
@@ -764,7 +785,31 @@ export default function SuperAdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reserves.map((reserve) => (
+                    {reserves
+                      .filter(reserve => {
+                        if (statusFilter === 'active') return reserve.isActive;
+                        if (statusFilter === 'inactive') return !reserve.isActive;
+                        return true;
+                      })
+                      .sort((a, b) => {
+                        // Ordina per numero CA TV: prima Cison (speciale), poi CA TV01-38 in ordine numerico, poi AFV
+                        if (a.id === 'cison-valmarino') return -1;
+                        if (b.id === 'cison-valmarino') return 1;
+                        
+                        const aMatch = a.id.match(/ca-tv(\d+)/);
+                        const bMatch = b.id.match(/ca-tv(\d+)/);
+                        
+                        if (aMatch && bMatch) {
+                          return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+                        }
+                        
+                        // AFV alla fine
+                        if (a.id.includes('afv') && !b.id.includes('afv')) return 1;
+                        if (!a.id.includes('afv') && b.id.includes('afv')) return -1;
+                        
+                        return a.name.localeCompare(b.name);
+                      })
+                      .map((reserve) => (
                       <TableRow key={reserve.id}>
                         <TableCell className="px-2 py-3 font-medium">
                           <div className="flex flex-col">
@@ -845,12 +890,22 @@ export default function SuperAdminDashboard() {
                   </Table>
                 </div>
                 
-                {reserves.length === 0 && (
+                {reserves.filter(reserve => {
+                  if (statusFilter === 'active') return reserve.isActive;
+                  if (statusFilter === 'inactive') return !reserve.isActive;
+                  return true;
+                }).length === 0 && (
                   <div className="text-center py-12">
                     <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Nessuna riserva</h3>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">
+                      {statusFilter === 'all' ? 'Nessuna riserva' : 
+                       statusFilter === 'active' ? 'Nessuna riserva attiva' : 
+                       'Nessuna riserva disattivata'}
+                    </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Inizia creando la prima riserva di caccia.
+                      {statusFilter === 'all' ? 'Inizia creando la prima riserva di caccia.' :
+                       statusFilter === 'active' ? 'Non ci sono riserve attive al momento.' :
+                       'Non ci sono riserve disattivate.'}
                     </p>
                   </div>
                 )}
