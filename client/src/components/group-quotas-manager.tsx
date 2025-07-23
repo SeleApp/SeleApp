@@ -68,6 +68,13 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
     staleTime: 30000
   });
 
+  // Carica le quote regionali del piano venatorio
+  const { data: regionalQuotas = [], isLoading: isLoadingRegional } = useQuery({
+    queryKey: ['/api/regional-quotas'],
+    enabled: !!reserveId,
+    staleTime: 30000
+  });
+
   // Mutation per aggiornare le quote
   const updateQuotasMutation = useMutation({
     mutationFn: async (quotas: Array<{ hunterGroup: string; species: string; category: string; totalQuota: number }>) => {
@@ -121,6 +128,34 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   const handleQuotaChange = (species: string, category: string, value: string) => {
     const numValue = parseInt(value) || 0;
     const key = `${activeGroup}-${species}-${category}`;
+    
+    // Validazione: verifica che la somma di tutti i gruppi non superi la quota regionale
+    const regionalKey = `${species}-${category}`;
+    const regionalLimit = regionalTotals[regionalKey]?.total || 0;
+    
+    if (regionalLimit > 0) {
+      // Calcola la somma delle quote di tutti i gruppi per questa categoria
+      const currentGroupQuotas = (groupQuotas as GroupQuota[]).filter(q => 
+        q.species === species && 
+        (q.roeDeerCategory === category || q.redDeerCategory === category)
+      );
+      
+      const otherGroupsTotal = currentGroupQuotas
+        .filter(q => q.hunterGroup !== activeGroup)
+        .reduce((sum, q) => sum + q.totalQuota, 0);
+      
+      const newTotal = otherGroupsTotal + numValue;
+      
+      if (newTotal > regionalLimit) {
+        toast({
+          title: "Quota Regionale Superata",
+          description: `La somma delle quote per ${category} (${newTotal}) supererebbe la quota regionale assegnata (${regionalLimit}). Totale altri gruppi: ${otherGroupsTotal}`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     setQuotaChanges(prev => ({
       ...prev,
       [key]: numValue
@@ -140,7 +175,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
 
   const hasChanges = Object.keys(quotaChanges).length > 0;
 
-  if (isLoading) {
+  if (isLoading || isLoadingRegional) {
     return <div className="p-4 text-center">Caricamento quote...</div>;
   }
 
@@ -148,12 +183,76 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
     return <div className="p-4 text-center">Nessuna quota trovata per questa riserva</div>;
   }
 
+  // Calcola i totali regionali per confronto
+  const getRegionalTotals = () => {
+    const totals: Record<string, { total: number; harvested: number }> = {};
+    regionalQuotas.forEach((quota: any) => {
+      const key = quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory;
+      if (key) {
+        totals[`${quota.species}-${key}`] = {
+          total: quota.totalQuota,
+          harvested: quota.harvested
+        };
+      }
+    });
+    return totals;
+  };
+
+  const regionalTotals = getRegionalTotals();
+
   return (
     <div className="space-y-6">
+      {/* Sezione Quote Regionali Piano Venatorio */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-green-600" />
+            Quote Regionali Piano Venatorio
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(SPECIES_CONFIG).map(([species, config]) => {
+              const speciesQuotas = regionalQuotas.filter((q: any) => q.species === species);
+              const speciesTotal = speciesQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
+              const speciesHarvested = speciesQuotas.reduce((sum: number, q: any) => sum + q.harvested, 0);
+              
+              return (
+                <div key={species} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold">{config.name}</h4>
+                    <Badge className={config.color}>
+                      {speciesTotal - speciesHarvested} / {speciesTotal} disponibili
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {config.categories.map(category => {
+                      const categoryQuota = speciesQuotas.find((q: any) => 
+                        q.species === species && 
+                        (q.roeDeerCategory === category || q.redDeerCategory === category)
+                      );
+                      if (!categoryQuota) return null;
+                      
+                      return (
+                        <div key={category} className="flex justify-between text-sm">
+                          <span className="font-mono">{category}</span>
+                          <span>{categoryQuota.harvested}/{categoryQuota.totalQuota}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sezione Quote per Gruppo */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold">Gestione Quote per Gruppo</h2>
+          <h2 className="text-lg font-semibold">Distribuzione Quote per Gruppo</h2>
         </div>
         {!readonly && hasChanges && (
           <Button 
@@ -206,7 +305,22 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                       return (
                         <div key={category} className="grid grid-cols-12 gap-2 items-center">
                           <div className="col-span-3">
-                            <Badge variant="outline">{category}</Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{category}</Badge>
+                              {regionalTotals[`${species}-${category}`] && (
+                                <span className="text-xs text-green-600 font-medium">
+                                  {/* Calcola somma gruppi vs regionale */}
+                                  {(() => {
+                                    const groupSum = (groupQuotas as GroupQuota[])
+                                      .filter(q => q.species === species && 
+                                        (q.roeDeerCategory === category || q.redDeerCategory === category))
+                                      .reduce((sum, q) => sum + q.totalQuota, 0);
+                                    const regional = regionalTotals[`${species}-${category}`].total;
+                                    return `${groupSum}/${regional}`;
+                                  })()}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           
                           {readonly ? (
@@ -234,12 +348,19 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                           <div className="col-span-1 text-center">=</div>
                           
                           <div className="col-span-3">
-                            <Badge 
-                              variant={available > 0 ? "default" : "destructive"}
-                              className="w-full justify-center"
-                            >
-                              {(pendingChange !== undefined ? pendingChange : currentQuota) - harvested}
-                            </Badge>
+                            <div className="space-y-1">
+                              <Badge 
+                                variant={available > 0 ? "default" : "destructive"}
+                                className="w-full justify-center"
+                              >
+                                {(pendingChange !== undefined ? pendingChange : currentQuota) - harvested}
+                              </Badge>
+                              {regionalTotals[`${species}-${category}`] && (
+                                <div className="text-xs text-gray-500 text-center">
+                                  Piano: {regionalTotals[`${species}-${category}`].total - regionalTotals[`${species}-${category}`].harvested}/{regionalTotals[`${species}-${category}`].total}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );

@@ -629,7 +629,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {currentReserve?.managementType === 'zones_groups' ? (
-                  <GroupQuotasManager reserveId={currentReserve?.id} />
+                  <div className="space-y-6">
+                    <GroupQuotasManager reserveId={currentReserve?.id} />
+                  </div>
                 ) : isLoadingQuotas ? (
                   <div className="text-center py-8">Caricamento quote regionali...</div>
                 ) : (
