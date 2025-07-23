@@ -447,7 +447,7 @@ export default function SuperAdminDashboard() {
           <div className="w-full overflow-x-auto px-1 sm:px-0">
             <TabsList className="flex w-full min-w-max flex-row gap-1 sm:grid sm:grid-cols-7 sm:gap-0">
               <TabsTrigger value="reserves" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Riserve</TabsTrigger>
-              <TabsTrigger value="quotas" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Quote Regionali</TabsTrigger>
+              <TabsTrigger value="quotas" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Piani di Prelievo</TabsTrigger>
               <TabsTrigger value="admins" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Amministratori</TabsTrigger>
               <TabsTrigger value="settings" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Impostazioni</TabsTrigger>
               <TabsTrigger value="support" className="whitespace-nowrap px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm">Supporto</TabsTrigger>
@@ -913,7 +913,7 @@ export default function SuperAdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Tab Quote Regionali */}
+          {/* Tab Piani di Prelievo Regionali */}
           <TabsContent value="quotas" className="space-y-4 sm:space-y-6">
             <SuperAdminRegionalQuotas reserves={reserves} />
           </TabsContent>

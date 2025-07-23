@@ -359,11 +359,11 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-green-600" />
-            Gestione Quote Regionali Piano Venatorio
+            Gestione Piani di Prelievo Regionali
           </CardTitle>
           <p className="text-sm text-green-700">
-            SUPERADMIN: Gestione delle quote regionali assegnate dalla Regione Veneto per ogni riserva.
-            Queste quote rappresentano i limiti massimi che non possono essere superati dagli amministratori locali.
+            SUPERADMIN: Gestione dei piani di prelievo regionali assegnati dalla Regione Veneto per ogni riserva.
+            Questi piani rappresentano i limiti massimi che non possono essere superati dagli amministratori locali.
           </p>
         </CardHeader>
       </Card>
@@ -407,9 +407,9 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Come funzionano le quote regionali:</p>
+                      <p className="font-medium mb-1">Come funzionano i piani di prelievo regionali:</p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
-                        <li><strong>Piano Venatorio:</strong> Le quote sono assegnate dalla Regione Veneto</li>
+                        <li><strong>Piano Venatorio:</strong> I piani di prelievo sono assegnati dalla Regione Veneto</li>
                         <li><strong>Limiti Massimi:</strong> Gli admin locali NON possono superare questi valori</li>
                         <li><strong>Distribuzione:</strong> Ogni riserva può distribuire internamente (es: per gruppi)</li>
                         <li><strong>Controllo:</strong> Solo il SuperAdmin può modificare questi valori ufficiali</li>
@@ -541,12 +541,12 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8">Caricamento quote regionali...</div>
+              <div className="text-center py-8">Caricamento piani di prelievo regionali...</div>
             ) : !Array.isArray(regionalQuotas) || regionalQuotas.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>Nessuna quota regionale configurata per questa riserva</p>
-                <p className="text-sm mt-2">Clicca "Aggiungi Quota" per iniziare</p>
+                <p>Nessun piano di prelievo regionale configurato per questa riserva</p>
+                <p className="text-sm mt-2">Clicca "Aggiungi Piano" per iniziare</p>
               </div>
             ) : (
               <div className="space-y-6">

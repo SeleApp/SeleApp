@@ -209,10 +209,10 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-green-600" />
-            Quote Regionali Piano Venatorio (FISSE - Regione Veneto)
+            Piani di Prelievo Regionali (FISSI - Regione Veneto)
           </CardTitle>
           <p className="text-sm text-green-700">
-            Quote assegnate dalla Regione Veneto - NON modificabili. Rappresentano il limite massimo per la somma di tutti i gruppi.
+            Piani di prelievo assegnati dalla Regione Veneto - NON modificabili. Rappresentano il limite massimo per la somma di tutti i gruppi.
           </p>
         </CardHeader>
         <CardContent>

@@ -494,6 +494,17 @@ Changelog:
   - **Database Update**: Replaced existing quotas with official Regione Veneto data ensuring compliance with hunting regulations
   - **Hierarchical Control**: SuperAdmin manages regional quotas (maximum limits), local admins distribute to groups within those limits
 - July 23, 2025. **COMPREHENSIVE REGIONAL QUOTAS DATABASE**: Complete import of all official hunting quotas from Regione Veneto PDFs
+- July 23, 2025. **BIOMETRIC DATA COLLECTION SYSTEM**: Implemented comprehensive biometric data collection for scientific wildlife management
+  - **BiometricDataForm Component**: 14 optional biometric fields (weight, measurements, antler data, body condition, age estimation)
+  - **Database Integration**: Added biometric columns to hunt_reports table with proper schema support
+  - **Dual Form Integration**: Biometric data collection available in both hunter and admin report forms  
+  - **Scientific Value**: Optional but detailed data collection for fauna research and management studies
+  - **User Interface**: Collapsible form section with species-specific fields and clear instructions
+- July 23, 2025. **TERMINOLOGY UPDATE**: Changed "Quote Regionali" to "Piani di Prelievo Regionali" across SuperAdmin interface
+  - **SuperAdmin Dashboard**: Updated tab name from "Quote Regionali" to "Piani di Prelievo"
+  - **Component Titles**: All references now use "Piani di Prelievo Regionali" terminology
+  - **User Interface**: Consistent terminology throughout SuperAdmin and admin interfaces
+  - **Documentation**: Updated help text and descriptions to reflect official terminology
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
   - **Official Data Sources**: Capriolo 2025-2026, Cervo 2025-2026, Camoscio e Muflone 2025-2026 PDFs fully processed

@@ -17,7 +17,7 @@ router.get("/:reserveId", authenticateToken, requireRole('SUPERADMIN'), async (r
     res.json(quotas);
   } catch (error) {
     console.error("Error fetching regional quotas:", error);
-    res.status(500).json({ message: "Errore nel recupero delle quote regionali" });
+    res.status(500).json({ message: "Errore nel recupero dei piani di prelievo regionali" });
   }
 });
 

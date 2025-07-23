@@ -118,7 +118,7 @@ export default [
       
       res.json({
         success: true,
-        message: `Quote regionali importate con successo per la specie ${species}`,
+        message: `Piani di prelievo regionali importati con successo per la specie ${species}`,
         totalReserves,
         totalQuotas,
         species
@@ -127,7 +127,7 @@ export default [
       console.error('Error importing regional quotas by species:', error);
       res.status(500).json({ 
         success: false, 
-        message: 'Errore durante l\'importazione delle quote regionali' 
+        message: 'Errore durante l\'importazione dei piani di prelievo regionali' 
       });
     }
   }
