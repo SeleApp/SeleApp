@@ -94,11 +94,11 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   });
 
   // Get active groups from reserve config or default to first 4
-  const activeGroups = currentReserve?.activeGroups || ['A', 'B', 'C', 'D'];
-  const numberOfGroups = currentReserve?.numberOfGroups || 4;
+  const activeGroups = (currentReserve as any)?.activeGroups || ['A', 'B', 'C', 'D'];
+  const numberOfGroups = (currentReserve as any)?.numberOfGroups || 4;
 
   // Filtra le quote per il gruppo attivo
-  const activeGroupQuotas = groupQuotas.filter((quota: GroupQuota) => quota.hunterGroup === activeGroup);
+  const activeGroupQuotas = (groupQuotas as GroupQuota[]).filter((quota: GroupQuota) => quota.hunterGroup === activeGroup);
 
   // Organizza le quote per specie e categoria
   const organizedQuotas = Object.entries(SPECIES_CONFIG).reduce((acc, [species, config]) => {
@@ -140,6 +140,14 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
 
   const hasChanges = Object.keys(quotaChanges).length > 0;
 
+  if (isLoading) {
+    return <div className="p-4 text-center">Caricamento quote...</div>;
+  }
+
+  if (!groupQuotas || !Array.isArray(groupQuotas) || groupQuotas.length === 0) {
+    return <div className="p-4 text-center">Nessuna quota trovata per questa riserva</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -161,7 +169,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
 
       <Tabs value={activeGroup} onValueChange={(value) => setActiveGroup(value as 'A' | 'B' | 'C' | 'D' | 'E' | 'F')}>
         <TabsList className={`grid w-full ${numberOfGroups === 2 ? 'grid-cols-2' : numberOfGroups === 3 ? 'grid-cols-3' : numberOfGroups === 5 ? 'grid-cols-5' : numberOfGroups === 6 ? 'grid-cols-6' : 'grid-cols-4'}`}>
-          {activeGroups.map(group => (
+          {activeGroups.map((group: string) => (
             <TabsTrigger key={group} value={group} className="gap-2">
               <Users className="h-4 w-4" />
               Gruppo {group}
@@ -169,7 +177,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
           ))}
         </TabsList>
 
-        {activeGroups.map(group => (
+        {activeGroups.map((group: string) => (
           <TabsContent key={group} value={group} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(SPECIES_CONFIG).map(([species, config]) => (
