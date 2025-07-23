@@ -286,7 +286,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-blue-600" />
-              <CardTitle>Distribuzione Quote per Gruppo (MODIFICABILI)</CardTitle>
+              <CardTitle className="text-xl">Distribuzione Quote per Gruppo (SEMPRE MODIFICABILI DURANTE LA STAGIONE)</CardTitle>
             </div>
             {!readonly && hasChanges && (
               <Button 
@@ -299,13 +299,14 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
               </Button>
             )}
           </div>
-          <p className="text-sm text-blue-700 mt-2">
-            L'amministratore può modificare le quote di ogni gruppo, ma la somma totale NON può superare le quote regionali.
-            <br />
-            <strong>Zone:</strong> Tutti i cacciatori possono prenotare in tutte le 16 zone di Cison.
-            <br />
-            <strong>Capi:</strong> Ogni cacciatore può prelevare solo i capi assegnati al suo gruppo.
-          </p>
+          <div className="text-base text-blue-800 mt-3 p-4 bg-blue-100 rounded-lg">
+            <div className="space-y-2">
+              <p><strong>🔄 MODIFICHE SEMPRE POSSIBILI:</strong> Puoi cambiare la distribuzione delle quote tra gruppi in qualsiasi momento durante la stagione.</p>
+              <p><strong>🎯 LIMITE MASSIMO:</strong> La somma di tutti i gruppi NON può superare le quote regionali assegnate.</p>
+              <p><strong>🗺️ ZONE LIBERE:</strong> Tutti i cacciatori possono prenotare in tutte le 16 zone di Cison.</p>
+              <p><strong>🦌 CAPI LIMITATI:</strong> Ogni cacciatore può prelevare solo i capi assegnati al suo gruppo.</p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
 
@@ -346,27 +347,35 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                       const displayQuota = pendingChange !== undefined ? pendingChange : currentQuota;
 
                       return (
-                        <div key={category} className="grid grid-cols-12 gap-2 items-center">
+                        <div key={category} className="grid grid-cols-12 gap-4 items-center py-3 border-b border-gray-100">
                           <div className="col-span-3">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{category}</Badge>
-                              {regionalTotals[`${species}-${category}`] && (
-                                <div className="text-xs">
-                                  {(() => {
-                                    const groupSum = (groupQuotas as GroupQuota[])
-                                      .filter(q => q.species === species && 
-                                        (q.roeDeerCategory === category || q.redDeerCategory === category))
-                                      .reduce((sum, q) => sum + q.totalQuota, 0);
-                                    const regional = regionalTotals[`${species}-${category}`].total;
-                                    const isOverLimit = groupSum > regional;
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="outline" className="text-lg py-1 px-3 font-bold">{category}</Badge>
+                              <div className="text-xs">
+                                {(() => {
+                                  const groupSum = (groupQuotas as GroupQuota[])
+                                    .filter(q => q.species === species && 
+                                      (q.roeDeerCategory === category || q.redDeerCategory === category))
+                                    .reduce((sum, q) => sum + q.totalQuota, 0);
+                                  const regional = regionalTotals[`${species}-${category}`]?.total || 0;
+                                  const isOverLimit = groupSum > regional && regional > 0;
+                                  const hasRegional = regional > 0;
+                                  
+                                  if (hasRegional) {
                                     return (
                                       <span className={isOverLimit ? "text-red-600 font-bold" : "text-green-600 font-medium"}>
                                         {isOverLimit ? "⚠️ " : "✓ "}Totale: {groupSum}/{regional}
                                       </span>
                                     );
-                                  })()}
-                                </div>
-                              )}
+                                  } else {
+                                    return (
+                                      <span className="text-gray-500 font-medium">
+                                        Totale: {groupSum}/0 (nessuna quota regionale)
+                                      </span>
+                                    );
+                                  }
+                                })()}
+                              </div>
                             </div>
                           </div>
                           
@@ -375,35 +384,31 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                               {currentQuota}
                             </div>
                           ) : (
-                            <div className="col-span-3 flex items-center gap-1">
+                            <div className="col-span-3 flex items-center gap-2">
                               <Button
                                 type="button"
                                 variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0 flex-shrink-0"
+                                size="lg"
+                                className="h-12 w-12 p-0 flex-shrink-0 text-xl font-bold"
                                 disabled={updateQuotasMutation.isPending || displayQuota <= 0}
                                 onClick={() => handleQuotaChange(species, category, String(Math.max(0, displayQuota - 1)))}
                               >
-                                <Minus className="h-3 w-3" />
+                                -
                               </Button>
-                              <Input
-                                type="number"
-                                min="0"
-                                max="99"
-                                value={displayQuota}
-                                onChange={(e) => handleQuotaChange(species, category, e.target.value)}
-                                className={`text-center flex-1 ${pendingChange !== undefined ? 'border-blue-500 bg-blue-50' : ''}`}
-                                disabled={updateQuotasMutation.isPending}
-                              />
+                              <div className="flex-1 text-center">
+                                <div className={`text-2xl font-bold py-2 px-3 rounded border-2 ${pendingChange !== undefined ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                                  {displayQuota}
+                                </div>
+                              </div>
                               <Button
                                 type="button"
                                 variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0 flex-shrink-0"
+                                size="lg"
+                                className="h-12 w-12 p-0 flex-shrink-0 text-xl font-bold"
                                 disabled={updateQuotasMutation.isPending}
                                 onClick={() => handleQuotaChange(species, category, String(displayQuota + 1))}
                               >
-                                <Plus className="h-3 w-3" />
+                                +
                               </Button>
                             </div>
                           )}
