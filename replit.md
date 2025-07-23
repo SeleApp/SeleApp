@@ -486,6 +486,13 @@ Changelog:
   - **Complete Quota System**: All 36 quotas created (4 groups × 9 categories) for Cison reserve with proper distribution
   - **Hunter Group Assignment**: Assigned existing hunters to groups A, B, C for immediate system testing
   - **Production Ready**: Cison reserve fully operational with zones_groups management, dynamic forms, and complete quota tracking
+- July 23, 2025. **OFFICIAL REGIONAL QUOTAS IMPLEMENTATION**: Complete SuperAdmin system for managing official Regione Veneto quotas
+  - **PDF Data Extraction**: Automatically extracted official 2025-2026 quotas from Regione Veneto PDFs for Cison di Valmarino
+  - **Official Quota Data**: Capriolo M0(2), F0(12), FA(3), M1(4), MA(7) = 28 total; Cervo CL0(2), MCL1(3), MM(3), FF(8) = 16 total
+  - **SuperAdmin Import System**: Created /api/superadmin/import-quotas endpoint for automatic PDF data import
+  - **Tab-Based Interface**: Added "Importa da PDF" tab in SuperAdmin dashboard for official quota management
+  - **Database Update**: Replaced existing quotas with official Regione Veneto data ensuring compliance with hunting regulations
+  - **Hierarchical Control**: SuperAdmin manages regional quotas (maximum limits), local admins distribute to groups within those limits
 
 # User Preferences
 
