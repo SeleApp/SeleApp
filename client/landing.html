@@ -447,8 +447,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Monitoraggio Quote</h3>
-                    <p style="color: var(--text-secondary);">Tracciamento in tempo reale dei piani di prelievo regionali con aggiornamenti automatici e notifiche</p>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Monitoraggio Prelievi e Gestione delle Specie</h3>
+                    <p style="color: var(--text-secondary);">Tracciamento in tempo reale dei prelievi regionali con aggiornamenti automatici e gestione completa delle specie</p>
                 </div>
                 
                 <div class="feature-card p-8 rounded-2xl">
@@ -458,8 +458,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Report Fotografici</h3>
-                    <p style="color: var(--text-secondary);">Sistema di caricamento obbligatorio delle foto delle schede di abbattimento per la tracciabilità</p>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Schede Abbattimento</h3>
+                    <p style="color: var(--text-secondary);">Compilazione e gestione digitale delle schede di abbattimento con moduli integrati per la tracciabilità</p>
                 </div>
                 
                 <div class="feature-card p-8 rounded-2xl">
@@ -537,13 +537,12 @@
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Fotocamera Integrata</h4>
-                                <p style="color: var(--text-secondary);">Scatta foto direttamente dall'app per i report di caccia, con compressione automatica e caricamento ottimizzato</p>
+                                <h4 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Moduli e Schede Abbattimento</h4>
+                                <p style="color: var(--text-secondary);">Compila facilmente moduli e schede abbattimento direttamente dal dispositivo mobile, con validazione automatica dei dati</p>
                             </div>
                         </div>
                         
@@ -1297,10 +1296,9 @@ Per modificare le preferenze, rimuoverò il consenso attuale e riaprirò il bann
             if (confirm('Vuoi provare la demo di SeleApp? Scegli OK per vedere le opzioni disponibili.')) {
                 const choice = prompt(`Scegli il tipo di demo:
 1 - Demo Cacciatore (prenotazioni e report)
-2 - Demo Amministratore (gestione riserva)  
-3 - Demo SuperAdmin (gestione sistema)
+2 - Demo Amministratore Comprensorio Alpino (gestione riserva)
 
-Inserisci il numero (1, 2 o 3):`);
+Inserisci il numero (1 o 2):`);
                 
                 switch(choice) {
                     case '1':
@@ -1308,9 +1306,6 @@ Inserisci il numero (1, 2 o 3):`);
                         break;
                     case '2':
                         startAdminDemo();
-                        break;
-                    case '3':
-                        startSuperAdminDemo();
                         break;
                     default:
                         alert('Scelta non valida. Riprova cliccando su un pulsante demo specifico.');
@@ -1344,49 +1339,29 @@ La demo si aprirà in una nuova finestra.`);
 
         function startAdminDemo() {
             // Login automatico come demo admin
-            if (confirm('Demo Amministratore: Accederai come admin demo per 30 minuti. Potrai gestire cacciatori e quote. Continui?')) {
+            if (confirm('Demo Amministratore Comprensorio Alpino: Accederai come admin demo per 30 minuti. Potrai gestire cacciatori e prelievi. Continui?')) {
                 const demoWindow = window.open('/app?demo=admin', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
                 
                 setTimeout(() => {
-                    alert(`Demo Amministratore avviata!
+                    alert(`Demo Amministratore Comprensorio Alpino avviata!
 
 ✅ Potrai:
 • Creare e gestire cacciatori
-• Modificare quote faunistiche
-• Visualizzare report di caccia
+• Modificare piani di prelievo e gestione specie
+• Visualizzare e correggere report di caccia
 • Gestire prenotazioni attive
-• Vedere statistiche riserva
+• Compilare moduli e schede abbattimento
+• Vedere statistiche comprensorio
 
 ⏱️ Tempo disponibile: 30 minuti  
-🎯 Riserva demo: "Valle Demo"
+🎯 Comprensorio demo: "CA TV01 Demo"
 
 La demo si aprirà in una nuova finestra.`);
                 }, 1000);
             }
         }
 
-        function startSuperAdminDemo() {
-            // Login automatico come demo superadmin
-            if (confirm('Demo SuperAdmin: Accederai come superadmin demo per 30 minuti. Vedrai la gestione di multiple riserve. Continui?')) {
-                const demoWindow = window.open('/app?demo=superadmin', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                
-                setTimeout(() => {
-                    alert(`Demo SuperAdmin avviata!
 
-✅ Potrai:
-• Gestire multiple riserve
-• Importare piani di prelievo regionali da PDF
-• Creare amministratori
-• Configurare sistemi di gestione
-• Vedere panoramica completa
-
-⏱️ Tempo disponibile: 30 minuti
-🌍 Scope: Sistema completo 39 riserve
-
-La demo si aprirà in una nuova finestra.`);
-                }, 1000);
-            }
-        }
 
         function startMobileDemo() {
             // Demo ottimizzata per mobile con device detection
@@ -1407,7 +1382,7 @@ La demo si aprirà in una nuova finestra.`);
 
 📱 Caratteristiche Mobile:
 • Interface ottimizzata touch
-• Fotocamera per report caccia  
+• Compilazione moduli e schede abbattimento
 • Installazione PWA possibile
 • Funzionalità offline
 • Notifiche push native

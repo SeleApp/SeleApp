@@ -513,7 +513,13 @@ Changelog:
   - **Mobile Demo Integration**: Added startMobileDemo() function with device detection and mobile-optimized demo experience
   - **Platform Support**: Visual indicators for iOS Safari, Android Chrome, and universal PWA compatibility
   - **Navigation Update**: Added "Mobile" link to main navigation menu for easy access
-  - **PWA Features**: Highlighted offline functionality, push notifications, camera integration, and native app experience
+  - **PWA Features**: Highlighted offline functionality, push notifications, and native app experience
+- July 23, 2025. **CONTENT REFINEMENT**: Updated landing page content based on user feedback for accuracy and focus
+  - **Terminology Update**: Changed "Monitoraggio Quote" to "Monitoraggio Prelievi e Gestione delle Specie" throughout
+  - **Feature Enhancement**: Replaced "Report Fotografici" with "Schede Abbattimento" focusing on digital form compilation
+  - **Demo Simplification**: Removed SuperAdmin demo completely, keeping only Hunter and "Amministratore Comprensorio Alpino" demos
+  - **Mobile Features Update**: Replaced camera references with "Moduli e Schede Abbattimento" compilation features
+  - **Professional Focus**: Updated demo descriptions to emphasize form compilation and species management over photography
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
   - **Official Data Sources**: Capriolo 2025-2026, Cervo 2025-2026, Camoscio e Muflone 2025-2026 PDFs fully processed
