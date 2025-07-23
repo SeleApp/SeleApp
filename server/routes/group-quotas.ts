@@ -73,7 +73,7 @@ router.get("/:group", authenticateToken, async (req: AuthRequest, res: Response)
 router.post("/", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user;
-    if (!user?.reserveId && user.role !== 'SUPERADMIN') {
+    if (!user || (!user.reserveId && user.role !== 'SUPERADMIN')) {
       return res.status(400).json({ error: "Riserva non identificata" });
     }
 
@@ -83,7 +83,7 @@ router.post("/", authenticateToken, requireRole(['ADMIN', 'SUPERADMIN']), async 
       return res.status(400).json({ error: "Formato quotas non valido" });
     }
 
-    const reserveId = user.reserveId || req.body.reserveId;
+    const reserveId = user?.reserveId || req.body.reserveId;
     
     // Verifica che la riserva utilizzi il sistema "zones_groups"
     const reserve = await db

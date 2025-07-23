@@ -129,6 +129,9 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
     const numValue = parseInt(value) || 0;
     const key = `${activeGroup}-${species}-${category}`;
     
+    // Ottieni i totali regionali prima di usarli
+    const regionalTotals = getRegionalTotals();
+    
     // Validazione: verifica che la somma di tutti i gruppi non superi la quota regionale
     const regionalKey = `${species}-${category}`;
     const regionalLimit = regionalTotals[regionalKey]?.total || 0;
@@ -156,20 +159,31 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
       }
     }
     
-    setQuotaChanges(prev => ({
-      ...prev,
-      [key]: numValue
-    }));
+    console.log('Setting quota change:', key, numValue);
+    setQuotaChanges(prev => {
+      const newChanges = {
+        ...prev,
+        [key]: numValue
+      };
+      console.log('New quotaChanges state:', newChanges);
+      return newChanges;
+    });
   };
 
   const saveChanges = () => {
+    console.log('saveChanges called, quotaChanges:', quotaChanges);
+    
     const quotasToUpdate = Object.entries(quotaChanges).map(([key, totalQuota]) => {
       const [hunterGroup, species, category] = key.split('-');
       return { hunterGroup, species, category, totalQuota };
     });
 
+    console.log('quotasToUpdate:', quotasToUpdate);
+
     if (quotasToUpdate.length > 0) {
       updateQuotasMutation.mutate(quotasToUpdate);
+    } else {
+      console.log('No quotas to update');
     }
   };
 
