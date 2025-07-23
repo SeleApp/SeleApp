@@ -662,7 +662,7 @@ export default function SuperAdminDashboard() {
                         <div>
                           <Label htmlFor="assignmentMode">Modalità Assegnazione Capi</Label>
                           <Select 
-                            onValueChange={(value) => reserveForm.setValue("assignmentMode", value)}
+                            onValueChange={(value) => reserveForm.setValue("assignmentMode", value as "manual" | "random")}
                             defaultValue={reserveForm.watch("assignmentMode") || "manual"}
                           >
                             <SelectTrigger className="w-full">
@@ -710,7 +710,7 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     <SpeciesCheckboxes 
-                      value={reserveForm.watch("species")}
+                      value={reserveForm.watch("species") || "[]"}
                       onChange={(value) => reserveForm.setValue("species", value)}
                     />
 

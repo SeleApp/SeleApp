@@ -85,6 +85,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const importRegionalQuotasBySpeciesRoutes = await import("./routes/superadmin/importRegionalQuotasBySpecies");
   app.post("/api/superadmin/import-quotas-by-species", ...importRegionalQuotasBySpeciesRoutes.default);
   
+  // SuperAdmin populate missing species (SUPERADMIN only)
+  const populateMissingSpeciesRoutes = await import("./routes/superadmin/populateMissingSpecies");
+  app.post("/api/superadmin/populate-missing-species", ...populateMissingSpeciesRoutes.default);
+  
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);

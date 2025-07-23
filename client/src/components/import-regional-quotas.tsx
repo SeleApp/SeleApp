@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, CheckCircle, AlertCircle, Target } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, Target, Plus, RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import type { Reserve } from "@shared/schema";
 
 interface ImportRegionalQuotasProps {
@@ -24,6 +25,31 @@ export default function ImportRegionalQuotas({ reserves, onImportComplete }: Imp
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
   const { toast } = useToast();
+
+  // Mutation per popolare specie mancanti
+  const populateMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/superadmin/populate-missing-species", {
+        method: "POST"
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Popolamento completato",
+        description: `${data.totalQuotasCreated} quote create in ${data.reservesProcessed} riserve`,
+      });
+      if (onImportComplete) {
+        onImportComplete();
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Errore nel popolamento",
+        description: error.message || "Errore durante il popolamento delle specie mancanti",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleImportQuotas = async () => {
     if (!selectedSpecies) {
@@ -155,6 +181,36 @@ export default function ImportRegionalQuotas({ reserves, onImportComplete }: Imp
             </div>
           </div>
         )}
+
+        {/* Separator e funzioni aggiuntive */}
+        <div className="border-t pt-6">
+          <div className="text-center mb-4">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Funzioni Avanzate</h4>
+            <p className="text-xs text-gray-600">Strumenti per la gestione massiva delle quote regionali</p>
+          </div>
+          
+          <Button
+            onClick={() => populateMutation.mutate()}
+            disabled={populateMutation.isPending}
+            variant="outline"
+            className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          >
+            {populateMutation.isPending ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Popolamento in corso...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Popola Specie Mancanti
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Crea automaticamente le quote per tutte le specie configurate ma non ancora presenti nelle riserve
+          </p>
+        </div>
 
         {/* Avviso importante */}
         <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">

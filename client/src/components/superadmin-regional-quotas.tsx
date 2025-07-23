@@ -19,6 +19,21 @@ interface SuperAdminRegionalQuotasProps {
     id: string;
     name: string;
     comune: string;
+    species?: string;
+    emailContatto?: string;
+    presidentName?: string | null;
+    huntingType?: string | null;
+    systemType?: string;
+    managementType?: "custom" | "standard_zones" | "zones_groups" | "standard_random" | "quota_only";
+    numberOfZones?: number | null;
+    numberOfGroups?: number | null;
+    activeGroups?: string[] | null;
+    assignmentMode?: string | null;
+    accessCode?: string;
+    codeActive?: boolean;
+    isActive?: boolean;
+    createdAt?: Date;
+    stats?: any;
   }>;
 }
 
