@@ -13,20 +13,25 @@ import LoginPage from "./pages/login";
 import HunterDashboard from "./pages/hunter-dashboard-simple";
 import AdminDashboard from "./pages/admin-dashboard-new";
 import SuperAdminDashboard from "./pages/superadmin-dashboard";
+import DashboardFauna from "./pages/dashboard-fauna";
 import NotFound from "@/pages/not-found";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import DemoIndicator from "@/components/demo-indicator";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
   component: ComponentType; 
-  requiredRole?: string;
+  requiredRole?: string | string[];
 }) {
   if (!authService.isAuthenticated()) {
     return <Redirect to="/" />;
   }
 
-  if (requiredRole && authService.getUser()?.role !== requiredRole) {
-    return <Redirect to="/" />;
+  const user = authService.getUser();
+  if (requiredRole) {
+    const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (!user?.role || !allowedRoles.includes(user.role)) {
+      return <Redirect to="/" />;
+    }
   }
 
   return <Component />;
@@ -45,6 +50,9 @@ function Router() {
       </Route>
       <Route path="/superadmin">
         <ProtectedRoute component={SuperAdminDashboard} requiredRole="SUPERADMIN" />
+      </Route>
+      <Route path="/fauna">
+        <ProtectedRoute component={DashboardFauna} requiredRole={["BIOLOGO", "PROVINCIA"]} />
       </Route>
       <Route component={NotFound} />
     </Switch>

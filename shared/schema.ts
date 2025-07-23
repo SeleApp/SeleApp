@@ -8,7 +8,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN', 'SUPERADMIN']);
+export const userRoleEnum = pgEnum('user_role', ['HUNTER', 'ADMIN', 'SUPERADMIN', 'BIOLOGO', 'PROVINCIA']);
 export const timeSlotEnum = pgEnum('time_slot', ['morning', 'afternoon', 'full_day']);
 export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer', 'fallow_deer', 'mouflon', 'chamois']);
 export const sexEnum = pgEnum('sex', ['male', 'female']);
@@ -35,6 +35,14 @@ export const managementTypeEnum = pgEnum('management_type', [
 // Sistema di sorteggio per assegnazione random
 export const lotteryStatusEnum = pgEnum('lottery_status', ['draft', 'active', 'closed', 'completed']);
 export const participationStatusEnum = pgEnum('participation_status', ['registered', 'winner', 'excluded']);
+
+// Enums per gestione faunistica (BIOLOGO/PROVINCIA)
+export const faunaSpeciesEnum = pgEnum('fauna_species', ['capriolo', 'cervo', 'daino', 'muflone', 'camoscio']);
+export const faunaSexEnum = pgEnum('fauna_sex', ['M', 'F']);
+export const faunaAgeClassEnum = pgEnum('fauna_age_class', ['J', 'Y', 'A']); // J=giovane, Y=yearling, A=adulto
+export const faunaObservationTypeEnum = pgEnum('fauna_observation_type', ['prelievo', 'avvistamento', 'fototrappola']);
+export const faunaReproductiveStatusEnum = pgEnum('fauna_reproductive_status', ['gravida', 'no', 'n.d.']);
+export const faunaBodyConditionEnum = pgEnum('fauna_body_condition', ['buono', 'medio', 'scarso']);
 
 // Reserves table (multi-tenant support)
 export const reserves = pgTable("reserves", {
@@ -794,3 +802,50 @@ export type InsertCa17Uscita = z.infer<typeof insertCa17UscitaSchema>;
 
 export type Ca17Blocco = typeof ca17Blocchi.$inferSelect;
 export type InsertCa17Blocco = z.infer<typeof insertCa17BloccoSchema>;
+
+// Tabella Osservazioni Faunistiche (BIOLOGO/PROVINCIA)
+export const osservazioniFaunistiche = pgTable("osservazioni_faunistiche", {
+  id: serial("id").primaryKey(),
+  specie: faunaSpeciesEnum("specie").notNull(),
+  sesso: faunaSexEnum("sesso").notNull(),
+  classeEta: faunaAgeClassEnum("classe_eta").notNull(),
+  data: timestamp("data").notNull(),
+  zonaId: integer("zona_id").notNull().references(() => zones.id),
+  sezione: text("sezione").notNull(), // es: pederobba, cison, ecc.
+  tipo: faunaObservationTypeEnum("tipo").notNull(),
+  peso: decimal("peso", { precision: 5, scale: 2 }), // facoltativo
+  statoRiproduttivo: faunaReproductiveStatusEnum("stato_riproduttivo").default('n.d.'),
+  statoCorpo: faunaBodyConditionEnum("stato_corpo").default('medio'),
+  lunghezzaMandibola: decimal("lunghezza_mandibola", { precision: 5, scale: 2 }), // opzionale
+  lunghezzaPalchi: decimal("lunghezza_palchi", { precision: 5, scale: 2 }), // opzionale
+  gpsLat: decimal("gps_lat", { precision: 10, scale: 8 }), // opzionale
+  gpsLon: decimal("gps_lon", { precision: 11, scale: 8 }), // opzionale
+  note: text("note"),
+  biologo: text("biologo").notNull(), // nome del biologo/operatore che ha inserito il dato
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Schema per inserimento osservazione faunistica
+export const insertOsservazioneFaunisticaSchema = createInsertSchema(osservazioniFaunistiche).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Relazioni per osservazioni faunistiche
+export const osservazioniFaunisticheRelations = relations(osservazioniFaunistiche, ({ one }) => ({
+  zona: one(zones, {
+    fields: [osservazioniFaunistiche.zonaId],
+    references: [zones.id],
+  }),
+  reserve: one(reserves, {
+    fields: [osservazioniFaunistiche.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+// Tipi per osservazioni faunistiche
+export type OsservazioneFaunistica = typeof osservazioniFaunistiche.$inferSelect;
+export type InsertOsservazioneFaunistica = z.infer<typeof insertOsservazioneFaunisticaSchema>;

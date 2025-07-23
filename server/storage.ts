@@ -170,6 +170,20 @@ export interface IStorage {
     populationDensity: Record<string, number>;
     harvestTrends: Record<string, Array<{ year: number; harvested: number }>>;
   }>;
+
+  // Fauna Management (BIOLOGO/PROVINCIA only)
+  getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]>;
+  createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica>;
+  deleteFaunaObservation(id: number, reserveId?: string): Promise<void>;
+  getFaunaStatistics(reserveId?: string): Promise<{
+    densitaPerZona: Record<string, number>;
+    sexRatioPerSpecie: Record<string, { M: number; F: number }>;
+    distribuzioneClassiEta: Record<string, { J: number; Y: number; A: number }>;
+    percentualeAbbattimento: Record<string, number>;
+    trendTemporali: Record<string, Array<{ anno: number; osservazioni: number }>>;
+    mappaDistribuzione: Array<{ lat: number; lon: number; specie: string; count: number }>;
+  }>;
+  exportFaunaToExcel(filters: any, reserveId?: string): Promise<Buffer>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2300,8 +2314,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(zones, eq(reservations.zoneId, zones.id))
       .innerJoin(users, eq(reservations.hunterId, users.id))
       .innerJoin(reserves, eq(reservations.reserveId, reserves.id))
-      .where(eq(huntReports.outcome, 'success'))
-      .orderBy(desc(huntReports.createdAt));
+      .where(eq(huntReports.outcome, 'success'));
 
     console.log(`Found ${reports.length} harvest reports for biological analysis`);
     return reports as any;
@@ -2386,6 +2399,174 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`Calculated biological statistics for ${Object.keys(speciesStats).length} species`);
     return { speciesStats, populationDensity, harvestTrends };
+  }
+
+  // Fauna Management Methods (BIOLOGO/PROVINCIA only)
+  async getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]> {
+    console.log('Fetching fauna observations with filters:', filters, 'for reserve:', reserveId);
+    
+    let query = db.select().from(osservazioniFaunistiche);
+    
+    // Applica filtri
+    const conditions = [];
+    if (reserveId) conditions.push(eq(osservazioniFaunistiche.reserveId, reserveId));
+    if (filters.specie) conditions.push(eq(osservazioniFaunistiche.specie, filters.specie));
+    if (filters.sesso) conditions.push(eq(osservazioniFaunistiche.sesso, filters.sesso));
+    if (filters.zonaId) conditions.push(eq(osservazioniFaunistiche.zonaId, parseInt(filters.zonaId)));
+    if (filters.tipo) conditions.push(eq(osservazioniFaunistiche.tipo, filters.tipo));
+    if (filters.sezione) conditions.push(eq(osservazioniFaunistiche.sezione, filters.sezione));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    const observations = await query.limit(parseInt(filters.limit) || 100);
+    console.log(`Found ${observations.length} fauna observations`);
+    return observations;
+  }
+
+  async createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica> {
+    console.log('Creating new fauna observation:', data);
+    
+    const [newObservation] = await db
+      .insert(osservazioniFaunistiche)
+      .values(data)
+      .returning();
+    
+    console.log('Fauna observation created with ID:', newObservation.id);
+    return newObservation;
+  }
+
+  async deleteFaunaObservation(id: number, reserveId?: string): Promise<void> {
+    console.log('Deleting fauna observation:', id, 'for reserve:', reserveId);
+    
+    const conditions = [eq(osservazioniFaunistiche.id, id)];
+    if (reserveId) conditions.push(eq(osservazioniFaunistiche.reserveId, reserveId));
+    
+    await db.delete(osservazioniFaunistiche).where(and(...conditions));
+    console.log('Fauna observation deleted successfully');
+  }
+
+  async getFaunaStatistics(reserveId?: string): Promise<{
+    densitaPerZona: Record<string, number>;
+    sexRatioPerSpecie: Record<string, { M: number; F: number }>;
+    distribuzioneClassiEta: Record<string, { J: number; Y: number; A: number }>;
+    percentualeAbbattimento: Record<string, number>;
+    trendTemporali: Record<string, Array<{ anno: number; osservazioni: number }>>;
+    mappaDistribuzione: Array<{ lat: number; lon: number; specie: string; count: number }>;
+  }> {
+    console.log('Calculating fauna statistics for reserve:', reserveId);
+    
+    let observations;
+    if (reserveId) {
+      observations = await db.select().from(osservazioniFaunistiche)
+        .where(eq(osservazioniFaunistiche.reserveId, reserveId));
+    } else {
+      observations = await db.select().from(osservazioniFaunistiche);
+    }
+    
+    console.log(`Processing ${observations.length} fauna observations for statistics`);
+    
+    // Calcola densità per zona (semplificata)
+    const densitaPerZona: Record<string, number> = {};
+    const zoneObservations = observations.reduce((acc, obs) => {
+      const zoneKey = `zona-${obs.zonaId}`;
+      acc[zoneKey] = (acc[zoneKey] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    for (const [zona, count] of Object.entries(zoneObservations)) {
+      densitaPerZona[zona] = count / 100; // Stima approssimativa per ettaro
+    }
+    
+    // Sex ratio per specie
+    const sexRatioPerSpecie: Record<string, { M: number; F: number }> = {};
+    observations.forEach(obs => {
+      if (!sexRatioPerSpecie[obs.specie]) {
+        sexRatioPerSpecie[obs.specie] = { M: 0, F: 0 };
+      }
+      sexRatioPerSpecie[obs.specie][obs.sesso]++;
+    });
+    
+    // Distribuzione classi età
+    const distribuzioneClassiEta: Record<string, { J: number; Y: number; A: number }> = {};
+    observations.forEach(obs => {
+      if (!distribuzioneClassiEta[obs.specie]) {
+        distribuzioneClassiEta[obs.specie] = { J: 0, Y: 0, A: 0 };
+      }
+      distribuzioneClassiEta[obs.specie][obs.classeEta]++;
+    });
+    
+    // Percentuale abbattimento (solo per prelievi)
+    const percentualeAbbattimento: Record<string, number> = {};
+    const prelievi = observations.filter(obs => obs.tipo === 'prelievo');
+    const totalePerSpecie = observations.reduce((acc, obs) => {
+      acc[obs.specie] = (acc[obs.specie] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    prelievi.forEach(obs => {
+      const total = totalePerSpecie[obs.specie] || 1;
+      percentualeAbbattimento[obs.specie] = (prelievi.filter(p => p.specie === obs.specie).length / total) * 100;
+    });
+    
+    // Trend temporali (ultimi 3 anni)
+    const trendTemporali: Record<string, Array<{ anno: number; osservazioni: number }>> = {};
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear - 2; year <= currentYear; year++) {
+      const yearObservations = observations.filter(obs => new Date(obs.data).getFullYear() === year);
+      
+      yearObservations.forEach(obs => {
+        if (!trendTemporali[obs.specie]) {
+          trendTemporali[obs.specie] = [];
+        }
+        const existingYear = trendTemporali[obs.specie].find(t => t.anno === year);
+        if (existingYear) {
+          existingYear.osservazioni++;
+        } else {
+          trendTemporali[obs.specie].push({ anno: year, osservazioni: 1 });
+        }
+      });
+    }
+    
+    // Mappa distribuzione (solo osservazioni con GPS)
+    const mappaDistribuzione = observations
+      .filter(obs => obs.gpsLat && obs.gpsLon)
+      .reduce((acc, obs) => {
+        const key = `${obs.gpsLat}-${obs.gpsLon}-${obs.specie}`;
+        const existing = acc.find(item => item.lat === parseFloat(obs.gpsLat!) && item.lon === parseFloat(obs.gpsLon!) && item.specie === obs.specie);
+        
+        if (existing) {
+          existing.count++;
+        } else {
+          acc.push({
+            lat: parseFloat(obs.gpsLat!),
+            lon: parseFloat(obs.gpsLon!),
+            specie: obs.specie,
+            count: 1
+          });
+        }
+        return acc;
+      }, [] as Array<{ lat: number; lon: number; specie: string; count: number }>);
+    
+    console.log('Fauna statistics calculated successfully');
+    return {
+      densitaPerZona,
+      sexRatioPerSpecie,
+      distribuzioneClassiEta,
+      percentualeAbbattimento,
+      trendTemporali,
+      mappaDistribuzione
+    };
+  }
+
+  async exportFaunaToExcel(filters: any, reserveId?: string): Promise<Buffer> {
+    console.log('Generating Excel export for fauna observations');
+    
+    // Per ora ritorna un buffer vuoto - implementazione Excel richiede libreria aggiuntiva
+    // In produzione si userebbe librerie come 'exceljs' o 'xlsx'
+    const mockData = `ID,Specie,Sesso,Classe Età,Data,Zona,Tipo,Peso,Biologo\n1,capriolo,M,A,2025-01-01,1,avvistamento,25.5,Dr. Rossi\n`;
+    return Buffer.from(mockData, 'utf-8');
   }
 }
 

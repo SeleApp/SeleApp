@@ -93,6 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const harvestReportsRoutes = await import("./routes/superadmin/harvestReports");
   app.use("/api/superadmin/harvest-reports", harvestReportsRoutes.default);
   
+  // Fauna management routes (BIOLOGO/PROVINCIA only)
+  const faunaRoutes = await import("./routes/fauna");
+  app.use("/api/fauna", faunaRoutes.default);
+  
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);

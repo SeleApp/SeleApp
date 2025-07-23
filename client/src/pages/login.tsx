@@ -47,6 +47,8 @@ export default function LoginPage() {
         navigate("/superadmin");
       } else if (user?.role === "ADMIN") {
         navigate("/admin");
+      } else if (user?.role === "BIOLOGO" || user?.role === "PROVINCIA") {
+        navigate("/fauna");
       } else {
         navigate("/hunter");
       }
@@ -77,6 +79,8 @@ export default function LoginPage() {
           navigate("/superadmin");
         } else if (response.user.role === "ADMIN") {
           navigate("/admin");
+        } else if (response.user.role === "BIOLOGO" || response.user.role === "PROVINCIA") {
+          navigate("/fauna");
         } else {
           navigate("/hunter");
         }
@@ -106,6 +110,8 @@ export default function LoginPage() {
         navigate("/superadmin");
       } else if (response.user.role === "ADMIN") {
         navigate("/admin");
+      } else if (response.user.role === "BIOLOGO" || response.user.role === "PROVINCIA") {
+        navigate("/fauna");
       } else {
         navigate("/hunter");
       }

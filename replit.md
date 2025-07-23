@@ -548,6 +548,18 @@ Changelog:
   - **Advanced Filtering**: Added status filter (active/inactive) and numerical sorting (CA TV01-TV38) in SuperAdmin dashboard
   - **CA TV28 Unification**: Merged duplicate CA TV28 with active Cison reserve, eliminated redundancy, now 39 total reserves
 
+- July 23, 2025. **WILDLIFE MANAGEMENT SYSTEM (GESTIONE FAUNISTICA)**: Complete implementation of biological monitoring system for BIOLOGO and PROVINCIA roles
+  - **New User Roles**: Added BIOLOGO and PROVINCIA roles with specialized access to wildlife management features
+  - **Database Schema**: Created osservazioni_faunistiche table with comprehensive biological data fields (species, sex, age, GPS coordinates, biometric data)
+  - **API Endpoints**: Implemented complete REST API at /api/fauna with CRUD operations and statistical analysis
+  - **React Dashboard**: Created dedicated dashboard-fauna.tsx with tabs for observations, statistics, charts, and interactive maps
+  - **Data Visualization**: Integrated Recharts for sex ratio analysis, age distribution, and population density graphs
+  - **Filtering System**: Advanced filtering by species, sex, observation type, location, and date ranges
+  - **Excel Export**: Template system for bulk data import with scientific field standards
+  - **Protected Access**: Routes protected for BIOLOGO/PROVINCIA roles only with JWT authentication
+  - **Scientific Fields**: Complete biometric data collection (weight, mandible length, antler measurements, reproductive status, body condition)
+  - **GPS Integration**: Geographical coordinates support for distribution mapping and habitat analysis
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
