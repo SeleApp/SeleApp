@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { AdminStats, ReservationWithDetails } from "@/lib/types";
 import { Users, CalendarCheck, Target, AlertTriangle, Calendar, Edit, Check, X, Settings, Trash2, UserCheck, UserX, ClipboardList, Plus, MapPin, BarChart3, XCircle } from "lucide-react";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
 import RegionalQuotaManager from "@/components/regional-quota-manager";
 import GroupQuotasManager from "@/components/group-quotas-manager";
 import HunterManagementModal from "@/components/hunter-management-modal";
@@ -31,6 +33,8 @@ export default function AdminDashboard() {
   const [showHunterManagement, setShowHunterManagement] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [selectedHunter, setSelectedHunter] = useState<any>(null);
+  const [showHunterModal, setShowHunterModal] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -60,7 +64,8 @@ export default function AdminDashboard() {
   // Query per le quote di gruppo (solo se il sistema è "Zone & gruppi")
   const { data: groupQuotas = [] } = useQuery({
     queryKey: ["/api/group-quotas"],
-    enabled: currentReserve?.managementType === 'zones_groups'
+    enabled: currentReserve?.managementType === 'zones_groups',
+    refetchOnWindowFocus: true
   });
 
   const { data: reservations = [], isLoading: isLoadingReservations } = useQuery({
@@ -71,7 +76,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/hunters"],
   });
 
-  const { data: currentReserve } = useQuery({
+  const { data: currentReserve = {} } = useQuery({
     queryKey: ["/api/current-reserve"],
   });
 

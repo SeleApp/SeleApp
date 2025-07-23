@@ -7,13 +7,19 @@ import { storage } from "../storage";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 import { createReservationSchema } from "@shared/schema";
 import { EmailService } from "../services/emailService";
+import { db } from "../db";
+import { groupQuotas, reserves } from "../../shared/schema";
+import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
 router.get("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const hunterId = req.user?.role === 'HUNTER' ? req.user.id : undefined;
-    const reservations = await storage.getReservations(req.user.reserveId, hunterId);
+    if (!req.user) {
+      return res.status(401).json({ message: "Utente non autenticato" });
+    }
+    const hunterId = req.user.role === 'HUNTER' ? req.user.id : undefined;
+    const reservations = await storage.getReservations(req.user.reserveId!, hunterId);
     res.json(reservations);
   } catch (error) {
     console.error("Error fetching reservations:", error);
@@ -26,20 +32,20 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     console.log("🔥 Ricevuto body request:", JSON.stringify(req.body, null, 2));
     console.log("🔑 User info:", { id: req.user.id, reserveId: req.user.reserveId });
     
-    if (req.user?.role !== 'HUNTER') {
+    if (!req.user || req.user.role !== 'HUNTER') {
       return res.status(403).json({ message: "Solo i cacciatori possono prenotare" });
     }
 
     const reservationData = createReservationSchema.parse({
       ...req.body,
       hunterId: req.user.id,
-      reserveId: req.user.reserveId,
+      reserveId: req.user.reserveId!,
     });
 
     console.log("✅ Dati validati con successo:", reservationData);
 
     // Check if zone exists and is active for this reserve
-    const zone = await storage.getZone(reservationData.zoneId, req.user.reserveId);
+    const zone = await storage.getZone(reservationData.zoneId, req.user.reserveId!);
     if (!zone || !zone.isActive) {
       return res.status(400).json({ message: "Zona non valida o non attiva" });
     }
@@ -64,7 +70,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     }
 
     // Check if hunter already has a reservation for this date and time slot
-    const existingReservations = await storage.getReservations(req.user.reserveId, req.user.id);
+    const existingReservations = await storage.getReservations(req.user.reserveId!, req.user.id);
     const dateStr = huntDateStr; // Use original string format
     const hasConflict = existingReservations.some(r => {
       const reservationDate = new Date(r.huntDate).toISOString().split('T')[0];
@@ -81,7 +87,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
 
     // Check zone cooldown rules
     const zoneCooldownCheck = await storage.checkZoneCooldown(
-      req.user.reserveId, 
+      req.user.reserveId!, 
       req.user.id, 
       reservationData.zoneId
     );
@@ -94,6 +100,57 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
           reason: zoneCooldownCheck.reason
         }
       });
+    }
+
+    // Get reserve management type to check if group quota validation is needed
+    const reserve = await db.select().from(reserves).where(eq(reserves.id, req.user.reserveId!)).limit(1);
+    const isZoneGroupsReserve = reserve[0]?.managementType === 'zones_groups';
+
+    // For zones_groups reserves: check group quotas for target species
+    if (isZoneGroupsReserve && reservationData.targetSpecies) {
+      const hunter = await storage.getUser(req.user.id);
+      if (!hunter?.hunterGroup) {
+        return res.status(400).json({ 
+          message: "Gruppo cacciatore non definito. Contatta l'amministratore." 
+        });
+      }
+
+      const targetCategory = reservationData.targetSpecies === 'roe_deer' 
+        ? reservationData.targetRoeDeerCategory 
+        : reservationData.targetRedDeerCategory;
+
+      if (targetCategory) {
+        // Find the specific quota for this group, species and category
+        const categoryField = reservationData.targetSpecies === 'roe_deer' ? 'roeDeerCategory' : 'redDeerCategory';
+        const groupQuota = await db.select()
+          .from(groupQuotas)
+          .where(
+            and(
+              eq(groupQuotas.reserveId, req.user.reserveId!),
+              eq(groupQuotas.hunterGroup, hunter.hunterGroup),
+              eq(groupQuotas.species, reservationData.targetSpecies),
+              eq(groupQuotas[categoryField as keyof typeof groupQuotas], targetCategory)
+            )
+          )
+          .limit(1);
+
+        if (groupQuota.length === 0) {
+          return res.status(400).json({ 
+            message: `Quota non trovata per ${targetCategory} nel gruppo ${hunter.hunterGroup}` 
+          });
+        }
+
+        const quota = groupQuota[0];
+        const available = quota.totalQuota - quota.harvested;
+        
+        if (available <= 0) {
+          return res.status(400).json({ 
+            message: `Quota esaurita per ${targetCategory} nel gruppo ${hunter.hunterGroup} (${quota.harvested}/${quota.totalQuota})` 
+          });
+        }
+
+        console.log(`✅ Group quota check passed: ${targetCategory} - ${available} available in group ${hunter.hunterGroup}`);
+      }
     }
 
     // Prepare target species data if provided

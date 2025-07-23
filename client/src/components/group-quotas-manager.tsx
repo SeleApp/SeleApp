@@ -18,7 +18,7 @@ import { Users, Target, Settings, Save } from "lucide-react";
 interface GroupQuota {
   id: number;
   reserveId: string;
-  hunterGroup: 'A' | 'B' | 'C' | 'D';
+  hunterGroup: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
   species: 'roe_deer' | 'red_deer';
   roeDeerCategory?: string;
   redDeerCategory?: string;
@@ -34,7 +34,7 @@ interface GroupQuotasManagerProps {
   readonly?: boolean;
 }
 
-const GROUPS = ['A', 'B', 'C', 'D'] as const;
+const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 const SPECIES_CONFIG = {
   roe_deer: {
     name: 'Capriolo',
@@ -49,8 +49,9 @@ const SPECIES_CONFIG = {
 };
 
 export default function GroupQuotasManager({ reserveId, readonly = false }: GroupQuotasManagerProps) {
-  const [activeGroup, setActiveGroup] = useState<'A' | 'B' | 'C' | 'D'>('A');
+  const [activeGroup, setActiveGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>('A');
   const [quotaChanges, setQuotaChanges] = useState<Record<string, number>>({});
+  const [editingQuota, setEditingQuota] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
