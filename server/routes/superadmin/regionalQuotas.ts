@@ -160,4 +160,28 @@ router.post("/import-from-pdfs", authenticateToken, requireRole('SUPERADMIN'), a
   }
 });
 
+// POST importa quote per specie specifica (SUPERADMIN only)
+router.post("/import-quotas-by-species", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+  try {
+    const { species } = req.body;
+    
+    if (!species) {
+      return res.status(400).json({ message: "Specie non specificata" });
+    }
+    
+    console.log(`SuperAdmin importing quotas for species: ${species}`);
+    
+    // Per ora restituiamo un messaggio che l'importazione per singola specie non è implementata
+    res.json({
+      message: `Importazione per specie ${species} non ancora implementata. Usa 'Importa da PDF' per importare tutte le specie.`,
+      imported: 0,
+      totalQuotas: 0,
+      totalReserves: 0
+    });
+  } catch (error) {
+    console.error("Error importing quotas by species:", error);
+    res.status(500).json({ message: "Errore nell'importazione per specie" });
+  }
+});
+
 export default router;

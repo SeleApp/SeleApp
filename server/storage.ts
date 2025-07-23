@@ -2318,7 +2318,58 @@ export class DatabaseStorage implements IStorage {
     console.log('Fetching all harvest reports for biological analysis');
     
     const reports = await db
-      .select()
+      .select({
+        // hunt_reports fields (escludiamo weight che non esiste)
+        id: huntReports.id,
+        reservationId: huntReports.reservationId,
+        outcome: huntReports.outcome,
+        species: huntReports.species,
+        sex: huntReports.sex,
+        ageClass: huntReports.ageClass,
+        notes: huntReports.notes,
+        reportedAt: huntReports.reportedAt,
+        roeDeerCategory: huntReports.roeDeerCategory,
+        redDeerCategory: huntReports.redDeerCategory,
+        killCardPhoto: huntReports.killCardPhoto,
+        reserveId: huntReports.reserveId,
+        fallowDeerCategory: huntReports.fallowDeerCategory,
+        mouflonCategory: huntReports.mouflonCategory,
+        chamoisCategory: huntReports.chamoisCategory,
+        // reservation fields
+        reservation: {
+          id: reservations.id,
+          hunterId: reservations.hunterId,
+          zoneId: reservations.zoneId,
+          date: reservations.date,
+          timeSlot: reservations.timeSlot,
+          status: reservations.status,
+          createdAt: reservations.createdAt,
+          reserveId: reservations.reserveId,
+          targetSpecies: reservations.targetSpecies,
+          // zone fields
+          zone: {
+            id: zones.id,
+            name: zones.name,
+            reserveId: zones.reserveId
+          },
+          // hunter fields
+          hunter: {
+            id: users.id,
+            email: users.email,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            role: users.role,
+            reserveId: users.reserveId
+          },
+          // reserve fields
+          reserve: {
+            id: reserves.id,
+            name: reserves.name,
+            comune: reserves.comune,
+            emailContatto: reserves.emailContatto
+          }
+        }
+      })
       .from(huntReports)
       .innerJoin(reservations, eq(huntReports.reservationId, reservations.id))
       .innerJoin(zones, eq(reservations.zoneId, zones.id))
