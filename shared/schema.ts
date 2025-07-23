@@ -298,6 +298,21 @@ export const huntReports = pgTable("hunt_reports", {
   chamoisCategory: chamoisCategoryEnum("chamois_category"),
   notes: text("notes"),
   killCardPhoto: text("kill_card_photo"), // Base64 della foto della scheda di abbattimento
+  // Dati biometrici dell'animale
+  weight: decimal("weight"), // Peso in kg
+  length: decimal("length"), // Lunghezza in cm
+  antlerPoints: integer("antler_points"), // Numero punte (solo maschi)
+  antlerLength: decimal("antler_length"), // Lunghezza corna in cm
+  chestGirth: decimal("chest_girth"), // Circonferenza torace in cm
+  hindLegLength: decimal("hind_leg_length"), // Lunghezza zampa posteriore in cm
+  earLength: decimal("ear_length"), // Lunghezza orecchio in cm
+  tailLength: decimal("tail_length"), // Lunghezza coda in cm
+  bodyCondition: text("body_condition"), // Condizione corporea (ottima, buona, media, scarsa)
+  furCondition: text("fur_condition"), // Condizione del pelo
+  teethCondition: text("teeth_condition"), // Condizione dei denti
+  reproductiveStatus: text("reproductive_status"), // Status riproduttivo (per femmine)
+  estimatedAge: integer("estimated_age"), // Età stimata in anni
+  biometricNotes: text("biometric_notes"), // Note sui dati biometrici
   reserveId: text("reserve_id").notNull(),
   reportedAt: timestamp("reported_at").notNull().defaultNow(),
 });
@@ -531,6 +546,21 @@ export const insertHuntReportSchema = createInsertSchema(huntReports).omit({
   reportedAt: true,
 }).extend({
   killCardPhoto: z.string().optional(),
+  // Dati biometrici opzionali
+  weight: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  length: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  antlerPoints: z.string().optional().transform((val) => val ? parseInt(val) : undefined),
+  antlerLength: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  chestGirth: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  hindLegLength: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  earLength: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  tailLength: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  bodyCondition: z.enum(['ottima', 'buona', 'media', 'scarsa']).optional(),
+  furCondition: z.string().optional(),
+  teethCondition: z.string().optional(),
+  reproductiveStatus: z.string().optional(),
+  estimatedAge: z.string().optional().transform((val) => val ? parseInt(val) : undefined),
+  biometricNotes: z.string().optional(),
 });
 
 // Types

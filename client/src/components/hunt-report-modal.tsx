@@ -13,6 +13,7 @@ import { insertHuntReportSchema } from "@shared/schema";
 import type { ReservationWithDetails, CreateHuntReportRequest } from "@/lib/types";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import BiometricDataForm from "./biometric-data-form";
 
 interface HuntReportModalProps {
   open: boolean;
@@ -31,7 +32,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     resolver: zodResolver(insertHuntReportSchema.omit({ reportedAt: true })),
     defaultValues: {
       reservationId: reservation.id,
-      reserveId: reservation.reserveId || "cison-valmarino",
+      reserveId: reservation.reserveId || reservation.zone?.reserveId || "cison-valmarino",
       outcome: "no_harvest",
       species: undefined,
       roeDeerCategory: undefined,
@@ -40,6 +41,21 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
       ageClass: undefined,
       notes: "",
       killCardPhoto: "",
+      // Dati biometrici - defaults
+      weight: "",
+      length: "",
+      antlerPoints: "",
+      antlerLength: "",
+      chestGirth: "",
+      hindLegLength: "",
+      earLength: "",
+      tailLength: "",
+      bodyCondition: undefined,
+      furCondition: "",
+      teethCondition: "",
+      reproductiveStatus: "",
+      estimatedAge: "",
+      biometricNotes: "",
     },
   });
 
@@ -241,7 +257,7 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
     setKillCardPhoto("");
     form.reset({
       reservationId: reservation.id,
-      reserveId: reservation.reserveId || "cison-valmarino",
+      reserveId: reservation.reserveId || reservation.zone?.reserveId || "cison-valmarino",
       outcome: "no_harvest",
       species: undefined,
       roeDeerCategory: undefined,
@@ -489,6 +505,15 @@ export default function HuntReportModal({ open, onOpenChange, reservation }: Hun
               </div>
             )}
           </div>
+
+          {/* Sezione Dati Biometrici (solo per prelievi effettuati) */}
+          {showHarvestDetails && (
+            <BiometricDataForm 
+              form={form} 
+              species={form.watch("species")} 
+              sex={form.watch("sex")} 
+            />
+          )}
 
           <div>
             <Label className="block text-lg font-medium text-gray-700 mb-2">

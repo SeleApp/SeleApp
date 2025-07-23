@@ -13,6 +13,7 @@ import { insertHuntReportSchema } from "@shared/schema";
 import type { CreateHuntReportRequest } from "@/lib/types";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import BiometricDataForm from "./biometric-data-form";
 
 interface AdminReportModalProps {
   open: boolean;
@@ -48,6 +49,21 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
       ageClass: undefined,
       notes: "",
       killCardPhoto: "",
+      // Dati biometrici - defaults
+      weight: "",
+      length: "",
+      antlerPoints: "",
+      antlerLength: "",
+      chestGirth: "",
+      hindLegLength: "",
+      earLength: "",
+      tailLength: "",
+      bodyCondition: undefined,
+      furCondition: "",
+      teethCondition: "",
+      reproductiveStatus: "",
+      estimatedAge: "",
+      biometricNotes: "",
     },
   });
 
@@ -468,6 +484,15 @@ export default function AdminReportModal({ open, onOpenChange }: AdminReportModa
               </div>
             )}
           </div>
+
+          {/* Sezione Dati Biometrici (solo per prelievi effettuati) */}
+          {showHarvestDetails && (
+            <BiometricDataForm 
+              form={form} 
+              species={form.watch("species")} 
+              sex={form.watch("sex")} 
+            />
+          )}
 
           <div>
             <Label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">

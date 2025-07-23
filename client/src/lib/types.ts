@@ -21,6 +21,7 @@ export interface ReservationWithDetails {
   id: number;
   hunterId: number;
   zoneId: number;
+  reserveId: string;
   huntDate: string;
   timeSlot: 'morning' | 'afternoon' | 'full_day';
   status: 'active' | 'completed' | 'cancelled';
@@ -37,6 +38,7 @@ export interface ReservationWithDetails {
     name: string;
     description?: string;
     isActive: boolean;
+    reserveId: string;
   };
   hunter: {
     id: number;
@@ -79,6 +81,21 @@ export interface CreateHuntReportRequest {
   ageClass?: 'adult' | 'young';
   notes?: string;
   killCardPhoto?: string; // Base64 della foto opzionale
+  // Dati biometrici dell'animale
+  weight?: string;
+  length?: string;
+  antlerPoints?: string;
+  antlerLength?: string;
+  chestGirth?: string;
+  hindLegLength?: string;
+  earLength?: string;
+  tailLength?: string;
+  bodyCondition?: 'ottima' | 'buona' | 'media' | 'scarsa';
+  furCondition?: string;
+  teethCondition?: string;
+  reproductiveStatus?: string;
+  estimatedAge?: string;
+  biometricNotes?: string;
 }
 
 export const TIME_SLOT_LABELS = {
