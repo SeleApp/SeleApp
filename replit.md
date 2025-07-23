@@ -509,6 +509,8 @@ Changelog:
   - **Quote Migration**: Transferred all regional quotas to correct CA TV IDs (ca-tv01 through ca-tv38)
   - **Structure Finalized**: 40 total reserves (1 active Cison + 39 deactivated CA TV + AFV zones)
   - **Data Integrity**: All quotas now properly aligned with official Regione Veneto CA TV structure
+  - **Standardized Format**: All 40 reserves now use uniform naming (CA TV## - Nome) and identical configurations
+  - **Uniform Settings**: All CA TV reserves configured with standard_zones, caccia_per_zone, 16 zones, 1 group
 
 # User Preferences
 
