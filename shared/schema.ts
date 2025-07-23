@@ -14,7 +14,7 @@ export const speciesEnum = pgEnum('species', ['roe_deer', 'red_deer', 'fallow_de
 export const sexEnum = pgEnum('sex', ['male', 'female']);
 export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
 // Gruppi cacciatori per sistema "Zone & gruppi"
-export const hunterGroupEnum = pgEnum('hunter_group', ['A', 'B', 'C', 'D']);
+export const hunterGroupEnum = pgEnum('hunter_group', ['A', 'B', 'C', 'D', 'E', 'F']);
 // Categorie specifiche per specie
 export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
@@ -51,6 +51,8 @@ export const reserves = pgTable("reserves", {
   codeActive: boolean("code_active").notNull().default(true), // Se false, il codice non permette registrazioni
   isActive: boolean("is_active").notNull().default(true), // Solo riserve attive possono registrare cacciatori
   numberOfZones: integer("number_of_zones").default(16), // Numero di zone da creare per riserve con gestione zone
+  numberOfGroups: integer("number_of_groups").default(4), // Numero di gruppi per riserve "zones_groups"
+  activeGroups: text("active_groups").array().default(['A', 'B', 'C', 'D']), // Gruppi attivi per la riserva
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

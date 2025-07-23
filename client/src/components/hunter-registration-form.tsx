@@ -245,13 +245,12 @@ export default function HunterRegistrationForm({ onSuccess, onCancel }: HunterRe
                 disabled={isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona il tuo gruppo (A, B, C, D)" />
+                  <SelectValue placeholder={`Seleziona il tuo gruppo (${selectedReserve.activeGroups?.join(', ') || 'A, B, C, D'})`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="A">Gruppo A</SelectItem>
-                  <SelectItem value="B">Gruppo B</SelectItem>
-                  <SelectItem value="C">Gruppo C</SelectItem>
-                  <SelectItem value="D">Gruppo D</SelectItem>
+                  {(selectedReserve.activeGroups || ['A', 'B', 'C', 'D']).map(group => (
+                    <SelectItem key={group} value={group}>Gruppo {group}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {form.formState.errors.hunterGroup && (

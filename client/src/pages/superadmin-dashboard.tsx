@@ -621,6 +621,37 @@ export default function SuperAdminDashboard() {
                         </div>
                       )}
 
+                      {/* Configurazione gruppi per Zone & gruppi */}
+                      {reserveForm.watch("managementType") === "zones_groups" && (
+                        <div>
+                          <Label htmlFor="numberOfGroups">Numero di Gruppi</Label>
+                          <Select 
+                            onValueChange={(value) => {
+                              const numGroups = parseInt(value);
+                              reserveForm.setValue("numberOfGroups", numGroups);
+                              // Aggiorna automaticamente i gruppi attivi
+                              const groups = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, numGroups);
+                              reserveForm.setValue("activeGroups", groups);
+                            }}
+                            defaultValue={reserveForm.watch("numberOfGroups")?.toString() || "4"}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Seleziona numero gruppi" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">2 Gruppi (A, B)</SelectItem>
+                              <SelectItem value="3">3 Gruppi (A, B, C)</SelectItem>
+                              <SelectItem value="4">4 Gruppi (A, B, C, D)</SelectItem>
+                              <SelectItem value="5">5 Gruppi (A, B, C, D, E)</SelectItem>
+                              <SelectItem value="6">6 Gruppi (A, B, C, D, E, F)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Gruppi attivi: {reserveForm.watch("activeGroups")?.join(", ") || "A, B, C, D"}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Sottotipo per Capo Assegnato */}
                       {reserveForm.watch("managementType") === "standard_random" && (
                         <div>

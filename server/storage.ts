@@ -430,12 +430,20 @@ export class DatabaseStorage implements IStorage {
       const selectedSpecies: string[] = JSON.parse(speciesJson || '[]');
       console.log(`Creating group quotas for selected species: ${selectedSpecies.join(', ')}`);
       
+      // Ottieni i gruppi configurati per questa riserva
+      const [reserve] = await db.select({
+        activeGroups: reserves.activeGroups,
+        numberOfGroups: reserves.numberOfGroups
+      }).from(reserves).where(eq(reserves.id, reserveId));
+      
+      const activeGroups = reserve?.activeGroups || ['A', 'B', 'C', 'D'];
+      console.log(`Using active groups for reserve ${reserveId}: ${activeGroups.join(', ')}`);
+      
       const groupsQuotasToCreate: any[] = [];
       const currentYear = new Date().getFullYear();
-      const groups = ['A', 'B', 'C', 'D'] as const;
       
-      // Crea quote per ogni gruppo e ogni specie selezionata
-      for (const group of groups) {
+      // Crea quote per ogni gruppo attivo e ogni specie selezionata
+      for (const group of activeGroups) {
         for (const species of selectedSpecies) {
           const normalizedSpecies = species.toLowerCase();
           
