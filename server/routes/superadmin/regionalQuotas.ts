@@ -6,6 +6,22 @@ import { importAllQuotasFromPDFs } from "../../utils/pdfImporter";
 
 const router = Router();
 
+// GET TUTTE le quote regionali per SuperAdmin dashboard (SUPERADMIN only)
+router.get("/", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+  try {
+    console.log('SuperAdmin fetching all regional quotas for all reserves');
+    
+    // Ottieni TUTTE le quote regionali per la tabella riassuntiva
+    const allQuotas = await storage.getAllRegionalQuotas();
+    
+    console.log(`Found ${allQuotas.length} total regional quotas across all reserves`);
+    res.json(allQuotas);
+  } catch (error) {
+    console.error("Error fetching all regional quotas:", error);
+    res.status(500).json({ message: "Errore nel recupero di tutti i piani di prelievo regionali" });
+  }
+});
+
 // GET quote regionali per una riserva specifica (SUPERADMIN only)
 router.get("/:reserveId", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {

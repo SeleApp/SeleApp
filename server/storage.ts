@@ -96,7 +96,7 @@ export interface IStorage {
   
   // Regional Quotas Management (filtered by reserveId)
   getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
-  getAllRegionalQuotas(): Promise<RegionalQuota[]>; // SuperAdmin method to get all quotas across all reserves
+  getAllRegionalQuotas(): Promise<RegionalQuota[]>;
   updateRegionalQuota(id: number, reserveId: string, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
   // SuperAdmin specific methods
   createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
@@ -1019,6 +1019,16 @@ export class DatabaseStorage implements IStorage {
   /**
    * Ottiene tutte le quote regionali con stato disponibilità e periodo di caccia
    */
+  async getAllRegionalQuotas(): Promise<RegionalQuota[]> {
+    console.log('Fetching all regional quotas for SuperAdmin dashboard');
+    
+    const allQuotas = await db.select().from(regionalQuotas)
+      .orderBy(regionalQuotas.reserveId, regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
+    
+    console.log(`Found ${allQuotas.length} total regional quotas across all reserves`);
+    return allQuotas;
+  }
+
   async getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]> {
     const quotas = await db.select().from(regionalQuotas)
       .where(eq(regionalQuotas.reserveId, reserveId))
