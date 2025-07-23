@@ -525,6 +525,9 @@ Changelog:
   - **Elderly-Friendly Demo Section**: Redesigned demo interface with larger fonts, clearer buttons, and simplified navigation for users over 50
   - **Icon Updates**: Replaced camera icons with document icons throughout to reflect focus on digital form compilation
   - **Simplified Layout**: Streamlined demo section from complex grid to clear two-option choice with prominent call-to-action buttons
+  - **Mobile Section Optimization**: Updated mobile section with elderly-friendly design - larger fonts, removed emojis, simplified instructions
+  - **Complete Emoji Removal**: Eliminated all emoji usage throughout the application for cleaner, professional appearance
+  - **Enhanced Mobile Instructions**: Larger step numbers (w-8 h-8), bigger text (text-lg), improved spacing for better readability
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
   - **Official Data Sources**: Capriolo 2025-2026, Cervo 2025-2026, Camoscio e Muflone 2025-2026 PDFs fully processed
