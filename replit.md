@@ -507,6 +507,13 @@ Changelog:
   - **Backend Messages**: Updated API success/error messages to use official terminology
   - **User Interface**: Consistent terminology throughout SuperAdmin, admin interfaces, and public pages
   - **Documentation**: Updated help text and descriptions to reflect official terminology
+- July 23, 2025. **MOBILE APPS SECTION**: Added comprehensive mobile section to landing page with iOS/Android PWA capabilities
+  - **Mobile Section**: New dedicated section showcasing Progressive Web App features for iOS and Android
+  - **Installation Instructions**: Step-by-step guides for installing SeleApp as native app on both iOS Safari and Android Chrome
+  - **Mobile Demo Integration**: Added startMobileDemo() function with device detection and mobile-optimized demo experience
+  - **Platform Support**: Visual indicators for iOS Safari, Android Chrome, and universal PWA compatibility
+  - **Navigation Update**: Added "Mobile" link to main navigation menu for easy access
+  - **PWA Features**: Highlighted offline functionality, push notifications, camera integration, and native app experience
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
   - **Official Data Sources**: Capriolo 2025-2026, Cervo 2025-2026, Camoscio e Muflone 2025-2026 PDFs fully processed
