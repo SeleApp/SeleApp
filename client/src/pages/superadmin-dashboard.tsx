@@ -562,6 +562,8 @@ export default function SuperAdminDashboard() {
                             reserveForm.setValue("huntingType", "zone");
                           } else if (value === "standard_random") {
                             reserveForm.setValue("huntingType", "capo_assegnato");
+                          } else if (value === "zones_groups") {
+                            reserveForm.setValue("huntingType", "zone");
                           } else if (value === "custom") {
                             reserveForm.setValue("huntingType", "misto");
                           }
@@ -574,6 +576,7 @@ export default function SuperAdminDashboard() {
                         <SelectContent>
                           <SelectItem value="standard_zones">Caccia per Zone</SelectItem>
                           <SelectItem value="standard_random">Caccia per Capo Assegnato</SelectItem>
+                          <SelectItem value="zones_groups">Zone e Gruppi</SelectItem>
                           <SelectItem value="custom">Misto</SelectItem>
                         </SelectContent>
                       </Select>
@@ -590,7 +593,7 @@ export default function SuperAdminDashboard() {
                     {/* Griglia per campi condizionali */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {/* Campo Numero Zone per gestioni con zone */}
-                      {(reserveForm.watch("managementType") === "standard_zones" || reserveForm.watch("managementType") === "custom") && (
+                      {(reserveForm.watch("managementType") === "standard_zones" || reserveForm.watch("managementType") === "zones_groups" || reserveForm.watch("managementType") === "custom") && (
                         <div>
                           <Label htmlFor="numberOfZones">Numero di Zone</Label>
                           <Input
@@ -758,12 +761,14 @@ export default function SuperAdminDashboard() {
                             className={`text-xs ${
                               reserve.managementType === 'standard_zones' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               reserve.managementType === 'standard_random' ? 'bg-green-50 text-green-700 border-green-200' :
+                              reserve.managementType === 'zones_groups' ? 'bg-orange-50 text-orange-700 border-orange-200' :
                               reserve.managementType === 'quota_only' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                               'bg-gray-50 text-gray-700 border-gray-200'
                             }`}
                           >
                             {reserve.managementType === 'standard_zones' ? 'Zone' :
                              reserve.managementType === 'standard_random' ? 'Capi' :
+                             reserve.managementType === 'zones_groups' ? 'Zone e Gruppi' :
                              reserve.managementType === 'quota_only' ? 'Quote' :
                              'Misto'}
                           </Badge>

@@ -10,6 +10,7 @@
 export type ManagementType = 
   | 'standard_zones'      // Standard con prenotazione zone (es. Cison)
   | 'standard_random'     // Standard con assegnazione random capi (es. Pederobba)
+  | 'zones_groups'        // Zone e gruppi con quote per gruppo
   | 'quota_only'          // Solo gestione quote senza zone
   | 'custom';             // Personalizzato per esigenze specifiche
 
@@ -60,6 +61,22 @@ export const MANAGEMENT_TYPE_CONFIGS: Record<ManagementType, ManagementTypeConfi
       hasCustomWorkflows: false,
     },
     modules: ['random_assignment', 'regional_quotas', 'hunt_reports', 'lottery_system'],
+    dashboardLayout: 'hunter_standard',
+  },
+
+  zones_groups: {
+    id: 'zones_groups',
+    name: 'Zone e Gruppi',
+    description: 'Sistema ibrido con zone fisiche e gestione quote per gruppo (A, B, C, D)',
+    features: {
+      hasZones: true,
+      hasReservations: true,
+      hasQuotas: true,
+      hasRandomAssignment: false,
+      hasAdvancedReporting: true,
+      hasCustomWorkflows: true,
+    },
+    modules: ['zones', 'reservations', 'group_quotas', 'hunt_reports', 'group_management'],
     dashboardLayout: 'hunter_standard',
   },
 
