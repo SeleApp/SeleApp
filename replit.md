@@ -577,6 +577,11 @@ Changelog:
   - **Frontend Support**: Extended login.tsx and demo-indicator.tsx to handle tecnico-faunistico demo sessions
   - **Complete Workflow**: Full demo system integration - startTecnicoFaunisticoDemo() → demo.tecnico-faunistico@seleapp.demo → /fauna dashboard
 
+- July 23, 2025. **GROUP QUOTAS RESET FOR CISON**: Reset all group quotas to zero for Cison di Valmarino reserve
+  - **Administrative Reset**: All 36 quotas (4 groups × 9 categories) set to 0 for fresh redistribution
+  - **Admin Control**: Allows reserve administrator to distribute regional quotas according to specific hunting group needs
+  - **Clean Slate**: Maintains database structure while giving complete flexibility for quota assignment
+  - **Reason**: User requested complete reset to allow custom redistribution by local administrator
 - July 23, 2025. **SUPERADMIN IMPORT SYSTEM FIX**: Resolved critical authentication error in PDF import system
   - **Authentication Fix**: Corrected 401 error in /api/superadmin/import-quotas-by-species endpoint by fixing router middleware chain
   - **Router Configuration**: Changed from spread operator to proper Express router setup with authenticateToken + requireRole('SUPERADMIN')
