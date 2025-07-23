@@ -47,7 +47,7 @@ interface QuotaData {
   totalQuota: number;
 }
 
-type RoeDeerCategory = 'M0' | 'F0' | 'FA' | 'M1' | 'MA';
+type RoeDeerCategory = 'M1' | 'M2' | 'F1_FF' | 'PM' | 'PF';
 type RedDeerCategory = 'CL0' | 'FF' | 'MM' | 'MCL1';
 type ChamoisCategory = 'CA-M-0' | 'CA-M-I' | 'CA-M-II' | 'CA-M-III' | 'CA-F-0' | 'CA-F-I' | 'CA-F-II' | 'CA-F-III';
 type MouflonCategory = 'MU-M-0' | 'MU-M-I' | 'MU-M-II' | 'MU-F-0' | 'MU-F-I' | 'MU-F-II';
@@ -78,8 +78,8 @@ async function extractRoeDeerData(pdfPath: string): Promise<QuotaData[]> {
           const reserveId = CA_TV_MAPPING[catvCode];
           
           if (reserveId) {
-            // Estrae le quote per le categorie M0, F0, FA, M1, MA
-            const categories = ['M0', 'F0', 'FA', 'M1', 'MA'];
+            // Estrae le quote per le categorie M1, M2, F1/FF, PM, PF (dai PDF ufficiali)
+            const categories = ['M1', 'M2', 'F1_FF', 'PM', 'PF'];
             const quotaValues = parts.slice(-5); // Ultimi 5 valori numerici
             
             for (let j = 0; j < categories.length && j < quotaValues.length; j++) {

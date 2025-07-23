@@ -41,7 +41,7 @@ interface SuperAdminRegionalQuotasProps {
 const SPECIES_CONFIG = {
   roe_deer: {
     name: 'Capriolo',
-    categories: ['M0', 'F0', 'FA', 'M1', 'MA'],
+    categories: ['M1', 'M2', 'F1_FF', 'PM', 'PF'],
     color: 'bg-amber-50 border-amber-200 text-amber-800'
   },
   red_deer: {
@@ -297,7 +297,7 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
                 return (
                   <TableRow className="bg-blue-50 border-t-2 border-blue-200 font-bold">
                     <TableCell className="font-bold text-blue-900">
-                      🎯 TOTALI PIANO VENATORIO 2025-2026
+                      TOTALI PIANO VENATORIO 2025-2026
                       <div className="text-xs font-normal text-blue-700 mt-1">
                         Regione Veneto - Tutte le Riserve
                       </div>

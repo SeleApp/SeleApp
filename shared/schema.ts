@@ -16,7 +16,7 @@ export const ageClassEnum = pgEnum('age_class', ['adult', 'young']);
 // Gruppi cacciatori per sistema "Zone & gruppi"
 export const hunterGroupEnum = pgEnum('hunter_group', ['A', 'B', 'C', 'D', 'E', 'F']);
 // Categorie specifiche per specie
-export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M0', 'F0', 'FA', 'M1', 'MA']);
+export const roeDeerCategoryEnum = pgEnum('roe_deer_category', ['M1', 'M2', 'F1_FF', 'PM', 'PF']);
 export const redDeerCategoryEnum = pgEnum('red_deer_category', ['CL0', 'FF', 'MM', 'MCL1']);
 export const fallowDeerCategoryEnum = pgEnum('fallow_deer_category', ['DA-M-0', 'DA-M-I', 'DA-M-II', 'DA-F-0', 'DA-F-I', 'DA-F-II']);
 export const mouflonCategoryEnum = pgEnum('mouflon_category', ['MU-M-0', 'MU-M-I', 'MU-M-II', 'MU-F-0', 'MU-F-I', 'MU-F-II']);
