@@ -68,12 +68,14 @@ const SPECIES_CONFIG = {
 
 // Componente per la tabella riassuntiva di tutte le quote regionali
 function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
-  const { data: allQuotas = [], isLoading } = useQuery({
+  const { data: allQuotas = [], isLoading, error } = useQuery({
     queryKey: ['/api/superadmin/regional-quotas'],
     queryFn: async () => {
+      console.log('Fetching regional quotas for SuperAdmin table...');
       const response = await apiRequest('/api/superadmin/regional-quotas', {
         method: 'GET'
       });
+      console.log('Regional quotas response:', response);
       return Array.isArray(response) ? response : [];
     }
   });
@@ -88,6 +90,21 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8 text-red-600">
+            <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+            Errore nel caricamento delle quote regionali: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  console.log('All quotas received:', allQuotas.length, 'quotas');
+
   // Raggruppa quote per riserva
   const quotasByReserve = allQuotas.reduce((acc: any, quota: any) => {
     if (!acc[quota.reserveId]) {
@@ -96,6 +113,8 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
     acc[quota.reserveId].push(quota);
     return acc;
   }, {});
+
+  console.log('Quotas grouped by reserve:', Object.keys(quotasByReserve).length, 'reserves');
 
   return (
     <Card>
