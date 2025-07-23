@@ -516,12 +516,15 @@ Changelog:
   - **PWA Features**: Highlighted offline functionality, push notifications, and native app experience
 - July 23, 2025. **CONTENT REFINEMENT**: Updated landing page content based on user feedback for accuracy and focus
   - **Terminology Update**: Changed "Monitoraggio Quote" to "Monitoraggio Prelievi e Gestione delle Specie" throughout
-  - **Feature Enhancement**: Replaced "Report Fotografici" with "Schede Abbattimento" focusing on digital form compilation
+  - **Feature Enhancement**: Replaced "Report Fotografici" with "Moduli e Schede Abbattimento" focusing on digital form compilation
   - **Demo Simplification**: Removed SuperAdmin demo completely, keeping only Hunter and "Amministratore Comprensorio Alpino" demos
   - **Mobile Features Update**: Replaced camera references with "Moduli e Schede Abbattimento" compilation features
   - **Professional Focus**: Updated demo descriptions to emphasize form compilation and species management over photography
   - **Footer Cleanup**: Updated footer "Funzionalità" section removing all obsolete references to "Report Fotografici" and "Gestione Quote"
   - **Complete Text Alignment**: All landing page content now consistently uses updated terminology across demo, features, and footer sections
+  - **Elderly-Friendly Demo Section**: Redesigned demo interface with larger fonts, clearer buttons, and simplified navigation for users over 50
+  - **Icon Updates**: Replaced camera icons with document icons throughout to reflect focus on digital form compilation
+  - **Simplified Layout**: Streamlined demo section from complex grid to clear two-option choice with prominent call-to-action buttons
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
   - **Official Data Sources**: Capriolo 2025-2026, Cervo 2025-2026, Camoscio e Muflone 2025-2026 PDFs fully processed
