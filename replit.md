@@ -500,10 +500,12 @@ Changelog:
   - **Dual Form Integration**: Biometric data collection available in both hunter and admin report forms  
   - **Scientific Value**: Optional but detailed data collection for fauna research and management studies
   - **User Interface**: Collapsible form section with species-specific fields and clear instructions
-- July 23, 2025. **TERMINOLOGY UPDATE**: Changed "Quote Regionali" to "Piani di Prelievo Regionali" across SuperAdmin interface
+- July 23, 2025. **TERMINOLOGY UPDATE**: Changed "Quote Regionali" to "Piani di Prelievo Regionali" across entire application
   - **SuperAdmin Dashboard**: Updated tab name from "Quote Regionali" to "Piani di Prelievo"
   - **Component Titles**: All references now use "Piani di Prelievo Regionali" terminology
-  - **User Interface**: Consistent terminology throughout SuperAdmin and admin interfaces
+  - **Landing Page**: Updated front page with new terminology in all sections (meta tags, hero, demo, features, FAQ)
+  - **Backend Messages**: Updated API success/error messages to use official terminology
+  - **User Interface**: Consistent terminology throughout SuperAdmin, admin interfaces, and public pages
   - **Documentation**: Updated help text and descriptions to reflect official terminology
   - **63 Hunting Reserves**: Created complete database with ALL hunting reserves from Veneto region (cleaned from duplicates)
   - **300 Regional Quotas**: Imported all official quotas from PDFs (485 roe deer, 362 red deer, 84 chamois, 22 mouflon)
