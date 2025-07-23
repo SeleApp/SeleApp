@@ -375,6 +375,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Demo routes
+  const demoRoutes = await import("./routes/demo");
+  app.post("/api/demo/start/:demoType", demoRoutes.startDemoSession);
+  app.get("/api/demo/status", demoRoutes.checkDemoStatus);
+  app.post("/api/demo/setup", demoRoutes.createDemoReserve);
+
   // Contact form endpoint
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {

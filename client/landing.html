@@ -99,6 +99,36 @@
             transform: translateY(-2px);
         }
         
+        .btn-demo-special {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffca28 100%);
+            color: white;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-demo-special::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-demo-special:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-demo-special:hover::before {
+            left: 100%;
+        }
+        
         .feature-card {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
@@ -173,6 +203,7 @@
                 </div>
                 <nav class="hidden md:flex items-center space-x-6">
                     <a href="#features" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Funzionalità</a>
+                    <a href="#demo" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Demo</a>
                     <a href="#faq" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">FAQ</a>
                     <a href="#contact" class="text-sm font-medium hover:text-green-600 transition-colors" style="color: var(--text-secondary);">Contatti</a>
                     <a href="/app" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
@@ -210,6 +241,12 @@
                             </svg>
                             Accedi all'Applicazione
                         </a>
+                        <button onclick="startDemo()" class="btn-demo-special px-8 py-4 font-semibold text-lg rounded-xl inline-flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
+                            </svg>
+                            Prova Demo Gratuita
+                        </button>
                         <a href="#features" class="btn-secondary px-8 py-4 font-semibold text-lg rounded-xl inline-flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -235,6 +272,142 @@
                             alt="SeleApp Logo Professionale" 
                             class="relative w-80 h-80 lg:w-96 lg:h-96 object-contain logo-shadow"
                         />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Trial Section -->
+    <section id="demo" class="py-20 lg:py-32 px-6 lg:px-8 bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center px-6 py-3 rounded-full glass-effect text-sm font-bold mb-6" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white;">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                    </svg>
+                    Demo Interattiva Gratuita
+                </div>
+                
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6" style="color: var(--text-primary);">
+                    Prova SeleApp in Azione
+                </h2>
+                <p class="text-xl max-w-4xl mx-auto mb-12" style="color: var(--text-secondary);">
+                    Esplora tutte le funzionalità di SeleApp con la nostra demo interattiva. Testa prenotazioni, gestione quote e report senza registrazione.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8 mb-16">
+                <!-- Demo Cacciatore -->
+                <div class="feature-card p-8 rounded-2xl text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Demo Cacciatore</h3>
+                    <p class="mb-6" style="color: var(--text-secondary);">Prova le prenotazioni, visualizza quote disponibili e invia report di caccia</p>
+                    <button onclick="startHunterDemo()" class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                        Prova Come Cacciatore
+                    </button>
+                </div>
+                
+                <!-- Demo Amministratore -->
+                <div class="feature-card p-8 rounded-2xl text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Demo Amministratore</h3>
+                    <p class="mb-6" style="color: var(--text-secondary);">Gestisci cacciatori, quote faunistiche e monitora le attività della riserva</p>
+                    <button onclick="startAdminDemo()" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                        Prova Come Amministratore
+                    </button>
+                </div>
+                
+                <!-- Demo SuperAdmin -->
+                <div class="feature-card p-8 rounded-2xl text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Demo SuperAdmin</h3>
+                    <p class="mb-6" style="color: var(--text-secondary);">Gestisci multiple riserve, quote regionali e configura il sistema completo</p>
+                    <button onclick="startSuperAdminDemo()" class="w-full px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors">
+                        Prova Come SuperAdmin
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Demo Features -->
+            <div class="bg-white rounded-3xl p-8 lg:p-12 shadow-xl">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-3xl font-bold mb-6" style="color: var(--text-primary);">
+                            Demo Completa con Dati Reali
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong>Riserva Demo "Valle Demo"</strong> - Ambiente completo con 16 zone di caccia
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong>Quote Regionali Realistiche</strong> - 5 specie faunistiche con 27 categorie ufficiali
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong>Sessione di 30 minuti</strong> - Tempo sufficiente per esplorare tutte le funzionalità
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong>Nessuna Registrazione</strong> - Accesso immediato senza inserire dati personali
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-2xl transform rotate-3"></div>
+                        <div class="relative bg-white rounded-2xl p-6 shadow-lg">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Accesso Immediato</h4>
+                                <p class="text-sm mb-4" style="color: var(--text-secondary);">Clicca su uno dei pulsanti demo sopra per iniziare immediatamente l'esplorazione</p>
+                                <div class="text-xs px-3 py-1 bg-orange-100 text-orange-800 rounded-full inline-block">
+                                    Demo attiva per 30 minuti
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -888,6 +1061,122 @@ Per modificare le preferenze, rimuoverò il consenso attuale e riaprirò il bann
                     localStorage.removeItem('cookieConsent');
                     setTimeout(showCookieBanner, 1500);
                     console.error('Errore parsing cookie consent:', error);
+                }
+            }
+        });
+
+        // Demo Functions
+        function startDemo() {
+            // Funzione generale che apre un modal di selezione demo
+            if (confirm('Vuoi provare la demo di SeleApp? Scegli OK per vedere le opzioni disponibili.')) {
+                const choice = prompt(`Scegli il tipo di demo:
+1 - Demo Cacciatore (prenotazioni e report)
+2 - Demo Amministratore (gestione riserva)  
+3 - Demo SuperAdmin (gestione sistema)
+
+Inserisci il numero (1, 2 o 3):`);
+                
+                switch(choice) {
+                    case '1':
+                        startHunterDemo();
+                        break;
+                    case '2':
+                        startAdminDemo();
+                        break;
+                    case '3':
+                        startSuperAdminDemo();
+                        break;
+                    default:
+                        alert('Scelta non valida. Riprova cliccando su un pulsante demo specifico.');
+                }
+            }
+        }
+
+        function startHunterDemo() {
+            // Login automatico come demo hunter
+            if (confirm('Demo Cacciatore: Accederai come cacciatore demo per 30 minuti. Potrai fare prenotazioni e vedere le quote. Continui?')) {
+                // Apri in una nuova finestra per non perdere la landing page
+                const demoWindow = window.open('/app?demo=hunter', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                
+                // Messaggio di conferma
+                setTimeout(() => {
+                    alert(`Demo Cacciatore avviata! 
+
+✅ Potrai:
+• Fare prenotazioni di caccia
+• Visualizzare quote disponibili  
+• Inviare report dopo la caccia
+• Vedere lo storico prenotazioni
+
+⏱️ Tempo disponibile: 30 minuti
+🎯 Riserva demo: "Valle Demo"
+
+La demo si aprirà in una nuova finestra.`);
+                }, 1000);
+            }
+        }
+
+        function startAdminDemo() {
+            // Login automatico come demo admin
+            if (confirm('Demo Amministratore: Accederai come admin demo per 30 minuti. Potrai gestire cacciatori e quote. Continui?')) {
+                const demoWindow = window.open('/app?demo=admin', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                
+                setTimeout(() => {
+                    alert(`Demo Amministratore avviata!
+
+✅ Potrai:
+• Creare e gestire cacciatori
+• Modificare quote faunistiche
+• Visualizzare report di caccia
+• Gestire prenotazioni attive
+• Vedere statistiche riserva
+
+⏱️ Tempo disponibile: 30 minuti  
+🎯 Riserva demo: "Valle Demo"
+
+La demo si aprirà in una nuova finestra.`);
+                }, 1000);
+            }
+        }
+
+        function startSuperAdminDemo() {
+            // Login automatico come demo superadmin
+            if (confirm('Demo SuperAdmin: Accederai come superadmin demo per 30 minuti. Vedrai la gestione di multiple riserve. Continui?')) {
+                const demoWindow = window.open('/app?demo=superadmin', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                
+                setTimeout(() => {
+                    alert(`Demo SuperAdmin avviata!
+
+✅ Potrai:
+• Gestire multiple riserve
+• Importare quote regionali da PDF
+• Creare amministratori
+• Configurare sistemi di gestione
+• Vedere panoramica completa
+
+⏱️ Tempo disponibile: 30 minuti
+🌍 Scope: Sistema completo 39 riserve
+
+La demo si aprirà in una nuova finestra.`);
+                }, 1000);
+            }
+        }
+
+        // Aggiungi link demo anche nel menu di navigazione
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aggiungi "Demo" al menu di navigazione
+            const nav = document.querySelector('nav');
+            if (nav) {
+                const demoLink = document.createElement('a');
+                demoLink.href = '#demo';
+                demoLink.className = 'text-sm font-medium hover:text-green-600 transition-colors';
+                demoLink.style.color = 'var(--text-secondary)';
+                demoLink.textContent = 'Demo';
+                
+                // Inseriscilo prima del pulsante "Accedi"
+                const loginButton = nav.querySelector('a[href="/app"]');
+                if (loginButton) {
+                    nav.insertBefore(demoLink, loginButton);
                 }
             }
         });

@@ -29,8 +29,18 @@ export default function LoginPage() {
     },
   });
 
-  // Check authentication on mount
+  // Check for demo parameter and handle demo login
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const demoType = urlParams.get('demo');
+    
+    if (demoType && ['hunter', 'admin', 'superadmin'].includes(demoType)) {
+      // Auto-login demo
+      handleDemoLogin(demoType);
+      return;
+    }
+
+    // Regular authentication check
     if (authService.isAuthenticated()) {
       const user = authService.getUser();
       if (user?.role === "SUPERADMIN") {
@@ -42,6 +52,45 @@ export default function LoginPage() {
       }
     }
   }, []); // Empty dependency array - only run once on mount
+
+  const handleDemoLogin = async (demoType: string) => {
+    setIsLoading(true);
+    try {
+      // Prima crea la riserva demo se non esiste
+      await apiRequest('/api/demo/setup', { method: 'POST' });
+      
+      // Poi avvia la sessione demo
+      const response = await apiRequest(`/api/demo/start/${demoType}`, { method: 'POST' }) as any;
+      
+      if (response.success) {
+        // Salva il token di demo
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        toast({
+          title: `Demo ${demoType.charAt(0).toUpperCase() + demoType.slice(1)} Avviata`,
+          description: `Benvenuto nella demo! Hai ${response.demoInfo.durationMinutes} minuti per esplorare.`,
+        });
+
+        // Redirect basato sul tipo demo
+        if (response.user.role === "SUPERADMIN") {
+          navigate("/superadmin");
+        } else if (response.user.role === "ADMIN") {
+          navigate("/admin");
+        } else {
+          navigate("/hunter");
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Errore Demo",
+        description: error.message || "Impossibile avviare la demo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onLogin = async (data: LoginRequest) => {
     setIsLoading(true);

@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin-dashboard-new";
 import SuperAdminDashboard from "./pages/superadmin-dashboard";
 import NotFound from "@/pages/not-found";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
+import DemoIndicator from "@/components/demo-indicator";
 
 function ProtectedRoute({ component: Component, requiredRole }: { 
   component: ComponentType; 
@@ -56,6 +57,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <DemoIndicator />
         <PWAInstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
