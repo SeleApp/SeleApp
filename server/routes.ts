@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // SuperAdmin import quotas by species (SUPERADMIN only)
   const importRegionalQuotasBySpeciesRoutes = await import("./routes/superadmin/importRegionalQuotasBySpecies");
-  app.post("/api/superadmin/import-quotas-by-species", ...importRegionalQuotasBySpeciesRoutes.default);
+  app.use("/api/superadmin/import-quotas-by-species", importRegionalQuotasBySpeciesRoutes.default);
   
   // SuperAdmin populate missing species (SUPERADMIN only)
   const populateMissingSpeciesRoutes = await import("./routes/superadmin/populateMissingSpecies");
@@ -263,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Invia email di conferma account admin
       try {
-        const reserve = await storage.getReserve(data.reserveId);
+        const reserve = data.reserveId ? await storage.getReserve(data.reserveId) : null;
         if (reserve) {
           await EmailService.sendAdminCreated({
             adminEmail: admin.email,

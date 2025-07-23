@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { requireRole, type AuthRequest } from '../../middleware/auth.js';
+import { Request, Response, Router } from 'express';
+import { requireRole, authenticateToken, type AuthRequest } from '../../middleware/auth.js';
 import { storage } from '../../storage.js';
 
 // Data ufficiali estratti dai PDF della Regione Veneto 2025-2026
@@ -46,10 +46,11 @@ const SPECIES_DATA = {
 };
 
 
-export default [
-  requireRole('SUPERADMIN'),
-  async (req: AuthRequest, res: Response) => {
+const router = Router();
+
+router.post('/', authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res: Response) => {
     console.log('Import regional quotas by species endpoint called');
+    console.log('Authenticated user:', req.user);
     
     try {
       const { species } = req.body;
@@ -85,11 +86,12 @@ export default [
 
         // Inserisci le nuove quote per ogni categoria
         for (const [category, quota] of Object.entries(categories)) {
-          if (quota > 0) { // Solo se la quota è maggiore di 0
+          const quotaValue = Number(quota);
+          if (quotaValue > 0) { // Solo se la quota è maggiore di 0
             const quotaData: any = {
               reserveId,
               species,
-              totalQuota: quota,
+              totalQuota: quotaValue,
               harvested: 0,
               notes: `Piano Venatorio 2025-2026 - Regione Veneto`,
               isActive: true
@@ -130,5 +132,6 @@ export default [
         message: 'Errore durante l\'importazione dei piani di prelievo regionali' 
       });
     }
-  }
-];
+  });
+
+export default router;
