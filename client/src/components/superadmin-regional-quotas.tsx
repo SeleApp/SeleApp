@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, Plus, Edit, Save, Upload, FileText, AlertCircle } from "lucide-react";
+import { Target, Plus, Edit, Save, Upload, FileText, AlertCircle, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import ImportRegionalQuotas from "@/components/import-regional-quotas";
@@ -47,8 +47,194 @@ const SPECIES_CONFIG = {
     name: 'Cervo', 
     categories: ['CL0', 'FF', 'MM', 'MCL1'],
     color: 'bg-red-50 border-red-200 text-red-800'
+  },
+  fallow_deer: {
+    name: 'Daino',
+    categories: ['DA-M-0', 'DA-M-I', 'DA-M-II', 'DA-F-0', 'DA-F-I', 'DA-F-II'],
+    color: 'bg-green-50 border-green-200 text-green-800'
+  },
+  mouflon: {
+    name: 'Muflone',
+    categories: ['MU-M-0', 'MU-M-I', 'MU-M-II', 'MU-F-0', 'MU-F-I', 'MU-F-II'],
+    color: 'bg-blue-50 border-blue-200 text-blue-800'
+  },
+  chamois: {
+    name: 'Camoscio',
+    categories: ['CA-M-0', 'CA-M-I', 'CA-M-II', 'CA-M-III', 'CA-F-0', 'CA-F-I', 'CA-F-II', 'CA-F-III'],
+    color: 'bg-purple-50 border-purple-200 text-purple-800'
   }
 };
+
+// Componente per la tabella riassuntiva di tutte le quote regionali
+function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
+  const { data: allQuotas = [], isLoading } = useQuery({
+    queryKey: ['/api/superadmin/all-regional-quotas'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/regional-quotas', {
+        method: 'GET'
+      });
+      return Array.isArray(response) ? response : [];
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">Caricamento quote regionali...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Raggruppa quote per riserva
+  const quotasByReserve = allQuotas.reduce((acc: any, quota: any) => {
+    if (!acc[quota.reserveId]) {
+      acc[quota.reserveId] = [];
+    }
+    acc[quota.reserveId].push(quota);
+    return acc;
+  }, {});
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-blue-600" />
+          Tabella Riassuntiva Quote Regionali - Piano Venatorio 2025-2026
+        </CardTitle>
+        <p className="text-sm text-gray-600">
+          Panoramica completa delle quote regionali assegnate dalla Regione Veneto per tutte le riserve
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-bold">Riserva</TableHead>
+                <TableHead className="text-center font-bold">Comune</TableHead>
+                <TableHead className="text-center font-bold">Specie Attive</TableHead>
+                <TableHead className="text-center font-bold">Quote Totali</TableHead>
+                <TableHead className="text-center font-bold">Capriolo</TableHead>
+                <TableHead className="text-center font-bold">Cervo</TableHead>
+                <TableHead className="text-center font-bold">Daino</TableHead>
+                <TableHead className="text-center font-bold">Muflone</TableHead>
+                <TableHead className="text-center font-bold">Camoscio</TableHead>
+                <TableHead className="text-center font-bold">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reserves.map(reserve => {
+                const reserveQuotas = quotasByReserve[reserve.id] || [];
+                const speciesCount = new Set(reserveQuotas.map((q: any) => q.species)).size;
+                const totalQuotas = reserveQuotas.reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                // Calcola totali per specie
+                const roeDeerTotal = reserveQuotas
+                  .filter((q: any) => q.species === 'roe_deer')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                const redDeerTotal = reserveQuotas
+                  .filter((q: any) => q.species === 'red_deer')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                const fallowDeerTotal = reserveQuotas
+                  .filter((q: any) => q.species === 'fallow_deer')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                const mouflonTotal = reserveQuotas
+                  .filter((q: any) => q.species === 'mouflon')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+                
+                const chamoisTotal = reserveQuotas
+                  .filter((q: any) => q.species === 'chamois')
+                  .reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
+
+                return (
+                  <TableRow key={reserve.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm">{reserve.name}</span>
+                        <Badge 
+                          variant="outline" 
+                          className={
+                            reserve.managementType === 'standard_zones' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            reserve.managementType === 'zones_groups' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                            'bg-gray-50 text-gray-700 border-gray-200'
+                          }
+                        >
+                          {reserve.managementType === 'zones_groups' ? 'Zone+Gruppi' : 
+                           reserve.managementType === 'standard_zones' ? 'Zone' : 'Altro'}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center text-sm">{reserve.comune}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline">{speciesCount} specie</Badge>
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-green-700">
+                      {totalQuotas}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {roeDeerTotal > 0 ? (
+                        <Badge className="bg-amber-100 text-amber-800">{roeDeerTotal}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {redDeerTotal > 0 ? (
+                        <Badge className="bg-red-100 text-red-800">{redDeerTotal}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {fallowDeerTotal > 0 ? (
+                        <Badge className="bg-green-100 text-green-800">{fallowDeerTotal}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {mouflonTotal > 0 ? (
+                        <Badge className="bg-blue-100 text-blue-800">{mouflonTotal}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {chamoisTotal > 0 ? (
+                        <Badge className="bg-purple-100 text-purple-800">{chamoisTotal}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {reserve.isActive ? (
+                        <Badge className="bg-green-100 text-green-800">Attiva</Badge>
+                      ) : (
+                        <Badge className="bg-gray-100 text-gray-800">Inattiva</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {reserves.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <p>Nessuna riserva configurata nel sistema</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegionalQuotasProps) {
   const [selectedReserve, setSelectedReserve] = useState<string | null>(null);
@@ -129,11 +315,17 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
       isActive: true
     };
 
-    // Imposta la categoria corretta
+    // Imposta la categoria corretta per ogni specie
     if (formData.species === 'roe_deer') {
       quotaData.roeDeerCategory = formData.category;
     } else if (formData.species === 'red_deer') {
       quotaData.redDeerCategory = formData.category;
+    } else if (formData.species === 'fallow_deer') {
+      quotaData.fallowDeerCategory = formData.category;
+    } else if (formData.species === 'mouflon') {
+      quotaData.mouflonCategory = formData.category;
+    } else if (formData.species === 'chamois') {
+      quotaData.chamoisCategory = formData.category;
     }
 
     upsertQuotaMutation.mutate(quotaData);
@@ -141,9 +333,18 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
 
   const startEdit = (quota: any) => {
     setEditingQuota(quota.id);
+    
+    // Determina la categoria in base alla specie
+    let category = '';
+    if (quota.species === 'roe_deer') category = quota.roeDeerCategory;
+    else if (quota.species === 'red_deer') category = quota.redDeerCategory;
+    else if (quota.species === 'fallow_deer') category = quota.fallowDeerCategory;
+    else if (quota.species === 'mouflon') category = quota.mouflonCategory;
+    else if (quota.species === 'chamois') category = quota.chamoisCategory;
+    
     setFormData({
       species: quota.species,
-      category: quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory,
+      category: category || '',
       totalQuota: quota.totalQuota.toString(),
       notes: quota.notes || ''
     });
@@ -167,11 +368,17 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="manage" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="summary" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="summary">Tabella Riassuntiva</TabsTrigger>
           <TabsTrigger value="manage">Gestione Manuale</TabsTrigger>
           <TabsTrigger value="import">Importa da PDF</TabsTrigger>
         </TabsList>
+
+        {/* Tab Tabella Riassuntiva */}
+        <TabsContent value="summary" className="space-y-4">
+          <ReserveQuotasSummaryTable reserves={reserves} />
+        </TabsContent>
 
         {/* Tab Gestione Manuale */}
         <TabsContent value="manage" className="space-y-4">
@@ -262,6 +469,9 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
                         <SelectContent>
                           <SelectItem value="roe_deer">Capriolo</SelectItem>
                           <SelectItem value="red_deer">Cervo</SelectItem>
+                          <SelectItem value="fallow_deer">Daino</SelectItem>
+                          <SelectItem value="mouflon">Muflone</SelectItem>
+                          <SelectItem value="chamois">Camoscio</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
