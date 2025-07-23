@@ -512,6 +512,7 @@ Changelog:
   - **Standardized Format**: All 40 reserves now use uniform naming (CA TV## - Nome) and identical configurations
   - **Uniform Settings**: All CA TV reserves configured with standard_zones, caccia_per_zone, 16 zones, 1 group
   - **Advanced Filtering**: Added status filter (active/inactive) and numerical sorting (CA TV01-TV38) in SuperAdmin dashboard
+  - **CA TV28 Unification**: Merged duplicate CA TV28 with active Cison reserve, eliminated redundancy, now 39 total reserves
 
 # User Preferences
 
