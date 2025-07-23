@@ -34,7 +34,7 @@ export default function LoginPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const demoType = urlParams.get('demo');
     
-    if (demoType && ['hunter', 'admin', 'superadmin', 'biologo'].includes(demoType)) {
+    if (demoType && ['hunter', 'admin', 'superadmin', 'tecnico-faunistico'].includes(demoType)) {
       // Auto-login demo
       handleDemoLogin(demoType);
       return;

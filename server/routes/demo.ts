@@ -27,11 +27,11 @@ const DEMO_ACCOUNTS = {
     role: "ADMIN" as const,
     reserveId: "valle-demo"
   },
-  biologo: {
-    email: "demo.biologo@seleapp.demo",
+  "tecnico-faunistico": {
+    email: "demo.tecnico-faunistico@seleapp.demo",
     password: "demo123",
-    firstName: "Biologo",
-    lastName: "Demo",
+    firstName: "Tecnico",
+    lastName: "Faunistico",
     role: "BIOLOGO" as const,
     reserveId: null
   },
@@ -52,7 +52,7 @@ export async function startDemoSession(req: Request, res: Response) {
     // Verifica che il tipo demo sia valido
     if (!demoType || !Object.keys(DEMO_ACCOUNTS).includes(demoType)) {
       return res.status(400).json({ 
-        message: "Tipo demo non valido. Usa: hunter, admin, biologo, superadmin" 
+        message: "Tipo demo non valido. Usa: hunter, admin, tecnico-faunistico, superadmin" 
       });
     }
 
@@ -273,7 +273,7 @@ function getDemoFeatures(demoType: string): string[] {
         "Correzione report errati"
       ];
 
-    case 'biologo':
+    case 'tecnico-faunistico':
       return [
         "Registrazione osservazioni faunistiche",
         "Gestione dati biometrici",
