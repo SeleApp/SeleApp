@@ -21,6 +21,7 @@ import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
 export interface IStorage {
   // Reserves Management (SUPERADMIN only)
   getAllReserves(): Promise<Reserve[]>;
+  getReserves(): Promise<Reserve[]>; // Alias for getAllReserves
   getReserve(id: string): Promise<Reserve | undefined>;
   createReserve(reserve: InsertReserve): Promise<Reserve>;
   updateReserve(id: string, data: Partial<Reserve>): Promise<Reserve | undefined>;
@@ -100,6 +101,7 @@ export interface IStorage {
   createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
   deleteRegionalQuota(id: number): Promise<boolean>;
   deleteAllRegionalQuotasForReserve(reserveId: string): Promise<void>;
+  deleteRegionalQuotasByReserveAndSpecies(reserveId: string, species: string): Promise<void>;
   createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
   isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string, reserveId: string): Promise<boolean>;
   
@@ -159,6 +161,10 @@ export class DatabaseStorage implements IStorage {
   // Reserves Management (SUPERADMIN only)
   async getAllReserves(): Promise<Reserve[]> {
     return await db.select().from(reserves);
+  }
+
+  async getReserves(): Promise<Reserve[]> {
+    return this.getAllReserves();
   }
 
   async getReserve(id: string): Promise<Reserve | undefined> {
@@ -1145,6 +1151,18 @@ export class DatabaseStorage implements IStorage {
       .delete(regionalQuotas)
       .where(eq(regionalQuotas.id, id));
     return result.changes > 0;
+  }
+
+  async deleteRegionalQuotasByReserveAndSpecies(reserveId: string, species: string): Promise<void> {
+    await db
+      .delete(regionalQuotas)
+      .where(
+        and(
+          eq(regionalQuotas.reserveId, reserveId),
+          eq(regionalQuotas.species, species)
+        )
+      );
+    console.log(`Deleted all ${species} quotas for reserve: ${reserveId}`);
   }
 
   /**

@@ -325,73 +325,186 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(SPECIES_CONFIG).map(([species, config]) => {
-                  const speciesQuotas = Array.isArray(regionalQuotas) ? regionalQuotas.filter((q: any) => q.species === species) : [];
-                  if (speciesQuotas.length === 0) return null;
-
-                  const totalQuota = speciesQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
-                  const totalHarvested = speciesQuotas.reduce((sum: number, q: any) => sum + (q.harvested || 0), 0);
+                {/* Tabella formato PDF per CAPRIOLO */}
+                {(() => {
+                  const roeDeerQuotas = Array.isArray(regionalQuotas) ? regionalQuotas.filter((q: any) => q.species === 'roe_deer') : [];
+                  if (roeDeerQuotas.length === 0) return null;
+                  
+                  // Ordina le categorie per seguire l'ordine del PDF: M0, F0, FA, M1, MA
+                  const categoryOrder = ['M0', 'F0', 'FA', 'M1', 'MA'];
+                  const sortedRoeDeer = roeDeerQuotas.sort((a, b) => 
+                    categoryOrder.indexOf(a.roeDeerCategory) - categoryOrder.indexOf(b.roeDeerCategory)
+                  );
+                  
+                  const total = sortedRoeDeer.reduce((sum, q) => sum + q.totalQuota, 0);
+                  const harvested = sortedRoeDeer.reduce((sum, q) => sum + (q.harvested || 0), 0);
 
                   return (
-                    <Card key={species} className={config.color}>
-                      <CardHeader className="pb-3">
+                    <Card key="roe_deer" className="border-amber-200 bg-amber-50">
+                      <CardHeader className="pb-4">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-semibold">{config.name}</h4>
-                          <Badge variant="outline">
-                            {totalHarvested}/{totalQuota} - {totalQuota - totalHarvested} disponibili
+                          <h3 className="text-lg font-bold text-amber-800">PIANO ABBATTIMENTO CAPRIOLO 2025-2026</h3>
+                          <Badge className="bg-amber-600 text-white">
+                            {harvested}/{total} abbattuti
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Categoria</TableHead>
-                              <TableHead>Quota Regionale</TableHead>
-                              <TableHead>Abbattuti</TableHead>
-                              <TableHead>Disponibili</TableHead>
-                              <TableHead>Note/Periodo</TableHead>
-                              <TableHead>Azioni</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {speciesQuotas.map((quota: any) => (
-                              <TableRow key={quota.id}>
-                                <TableCell className="font-mono font-medium">
-                                  {quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory}
-                                </TableCell>
-                                <TableCell className="font-bold text-green-700">
-                                  {quota.totalQuota}
-                                </TableCell>
-                                <TableCell className="text-red-600">
-                                  {quota.harvested || 0}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge variant={quota.totalQuota - (quota.harvested || 0) > 0 ? "default" : "destructive"}>
-                                    {quota.totalQuota - (quota.harvested || 0)}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-xs text-gray-600">
-                                  {quota.notes || '-'}
-                                </TableCell>
-                                <TableCell>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse border border-gray-400">
+                            <thead>
+                              <tr className="bg-amber-100">
+                                <th className="border border-gray-400 px-3 py-2 text-left font-bold">Riserva</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">M0</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">F0</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">FA</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">M1</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">MA</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold bg-amber-200">TOT</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">Azioni</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="hover:bg-amber-25">
+                                <td className="border border-gray-400 px-3 py-2 font-medium">
+                                  {selectedReserveName}
+                                </td>
+                                {categoryOrder.map(category => {
+                                  const quota = sortedRoeDeer.find(q => q.roeDeerCategory === category);
+                                  return (
+                                    <td key={category} className="border border-gray-400 px-3 py-2 text-center">
+                                      <div className="flex flex-col items-center">
+                                        <span className="font-bold text-green-700">
+                                          {quota?.totalQuota || 0}
+                                        </span>
+                                        {quota && quota.harvested > 0 && (
+                                          <span className="text-xs text-red-600">
+                                            (-{quota.harvested})
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-gray-400 px-3 py-2 text-center bg-amber-100">
+                                  <span className="font-bold text-lg">{total}</span>
+                                  {harvested > 0 && (
+                                    <div className="text-xs text-red-600">(-{harvested})</div>
+                                  )}
+                                </td>
+                                <td className="border border-gray-400 px-3 py-2 text-center">
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => startEdit(quota)}
+                                    onClick={() => {
+                                      // Modifica prima quota trovata per aprire il modal
+                                      if (sortedRoeDeer.length > 0) {
+                                        startEdit(sortedRoeDeer[0]);
+                                      }
+                                    }}
                                     className="h-8 w-8 p-0"
                                   >
                                     <Edit className="h-4 w-4" />
                                   </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </CardContent>
                     </Card>
                   );
-                })}
+                })()}
+
+                {/* Tabella formato PDF per CERVO */}
+                {(() => {
+                  const redDeerQuotas = Array.isArray(regionalQuotas) ? regionalQuotas.filter((q: any) => q.species === 'red_deer') : [];
+                  if (redDeerQuotas.length === 0) return null;
+                  
+                  // Ordina le categorie per seguire l'ordine del PDF: CL0, MCL1, MM, FF
+                  const categoryOrder = ['CL0', 'MCL1', 'MM', 'FF'];
+                  const sortedRedDeer = redDeerQuotas.sort((a, b) => 
+                    categoryOrder.indexOf(a.redDeerCategory) - categoryOrder.indexOf(b.redDeerCategory)
+                  );
+                  
+                  const total = sortedRedDeer.reduce((sum, q) => sum + q.totalQuota, 0);
+                  const harvested = sortedRedDeer.reduce((sum, q) => sum + (q.harvested || 0), 0);
+
+                  return (
+                    <Card key="red_deer" className="border-red-200 bg-red-50">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-bold text-red-800">CERVO piano prelievo 2025/2026</h3>
+                          <Badge className="bg-red-600 text-white">
+                            {harvested}/{total} abbattuti
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse border border-gray-400">
+                            <thead>
+                              <tr className="bg-red-100">
+                                <th className="border border-gray-400 px-3 py-2 text-left font-bold">Comp A</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">CL0</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">MCL1</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">MM</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">FF</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold bg-red-200">tot</th>
+                                <th className="border border-gray-400 px-3 py-2 text-center font-bold">Azioni</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="hover:bg-red-25">
+                                <td className="border border-gray-400 px-3 py-2 font-medium">
+                                  {selectedReserveName?.replace('CA TV', 'CA TV')}
+                                </td>
+                                {categoryOrder.map(category => {
+                                  const quota = sortedRedDeer.find(q => q.redDeerCategory === category);
+                                  return (
+                                    <td key={category} className="border border-gray-400 px-3 py-2 text-center">
+                                      <div className="flex flex-col items-center">
+                                        <span className="font-bold text-green-700">
+                                          {quota?.totalQuota || 0}
+                                        </span>
+                                        {quota && quota.harvested > 0 && (
+                                          <span className="text-xs text-red-600">
+                                            (-{quota.harvested})
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-gray-400 px-3 py-2 text-center bg-red-100">
+                                  <span className="font-bold text-lg">{total}</span>
+                                  {harvested > 0 && (
+                                    <div className="text-xs text-red-600">(-{harvested})</div>
+                                  )}
+                                </td>
+                                <td className="border border-gray-400 px-3 py-2 text-center">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      // Modifica prima quota trovata per aprire il modal
+                                      if (sortedRedDeer.length > 0) {
+                                        startEdit(sortedRedDeer[0]);
+                                      }
+                                    }}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
               </div>
             )}
           </CardContent>
