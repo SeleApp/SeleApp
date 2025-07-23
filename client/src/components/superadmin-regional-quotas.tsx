@@ -72,11 +72,23 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
     queryKey: ['/api/superadmin/regional-quotas'],
     queryFn: async () => {
       console.log('Fetching regional quotas for SuperAdmin table...');
-      const response = await apiRequest('/api/superadmin/regional-quotas', {
-        method: 'GET'
+      const response = await fetch('/api/superadmin/regional-quotas', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
       });
-      console.log('Regional quotas response:', response);
-      return Array.isArray(response) ? response : [];
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Regional quotas RAW response:', data);
+      console.log('Is array?', Array.isArray(data));
+      console.log('First item:', data[0]);
+      return Array.isArray(data) ? data : [];
     }
   });
 
@@ -97,6 +109,19 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
           <div className="text-center py-8 text-red-600">
             <AlertCircle className="h-8 w-8 mx-auto mb-2" />
             Errore nel caricamento delle quote regionali: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (allQuotas.length === 0) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8 text-yellow-600">
+            <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+            NESSUNA QUOTA TROVATA - Dati vuoti dall'API
           </div>
         </CardContent>
       </Card>
@@ -153,11 +178,15 @@ function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
                 const totalQuotas = reserveQuotas.reduce((sum: number, q: any) => sum + (q.totalQuota || 0), 0);
                 
                 // Debug logging EXTRA per trovare il problema
-                console.log(`Checking reserve ${reserve.id}:`, {
-                  quotasFound: reserveQuotas.length,
-                  totalQuotas: totalQuotas,
-                  availableInQuotasByReserve: !!quotasByReserve[reserve.id]
-                });
+                if (reserve.id === 'ca-tv01' || reserve.id === 'cison-valmarino') {
+                  console.log(`DEBUG RESERVE ${reserve.id}:`, {
+                    quotasFound: reserveQuotas.length,
+                    totalQuotas: totalQuotas,
+                    availableInQuotasByReserve: !!quotasByReserve[reserve.id],
+                    firstQuota: reserveQuotas[0],
+                    allReserveQuotas: reserveQuotas
+                  });
+                }
                 
                 // Calcola totali per specie
                 const roeDeerTotal = reserveQuotas
