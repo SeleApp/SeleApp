@@ -502,6 +502,7 @@ Changelog:
   - **Species Coverage**: Complete quotas for all 4 hunting species with proper categories and seasonal dates
   - **SuperAdmin Access**: All 63 reserves and 300 quotas now visible in SuperAdmin dashboard for central management
   - **Full Compliance**: System contains complete official Regione Veneto data ensuring total regulatory compliance
+  - **Production Focus**: Deactivated all 62 reserves except Cison di Valmarino for production deployment focus
 
 # User Preferences
 
