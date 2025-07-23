@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Plus, Edit, Save, Upload, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import ImportRegionalQuotas from "@/components/import-regional-quotas";
 
 interface SuperAdminRegionalQuotasProps {
   reserves: Array<{
@@ -148,43 +149,68 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
             Queste quote rappresentano i limiti massimi che non possono essere superati dagli amministratori locali.
           </p>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Selezione Riserva */}
-            <div>
-              <Label htmlFor="reserve-select">Seleziona Riserva</Label>
-              <Select value={selectedReserve || ''} onValueChange={setSelectedReserve}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleziona una riserva per gestire le quote regionali" />
-                </SelectTrigger>
-                <SelectContent>
-                  {reserves.map(reserve => (
-                    <SelectItem key={reserve.id} value={reserve.id}>
-                      {reserve.name} - {reserve.comune}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      </Card>
 
-            {/* Alert informativo */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Come funzionano le quote regionali:</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li><strong>Piano Venatorio:</strong> Le quote sono assegnate dalla Regione Veneto</li>
-                    <li><strong>Limiti Massimi:</strong> Gli admin locali NON possono superare questi valori</li>
-                    <li><strong>Distribuzione:</strong> Ogni riserva può distribuire internamente (es: per gruppi)</li>
-                    <li><strong>Controllo:</strong> Solo il SuperAdmin può modificare questi valori ufficiali</li>
-                  </ul>
+      <Tabs defaultValue="manage" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="manage">Gestione Manuale</TabsTrigger>
+          <TabsTrigger value="import">Importa da PDF</TabsTrigger>
+        </TabsList>
+
+        {/* Tab Gestione Manuale */}
+        <TabsContent value="manage" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {/* Selezione Riserva */}
+                <div>
+                  <Label htmlFor="reserve-select">Seleziona Riserva</Label>
+                  <Select value={selectedReserve || ''} onValueChange={setSelectedReserve}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleziona una riserva per gestire le quote regionali" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reserves.map(reserve => (
+                        <SelectItem key={reserve.id} value={reserve.id}>
+                          {reserve.name} - {reserve.comune}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Alert informativo */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">Come funzionano le quote regionali:</p>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        <li><strong>Piano Venatorio:</strong> Le quote sono assegnate dalla Regione Veneto</li>
+                        <li><strong>Limiti Massimi:</strong> Gli admin locali NON possono superare questi valori</li>
+                        <li><strong>Distribuzione:</strong> Ogni riserva può distribuire internamente (es: per gruppi)</li>
+                        <li><strong>Controllo:</strong> Solo il SuperAdmin può modificare questi valori ufficiali</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab Importazione da PDF */}
+        <TabsContent value="import" className="space-y-4">
+          <ImportRegionalQuotas 
+            reserves={reserves} 
+            onImportComplete={() => {
+              if (selectedReserve) {
+                quotasQuery.refetch();
+              }
+            }}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Gestione Quote per Riserva Selezionata */}
       {selectedReserve && (

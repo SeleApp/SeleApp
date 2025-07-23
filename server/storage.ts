@@ -99,6 +99,7 @@ export interface IStorage {
   // SuperAdmin specific methods
   createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
   deleteRegionalQuota(id: number): Promise<boolean>;
+  deleteAllRegionalQuotasForReserve(reserveId: string): Promise<void>;
   createOrUpdateRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
   isSpeciesCategoryAvailable(species: 'roe_deer' | 'red_deer', category: string, reserveId: string): Promise<boolean>;
   
@@ -1144,6 +1145,16 @@ export class DatabaseStorage implements IStorage {
       .delete(regionalQuotas)
       .where(eq(regionalQuotas.id, id));
     return result.changes > 0;
+  }
+
+  /**
+   * SUPERADMIN: Elimina tutte le quote regionali per una riserva (per reimportazione)
+   */
+  async deleteAllRegionalQuotasForReserve(reserveId: string): Promise<void> {
+    await db
+      .delete(regionalQuotas)
+      .where(eq(regionalQuotas.reserveId, reserveId));
+    console.log(`🗑️ Deleted all regional quotas for reserve ${reserveId}`);
   }
 
   async deleteHuntReport(id: number, reserveId: string): Promise<void> {
