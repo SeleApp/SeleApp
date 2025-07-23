@@ -57,7 +57,8 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
       const response = await apiRequest(`/api/superadmin/regional-quotas/${selectedReserve}`, {
         method: 'GET'
       });
-      return response;
+      // Assicurati che la risposta sia sempre un array
+      return Array.isArray(response) ? response : [];
     }
   });
 
@@ -205,7 +206,7 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
             reserves={reserves} 
             onImportComplete={() => {
               if (selectedReserve) {
-                quotasQuery.refetch();
+                queryClient.invalidateQueries({ queryKey: ['/api/superadmin/regional-quotas', selectedReserve] });
               }
             }}
           />
@@ -316,7 +317,7 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">Caricamento quote regionali...</div>
-            ) : regionalQuotas.length === 0 ? (
+            ) : !Array.isArray(regionalQuotas) || regionalQuotas.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                 <p>Nessuna quota regionale configurata per questa riserva</p>
@@ -325,7 +326,7 @@ export default function SuperAdminRegionalQuotas({ reserves }: SuperAdminRegiona
             ) : (
               <div className="space-y-6">
                 {Object.entries(SPECIES_CONFIG).map(([species, config]) => {
-                  const speciesQuotas = regionalQuotas.filter((q: any) => q.species === species);
+                  const speciesQuotas = Array.isArray(regionalQuotas) ? regionalQuotas.filter((q: any) => q.species === species) : [];
                   if (speciesQuotas.length === 0) return null;
 
                   const totalQuota = speciesQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
