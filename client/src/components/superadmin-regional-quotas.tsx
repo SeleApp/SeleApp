@@ -68,9 +68,9 @@ const SPECIES_CONFIG = {
 // Componente per la tabella riassuntiva di tutte le quote regionali
 function ReserveQuotasSummaryTable({ reserves }: { reserves: any[] }) {
   const { data: allQuotas = [], isLoading } = useQuery({
-    queryKey: ['/api/superadmin/all-regional-quotas'],
+    queryKey: ['/api/superadmin/regional-quotas'],
     queryFn: async () => {
-      const response = await apiRequest('/api/regional-quotas', {
+      const response = await apiRequest('/api/superadmin/regional-quotas', {
         method: 'GET'
       });
       return Array.isArray(response) ? response : [];

@@ -98,24 +98,19 @@ router.delete("/:id", authenticateToken, requireRole('SUPERADMIN'), async (req: 
   }
 });
 
-// GET statistiche quote regionali per tutte le riserve (SUPERADMIN only)
+// GET tutte le quote regionali per tutte le riserve (SUPERADMIN only)
 router.get("/", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
   try {
-    console.log(`SuperAdmin fetching all regional quotas statistics`);
+    console.log(`SuperAdmin fetching all regional quotas for all reserves`);
     
-    // Per ora restituisce un array vuoto, ma può essere implementato
-    // per fornire statistiche aggregate di tutte le riserve
-    const stats = {
-      totalReserves: 0,
-      totalQuotas: 0,
-      totalHarvested: 0,
-      bySpecies: {}
-    };
+    // Ottieni tutte le quote regionali da tutte le riserve
+    const allQuotas = await storage.getAllRegionalQuotas();
     
-    res.json(stats);
+    console.log(`Found ${allQuotas.length} total regional quotas across all reserves`);
+    res.json(allQuotas);
   } catch (error) {
-    console.error("Error fetching regional quotas statistics:", error);
-    res.status(500).json({ message: "Errore nel recupero delle statistiche" });
+    console.error("Error fetching all regional quotas:", error);
+    res.status(500).json({ message: "Errore nel recupero delle quote regionali" });
   }
 });
 

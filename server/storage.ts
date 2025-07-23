@@ -96,6 +96,7 @@ export interface IStorage {
   
   // Regional Quotas Management (filtered by reserveId)
   getRegionalQuotas(reserveId: string): Promise<(RegionalQuota & { available: number; isExhausted: boolean; isInSeason: boolean })[]>;
+  getAllRegionalQuotas(): Promise<RegionalQuota[]>; // SuperAdmin method to get all quotas across all reserves
   updateRegionalQuota(id: number, reserveId: string, data: Partial<RegionalQuota>): Promise<RegionalQuota | undefined>;
   // SuperAdmin specific methods
   createRegionalQuota(quota: InsertRegionalQuota): Promise<RegionalQuota>;
@@ -973,6 +974,18 @@ export class DatabaseStorage implements IStorage {
       );
     
     return quota ? quota.harvested < quota.totalQuota : false;
+  }
+
+  /**
+   * Ottiene tutte le quote regionali per tutte le riserve (SUPERADMIN only)
+   */
+  async getAllRegionalQuotas(): Promise<RegionalQuota[]> {
+    console.log('Fetching all regional quotas for SuperAdmin dashboard');
+    const quotas = await db.select().from(regionalQuotas)
+      .orderBy(regionalQuotas.reserveId, regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
+    
+    console.log(`Found ${quotas.length} total regional quotas across all reserves`);
+    return quotas;
   }
 
   /**
