@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticateToken, requireRole, type AuthRequest } from "../../middleware/auth";
 import { storage } from "../../storage";
 import { insertRegionalQuotaSchema } from "@shared/schema";
+import { importAllQuotasFromPDFs } from "../../utils/pdfImporter";
 
 const router = Router();
 
@@ -115,6 +116,36 @@ router.get("/", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRe
   } catch (error) {
     console.error("Error fetching regional quotas statistics:", error);
     res.status(500).json({ message: "Errore nel recupero delle statistiche" });
+  }
+});
+
+// POST importa tutti i dati dai PDF ufficiali (SUPERADMIN only)
+router.post("/import-from-pdfs", authenticateToken, requireRole('SUPERADMIN'), async (req: AuthRequest, res) => {
+  try {
+    console.log('SuperAdmin importing all quotas from PDFs...');
+    
+    const result = await importAllQuotasFromPDFs();
+    
+    if (result.success) {
+      res.json({
+        message: `Importazione completata con successo! Importate ${result.imported} quote regionali dai PDF ufficiali 2025-2026.`,
+        imported: result.imported,
+        errors: []
+      });
+    } else {
+      res.status(207).json({
+        message: `Importazione parzialmente completata. Importate ${result.imported} quote, ${result.errors.length} errori.`,
+        imported: result.imported,
+        errors: result.errors
+      });
+    }
+    
+  } catch (error) {
+    console.error("Error importing quotas from PDFs:", error);
+    res.status(500).json({ 
+      message: "Errore durante l'importazione dai PDF",
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
   }
 });
 
