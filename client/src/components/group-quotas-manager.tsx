@@ -186,15 +186,17 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
   // Calcola i totali regionali per confronto
   const getRegionalTotals = () => {
     const totals: Record<string, { total: number; harvested: number }> = {};
-    regionalQuotas.forEach((quota: any) => {
-      const key = quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory;
-      if (key) {
-        totals[`${quota.species}-${key}`] = {
-          total: quota.totalQuota,
-          harvested: quota.harvested
-        };
-      }
-    });
+    if (Array.isArray(regionalQuotas)) {
+      regionalQuotas.forEach((quota: any) => {
+        const key = quota.species === 'roe_deer' ? quota.roeDeerCategory : quota.redDeerCategory;
+        if (key) {
+          totals[`${quota.species}-${key}`] = {
+            total: quota.totalQuota,
+            harvested: quota.harvested
+          };
+        }
+      });
+    }
     return totals;
   };
 
@@ -202,27 +204,30 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
 
   return (
     <div className="space-y-6">
-      {/* Sezione Quote Regionali Piano Venatorio */}
-      <Card>
+      {/* Sezione Quote Regionali Piano Venatorio - FISSE */}
+      <Card className="border-green-200 bg-green-50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-green-600" />
-            Quote Regionali Piano Venatorio
+            Quote Regionali Piano Venatorio (FISSE - Regione Veneto)
           </CardTitle>
+          <p className="text-sm text-green-700">
+            Quote assegnate dalla Regione Veneto - NON modificabili. Rappresentano il limite massimo per la somma di tutti i gruppi.
+          </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(SPECIES_CONFIG).map(([species, config]) => {
-              const speciesQuotas = regionalQuotas.filter((q: any) => q.species === species);
+              const speciesQuotas = Array.isArray(regionalQuotas) ? regionalQuotas.filter((q: any) => q.species === species) : [];
               const speciesTotal = speciesQuotas.reduce((sum: number, q: any) => sum + q.totalQuota, 0);
               const speciesHarvested = speciesQuotas.reduce((sum: number, q: any) => sum + q.harvested, 0);
               
               return (
-                <div key={species} className="p-4 bg-gray-50 rounded-lg">
+                <div key={species} className="p-4 bg-white border border-green-200 rounded-lg">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold">{config.name}</h4>
-                    <Badge className={config.color}>
-                      {speciesTotal - speciesHarvested} / {speciesTotal} disponibili
+                    <h4 className="font-semibold text-green-800">{config.name}</h4>
+                    <Badge className="bg-green-600 text-white">
+                      REGIONALE: {speciesTotal - speciesHarvested} / {speciesTotal}
                     </Badge>
                   </div>
                   <div className="space-y-2">
@@ -233,10 +238,23 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                       );
                       if (!categoryQuota) return null;
                       
+                      // Calcola la somma delle quote di gruppo per questa categoria
+                      const groupSum = (groupQuotas as GroupQuota[])
+                        .filter(q => q.species === species && 
+                          (q.roeDeerCategory === category || q.redDeerCategory === category))
+                        .reduce((sum, q) => sum + q.totalQuota, 0);
+                      
                       return (
-                        <div key={category} className="flex justify-between text-sm">
-                          <span className="font-mono">{category}</span>
-                          <span>{categoryQuota.harvested}/{categoryQuota.totalQuota}</span>
+                        <div key={category} className="flex justify-between items-center text-sm border-b border-green-100 pb-1">
+                          <span className="font-mono font-semibold">{category}</span>
+                          <div className="text-right">
+                            <div className="font-semibold text-green-700">
+                              Regionale: {categoryQuota.totalQuota}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              Gruppi: {groupSum}/{categoryQuota.totalQuota}
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -248,23 +266,34 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
         </CardContent>
       </Card>
 
-      {/* Sezione Quote per Gruppo */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold">Distribuzione Quote per Gruppo</h2>
-        </div>
-        {!readonly && hasChanges && (
-          <Button 
-            onClick={saveChanges}
-            disabled={updateQuotasMutation.isPending}
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            Salva Modifiche
-          </Button>
-        )}
-      </div>
+      {/* Sezione Quote per Gruppo - MODIFICABILI */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600" />
+              <CardTitle>Distribuzione Quote per Gruppo (MODIFICABILI)</CardTitle>
+            </div>
+            {!readonly && hasChanges && (
+              <Button 
+                onClick={saveChanges}
+                disabled={updateQuotasMutation.isPending}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Salva Modifiche
+              </Button>
+            )}
+          </div>
+          <p className="text-sm text-blue-700 mt-2">
+            L'amministratore può modificare le quote di ogni gruppo, ma la somma totale NON può superare le quote regionali.
+            <br />
+            <strong>Zone:</strong> Tutti i cacciatori possono prenotare in tutte le 16 zone di Cison.
+            <br />
+            <strong>Capi:</strong> Ogni cacciatore può prelevare solo i capi assegnati al suo gruppo.
+          </p>
+        </CardHeader>
+        <CardContent>
 
       <Tabs value={activeGroup} onValueChange={(value) => setActiveGroup(value as 'A' | 'B' | 'C' | 'D' | 'E' | 'F')}>
         <TabsList className={`grid w-full ${numberOfGroups === 2 ? 'grid-cols-2' : numberOfGroups === 3 ? 'grid-cols-3' : numberOfGroups === 5 ? 'grid-cols-5' : numberOfGroups === 6 ? 'grid-cols-6' : 'grid-cols-4'}`}>
@@ -308,17 +337,21 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">{category}</Badge>
                               {regionalTotals[`${species}-${category}`] && (
-                                <span className="text-xs text-green-600 font-medium">
-                                  {/* Calcola somma gruppi vs regionale */}
+                                <div className="text-xs">
                                   {(() => {
                                     const groupSum = (groupQuotas as GroupQuota[])
                                       .filter(q => q.species === species && 
                                         (q.roeDeerCategory === category || q.redDeerCategory === category))
                                       .reduce((sum, q) => sum + q.totalQuota, 0);
                                     const regional = regionalTotals[`${species}-${category}`].total;
-                                    return `${groupSum}/${regional}`;
+                                    const isOverLimit = groupSum > regional;
+                                    return (
+                                      <span className={isOverLimit ? "text-red-600 font-bold" : "text-green-600 font-medium"}>
+                                        {isOverLimit ? "⚠️ " : "✓ "}Totale: {groupSum}/{regional}
+                                      </span>
+                                    );
                                   })()}
-                                </span>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -398,6 +431,8 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
           </TabsContent>
         ))}
       </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }
