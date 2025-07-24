@@ -332,57 +332,57 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
             <TabsContent key={group} value={group} className="space-y-6">
               
               {/* Header con titolo e pulsante salva per il gruppo */}
-              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border border-blue-200">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg border border-blue-200">
                 <div>
-                  <h2 className="text-2xl font-bold text-blue-900">Gruppo {group}</h2>
-                  <p className="text-lg text-blue-700 mt-1">Distribuzione quote per il gruppo di caccia</p>
+                  <h2 className="text-xl font-bold text-blue-900">Gruppo {group}</h2>
+                  <p className="text-base text-blue-700 mt-1">Distribuzione quote per il gruppo di caccia</p>
                 </div>
                 {!readonly && hasGroupChanges(group) && (
                   <Button 
                     onClick={() => saveGroupChanges(group)}
                     disabled={savingGroup === group}
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg gap-3 h-16"
+                    size="default"
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 text-base gap-2 h-12"
                   >
-                    <Save className="h-6 w-6" />
+                    <Save className="h-5 w-5" />
                     {savingGroup === group ? 'Salvando...' : `Salva Gruppo ${group}`}
                   </Button>
                 )}
                 {!readonly && !hasGroupChanges(group) && (
-                  <div className="text-lg text-gray-500 px-8 py-4">
+                  <div className="text-base text-gray-500 px-6 py-3">
                     Nessuna modifica da salvare
                   </div>
                 )}
               </div>
               
               {/* Tabelle delle quote per specie */}
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {Object.entries(SPECIES_CONFIG).map(([species, config]) => (
                   <Card key={species} className="border-2 border-gray-200">
                     <CardHeader className="bg-gray-50 border-b-2 border-gray-200">
-                      <CardTitle className="flex items-center justify-between text-2xl">
-                        <div className="flex items-center gap-3">
-                          <Target className="h-7 w-7" />
-                          <span className="text-2xl font-bold">{config.name}</span>
+                      <CardTitle className="flex items-center justify-between text-xl">
+                        <div className="flex items-center gap-2">
+                          <Target className="h-6 w-6" />
+                          <span className="text-xl font-bold">{config.name}</span>
                         </div>
-                        <Badge className={`${config.color} text-lg px-4 py-2`}>
+                        <Badge className={`${config.color} text-base px-3 py-1`}>
                           {groupOrganizedQuotas[species]?.reduce((sum, cat) => sum + cat.available, 0) || 0} disponibili
                         </Badge>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8">
+                    <CardContent className="p-6">
                       
-                      {/* Tabella grande e chiara */}
+                      {/* Tabella ottimizzata per senior */}
                       <div className="overflow-x-auto">
-                        <table className="w-full text-xl border-collapse">
+                        <table className="w-full text-base border-collapse">
                           <thead>
                             <tr className="bg-gray-100 border-b-2 border-gray-300">
-                              <th className="text-left p-4 font-bold text-xl">Categoria</th>
-                              <th className="text-center p-4 font-bold text-xl">Quote Assegnate</th>
-                              <th className="text-center p-4 font-bold text-xl">Controlli</th>
-                              <th className="text-center p-4 font-bold text-xl">Prelevati</th>
-                              <th className="text-center p-4 font-bold text-xl">Disponibili</th>
-                              <th className="text-center p-4 font-bold text-xl">Limite Regionale</th>
+                              <th className="text-left p-3 font-bold text-base">Categoria</th>
+                              <th className="text-center p-3 font-bold text-base">Quote Assegnate</th>
+                              <th className="text-center p-3 font-bold text-base">Controlli</th>
+                              <th className="text-center p-3 font-bold text-base">Prelevati</th>
+                              <th className="text-center p-3 font-bold text-base">Disponibili</th>
+                              <th className="text-center p-3 font-bold text-base">Limite Regionale</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -403,66 +403,66 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                                 <tr key={category} className="border-b border-gray-200 hover:bg-gray-50">
                                   
                                   {/* Categoria */}
-                                  <td className="p-6">
-                                    <span className="font-mono font-bold text-2xl bg-gray-200 px-4 py-2 rounded">
+                                  <td className="p-4">
+                                    <span className="font-mono font-bold text-lg bg-gray-200 px-3 py-1 rounded">
                                       {category}
                                     </span>
                                   </td>
                                   
                                   {/* Quote Assegnate */}
-                                  <td className="p-6 text-center">
-                                    <div className="text-3xl font-bold text-blue-600">
+                                  <td className="p-4 text-center">
+                                    <div className="text-xl font-bold text-blue-600">
                                       {displayQuota}
                                     </div>
                                     {pendingChange !== undefined && (
-                                      <div className="text-sm text-orange-600 mt-1">
+                                      <div className="text-xs text-orange-600 mt-1">
                                         (era {currentQuota})
                                       </div>
                                     )}
                                   </td>
                                   
                                   {/* Controlli +/- */}
-                                  <td className="p-6">
+                                  <td className="p-4">
                                     {!readonly && (
-                                      <div className="flex items-center justify-center gap-2">
+                                      <div className="flex items-center justify-center gap-1">
                                         <Button
                                           onClick={() => handleQuotaChange(species, category, (displayQuota - 1).toString())}
                                           disabled={displayQuota <= 0}
-                                          size="lg"
+                                          size="sm"
                                           variant="outline"
-                                          className="h-14 w-14 text-2xl font-bold hover:bg-red-50"
+                                          className="h-10 w-10 text-lg font-bold hover:bg-red-50"
                                         >
-                                          <Minus className="h-8 w-8" />
+                                          <Minus className="h-5 w-5" />
                                         </Button>
                                         <Button
                                           onClick={() => handleQuotaChange(species, category, (displayQuota + 1).toString())}
-                                          size="lg"
+                                          size="sm"
                                           variant="outline"
-                                          className="h-14 w-14 text-2xl font-bold hover:bg-green-50"
+                                          className="h-10 w-10 text-lg font-bold hover:bg-green-50"
                                         >
-                                          <Plus className="h-8 w-8" />
+                                          <Plus className="h-5 w-5" />
                                         </Button>
                                       </div>
                                     )}
                                   </td>
                                   
                                   {/* Prelevati */}
-                                  <td className="p-6 text-center">
-                                    <div className="text-2xl font-semibold text-red-600">
+                                  <td className="p-4 text-center">
+                                    <div className="text-lg font-semibold text-red-600">
                                       {harvested}
                                     </div>
                                   </td>
                                   
                                   {/* Disponibili */}
-                                  <td className="p-6 text-center">
-                                    <div className="text-2xl font-bold text-green-600">
+                                  <td className="p-4 text-center">
+                                    <div className="text-lg font-bold text-green-600">
                                       {Math.max(0, displayQuota - harvested)}
                                     </div>
                                   </td>
                                   
                                   {/* Limite Regionale */}
-                                  <td className="p-6 text-center">
-                                    <div className="text-lg text-green-700 font-semibold">
+                                  <td className="p-4 text-center">
+                                    <div className="text-base text-green-700 font-semibold">
                                       {regionalLimit > 0 ? regionalLimit : '-'}
                                     </div>
                                   </td>

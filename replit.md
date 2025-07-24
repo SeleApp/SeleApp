@@ -587,6 +587,13 @@ Changelog:
   - **Admin Control**: Allows reserve administrator to distribute regional quotas according to specific hunting group needs
   - **Clean Slate**: Maintains database structure while giving complete flexibility for quota assignment
   - **Reason**: User requested complete reset to allow custom redistribution by local administrator
+- July 24, 2025. **GROUP QUOTAS INTERFACE REDESIGN**: Complete overhaul of group quota management interface for 50+ users
+  - **Individual Group Saving**: Each group has its own "Salva Gruppo X" button for independent modifications
+  - **Senior-Friendly Layout**: Reduced font sizes to match regional quotas table while maintaining readability
+  - **Optimized Table Design**: 6-column layout (Category, Assigned Quotas, Controls, Taken, Available, Regional Limit)
+  - **Large Controls**: +/- buttons sized 10x10 (2.5rem) with text-lg for easy clicking
+  - **Clear Visual Hierarchy**: Text sizes from base to xl, proper spacing p-4, rounded elements
+  - **Professional Appearance**: Consistent with regional quotas section styling and spacing
 - July 23, 2025. **SUPERADMIN IMPORT SYSTEM FIX**: Resolved critical authentication error in PDF import system
   - **Authentication Fix**: Corrected 401 error in /api/superadmin/import-quotas-by-species endpoint by fixing router middleware chain
   - **Router Configuration**: Changed from spread operator to proper Express router setup with authenticateToken + requireRole('SUPERADMIN')
