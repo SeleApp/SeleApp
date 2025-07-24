@@ -35,7 +35,7 @@ export default function LoginPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const demoType = urlParams.get('demo');
     
-    console.log('Demo check:', { demoType, search: window.location.search });
+    console.log('Demo check:', { demoType, search: window.location.search, url: window.location.href });
     
     if (demoType && ['hunter', 'admin', 'superadmin', 'tecnico-faunistico'].includes(demoType)) {
       console.log('Starting demo login for:', demoType);
@@ -48,6 +48,7 @@ export default function LoginPage() {
     // Regular authentication check
     if (authService.isAuthenticated()) {
       const user = authService.getUser();
+      console.log('User already authenticated:', user);
       if (user?.role === "SUPERADMIN") {
         navigate("/superadmin");
       } else if (user?.role === "ADMIN") {
@@ -81,6 +82,7 @@ export default function LoginPage() {
         });
 
         // Redirect basato sul tipo demo
+        console.log('Demo login successful, navigating to dashboard for role:', response.user.role);
         if (response.user.role === "SUPERADMIN") {
           navigate("/superadmin");
         } else if (response.user.role === "ADMIN") {
