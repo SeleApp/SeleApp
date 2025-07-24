@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { storage } from "../storage";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET || "seleapp_dev_secret_2025";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -37,6 +37,8 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
       role?: string;
       email?: string;
     };
+    
+    // Token decodificato correttamente
     
     // Gestione token demo
     if (decoded.isDemo) {

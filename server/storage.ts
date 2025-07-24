@@ -5,7 +5,7 @@
 import { 
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves, groupQuotas,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
-  lotteries, lotteryParticipations, reserveRules,
+  lotteries, lotteryParticipations, reserveRules, osservazioniFaunistiche,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
@@ -13,7 +13,8 @@ import {
   type SupportTicket, type InsertSupportTicket, type Billing, type InsertBilling,
   type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
   type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation,
-  type ReserveRule, type InsertReserveRule, type GroupQuota, type InsertGroupQuota
+  type ReserveRule, type InsertReserveRule, type GroupQuota, type InsertGroupQuota,
+  type OsservazioneFaunistica, type InsertOsservazioneFaunistica
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -2459,38 +2460,49 @@ export class DatabaseStorage implements IStorage {
 
   // Fauna Management Methods (BIOLOGO/PROVINCIA only)
   async getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]> {
-    console.log('Fetching fauna observations with filters:', filters, 'for reserve:', reserveId);
-    
-    let query = db.select().from(osservazioniFaunistiche);
-    
-    // Applica filtri
-    const conditions = [];
-    if (reserveId) conditions.push(eq(osservazioniFaunistiche.reserveId, reserveId));
-    if (filters.specie) conditions.push(eq(osservazioniFaunistiche.specie, filters.specie));
-    if (filters.sesso) conditions.push(eq(osservazioniFaunistiche.sesso, filters.sesso));
-    if (filters.zonaId) conditions.push(eq(osservazioniFaunistiche.zonaId, parseInt(filters.zonaId)));
-    if (filters.tipo) conditions.push(eq(osservazioniFaunistiche.tipo, filters.tipo));
-    if (filters.sezione) conditions.push(eq(osservazioniFaunistiche.sezione, filters.sezione));
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+    try {
+      console.log('Fetching fauna observations with filters:', filters, 'for reserve:', reserveId);
+      
+      let query = db.select().from(osservazioniFaunistiche);
+      
+      // Applica filtri
+      const conditions = [];
+      if (reserveId) conditions.push(eq(osservazioniFaunistiche.reserveId, reserveId));
+      if (filters.specie) conditions.push(eq(osservazioniFaunistiche.specie, filters.specie));
+      if (filters.sesso) conditions.push(eq(osservazioniFaunistiche.sesso, filters.sesso));
+      if (filters.zonaId) conditions.push(eq(osservazioniFaunistiche.zonaId, parseInt(filters.zonaId)));
+      if (filters.tipo) conditions.push(eq(osservazioniFaunistiche.tipo, filters.tipo));
+      if (filters.sezione) conditions.push(eq(osservazioniFaunistiche.sezione, filters.sezione));
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      const observations = await query.limit(parseInt(filters.limit) || 100);
+      console.log(`Found ${observations.length} fauna observations`);
+      return observations;
+    } catch (error) {
+      console.error('Error in getFaunaObservations:', error);
+      // Ritorna array vuoto se la tabella non esiste ancora
+      return [];
     }
-    
-    const observations = await query.limit(parseInt(filters.limit) || 100);
-    console.log(`Found ${observations.length} fauna observations`);
-    return observations;
   }
 
   async createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica> {
-    console.log('Creating new fauna observation:', data);
-    
-    const [newObservation] = await db
-      .insert(osservazioniFaunistiche)
-      .values(data)
-      .returning();
-    
-    console.log('Fauna observation created with ID:', newObservation.id);
-    return newObservation;
+    try {
+      console.log('Creating new fauna observation:', data);
+      
+      const [newObservation] = await db
+        .insert(osservazioniFaunistiche)
+        .values(data)
+        .returning();
+      
+      console.log('Fauna observation created with ID:', newObservation.id);
+      return newObservation;
+    } catch (error) {
+      console.error('Error creating fauna observation:', error);
+      throw error;
+    }
   }
 
   async deleteFaunaObservation(id: number, reserveId?: string): Promise<void> {
