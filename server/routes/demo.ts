@@ -197,11 +197,11 @@ export async function createDemoReserve(req: Request, res: Response) {
     // Crea quote demo realistiche
     const demoQuotas = [
       // Capriolo
-      { species: "roe_deer", roeDeerCategory: "M0", totalQuota: 8, harvested: 2 },
-      { species: "roe_deer", roeDeerCategory: "F0", totalQuota: 12, harvested: 5 },
-      { species: "roe_deer", roeDeerCategory: "FA", totalQuota: 6, harvested: 1 },
+      { species: "roe_deer", roeDeerCategory: "PM", totalQuota: 8, harvested: 2 },
+      { species: "roe_deer", roeDeerCategory: "PF", totalQuota: 12, harvested: 5 },
+      { species: "roe_deer", roeDeerCategory: "F1_FF", totalQuota: 6, harvested: 1 },
       { species: "roe_deer", roeDeerCategory: "M1", totalQuota: 4, harvested: 0 },
-      { species: "roe_deer", roeDeerCategory: "MA", totalQuota: 3, harvested: 1 },
+      { species: "roe_deer", roeDeerCategory: "M2", totalQuota: 3, harvested: 1 },
       
       // Cervo 
       { species: "red_deer", redDeerCategory: "CL0", totalQuota: 3, harvested: 0 },
@@ -227,7 +227,7 @@ export async function createDemoReserve(req: Request, res: Response) {
       await storage.createRegionalQuota({
         reserveId: "valle-demo",
         species: quota.species as "roe_deer" | "red_deer" | "fallow_deer" | "mouflon" | "chamois",
-        roeDeerCategory: quota.roeDeerCategory as "M0" | "F0" | "FA" | "M1" | "MA" | null | undefined,
+        roeDeerCategory: quota.roeDeerCategory as "M1" | "M2" | "F1_FF" | "PF" | "PM" | null | undefined,
         redDeerCategory: quota.redDeerCategory as "CL0" | "FF" | "MM" | "MCL1" | null | undefined,
         fallowDeerCategory: quota.fallowDeerCategory as "DA-M-0" | "DA-F-0" | "DA-M-I" | "DA-M-II" | "DA-F-I" | "DA-F-II" | null | undefined,
         mouflonCategory: quota.mouflonCategory as "MU-M-I" | "MU-F-I" | "MU-M-0" | "MU-M-II" | "MU-F-0" | "MU-F-II" | null | undefined,

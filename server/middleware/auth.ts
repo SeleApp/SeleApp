@@ -16,6 +16,8 @@ export interface AuthRequest extends Request {
     firstName: string;
     lastName: string;
     reserveId?: string | null;
+    isDemo?: boolean;
+    demoType?: string;
   };
 }
 
@@ -28,9 +30,30 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const decoded = jwt.verify(token, JWT_SECRET) as { 
+      userId: number; 
+      isDemo?: boolean; 
+      demoType?: string; 
+      role?: string;
+      email?: string;
+    };
     
-    // Non passiamo reserveId per permettere l'accesso a tutti gli utenti durante l'autenticazione
+    // Gestione token demo
+    if (decoded.isDemo) {
+      req.user = {
+        id: decoded.userId,
+        email: decoded.email || 'demo@seleapp.demo',
+        role: decoded.role || 'HUNTER',
+        firstName: 'Demo',
+        lastName: 'User',
+        reserveId: null,
+        isDemo: true,
+        demoType: decoded.demoType
+      };
+      return next();
+    }
+    
+    // Gestione token normali
     const user = await storage.getUser(decoded.userId);
     
     if (!user || !user.isActive) {

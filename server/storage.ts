@@ -172,8 +172,8 @@ export interface IStorage {
   }>;
 
   // Fauna Management (BIOLOGO/PROVINCIA only)
-  getFaunaObservations(filters: any, reserveId?: string): Promise<FaunaObservation[]>;
-  createFaunaObservation(data: InsertFaunaObservation): Promise<FaunaObservation>;
+  getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]>;
+  createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica>;
   deleteFaunaObservation(id: number, reserveId?: string): Promise<void>;
   getFaunaStatistics(reserveId?: string): Promise<{
     densitaPerZona: Record<string, number>;
@@ -448,8 +448,8 @@ export class DatabaseStorage implements IStorage {
 
     const quotasToCreate = quotaCategories.map(quota => ({
       species: quota.species,
-      roeDeerCategory: quota.species === 'roe_deer' ? quota.roeDeerCategory : null,
-      redDeerCategory: quota.species === 'red_deer' ? quota.redDeerCategory : null,
+      roeDeerCategory: quota.species === 'roe_deer' ? (quota as any).roeDeerCategory : null,
+      redDeerCategory: quota.species === 'red_deer' ? (quota as any).redDeerCategory : null,
       totalQuota: quota.totalQuota,
       harvested: quota.harvested,
       reserveId,
@@ -786,11 +786,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(reservations.reserveId, reserveId))
       .orderBy(desc(reservations.huntDate));
 
+    const baseQuery = query;
+    
     if (hunterId) {
-      return await query.where(eq(reservations.hunterId, hunterId));
+      return await baseQuery.where(eq(reservations.hunterId, hunterId));
     }
 
-    return await query;
+    return await baseQuery;
   }
 
   async getReservation(id: number): Promise<Reservation | undefined> {
@@ -900,16 +902,21 @@ export class DatabaseStorage implements IStorage {
    * Le quote sono a livello regionale, non per zona - ogni prelievo scala la quota totale disponibile
    */
   async createHuntReport(report: InsertHuntReport): Promise<HuntReport> {
-    const [newReport] = await db.insert(huntReports).values(report).returning();
+    const [newReport] = await db.insert(huntReports).values([report]).returning();
     
     // Se è stato dichiarato un prelievo, aggiorna la quota regionale
     if (report.outcome === 'harvest' && report.species) {
-      await this.updateRegionalQuotaAfterHarvestByCategory(
-        report.species, 
-        report.roeDeerCategory, 
-        report.redDeerCategory, 
-        report.reserveId
-      );
+      const validSpecies: ('roe_deer' | 'red_deer' | 'fallow_deer' | 'mouflon' | 'chamois')[] = 
+        ['roe_deer', 'red_deer', 'fallow_deer', 'mouflon', 'chamois'];
+      
+      if (validSpecies.includes(report.species as any)) {
+        await this.updateRegionalQuotaAfterHarvestByCategory(
+          report.species as any, 
+          report.roeDeerCategory, 
+          report.redDeerCategory, 
+          report.reserveId
+        );
+      }
     }
     
     // Marca la prenotazione come completata
@@ -926,7 +933,7 @@ export class DatabaseStorage implements IStorage {
    * Decrementa direttamente la quota della categoria selezionata
    */
   private async updateRegionalQuotaAfterHarvestByCategory(
-    species: 'roe_deer' | 'red_deer',
+    species: 'roe_deer' | 'red_deer' | 'fallow_deer' | 'mouflon' | 'chamois',
     roeDeerCategory?: string | null,
     redDeerCategory?: string | null,
     reserveId?: string
@@ -1144,7 +1151,7 @@ export class DatabaseStorage implements IStorage {
           const oldCategory = existingReport.species === 'roe_deer' 
             ? existingReport.roeDeerCategory! 
             : existingReport.redDeerCategory!;
-          await this.restoreRegionalQuotaAfterDelete(existingReport.species, oldCategory, reserveId);
+          await this.restoreRegionalQuotaAfterDelete(existingReport.species as any, oldCategory, reserveId);
         }
 
         // Se il nuovo report è un prelievo, aggiorna la quota
@@ -1152,7 +1159,7 @@ export class DatabaseStorage implements IStorage {
           const newCategory = updatedReport.species === 'roe_deer' 
             ? updatedReport.roeDeerCategory! 
             : updatedReport.redDeerCategory!;
-          await this.updateRegionalQuotaOnHarvest(updatedReport.species, newCategory, reserveId);
+          await this.updateRegionalQuotaAfterHarvestByCategory(updatedReport.species as any, updatedReport.roeDeerCategory, updatedReport.redDeerCategory, reserveId);
         }
       }
 
