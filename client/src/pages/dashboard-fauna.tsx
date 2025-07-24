@@ -127,22 +127,22 @@ export default function DashboardFauna() {
   };
 
   // Prepara dati per i grafici
-  const sexRatioData = Object.entries(statistics.sexRatioPerSpecie || {}).map(([specie, ratio]) => ({
+  const sexRatioData = Object.entries((statistics as any)?.sexRatioPerSpecie || {}).map(([specie, ratio]: [string, any]) => ({
     specie: SPECIES_CONFIG[specie as keyof typeof SPECIES_CONFIG]?.name || specie,
-    maschi: ratio.M || 0,
-    femmine: ratio.F || 0
+    maschi: ratio?.M || 0,
+    femmine: ratio?.F || 0
   }));
 
-  const ageDistributionData = Object.entries(statistics.distribuzioneClassiEta || {}).map(([specie, distribution]) => ({
+  const ageDistributionData = Object.entries((statistics as any)?.distribuzioneClassiEta || {}).map(([specie, distribution]: [string, any]) => ({
     specie: SPECIES_CONFIG[specie as keyof typeof SPECIES_CONFIG]?.name || specie,
-    giovani: distribution.J || 0,
-    yearling: distribution.Y || 0,
-    adulti: distribution.A || 0
+    giovani: distribution?.J || 0,
+    yearling: distribution?.Y || 0,
+    adulti: distribution?.A || 0
   }));
 
-  const densityData = Object.entries(statistics.densitaPerZona || {}).map(([zona, densita]) => ({
+  const densityData = Object.entries((statistics as any)?.densitaPerZona || {}).map(([zona, densita]: [string, any]) => ({
     zona,
-    densita: Number(densita.toFixed(2))
+    densita: Number(densita?.toFixed?.(2) || 0)
   }));
 
   return (
@@ -259,7 +259,7 @@ export default function DashboardFauna() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
-                Elenco Osservazioni ({observations.length})
+                Elenco Osservazioni ({Array.isArray(observations) ? observations.length : 0})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -279,12 +279,12 @@ export default function DashboardFauna() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {observations.map((obs: any) => (
+                    {Array.isArray(observations) && observations.map((obs: any) => (
                       <TableRow key={obs.id}>
                         <TableCell>{format(new Date(obs.data), 'dd/MM/yyyy', { locale: it })}</TableCell>
                         <TableCell>
-                          <Badge style={{ backgroundColor: SPECIES_CONFIG[obs.specie]?.color }}>
-                            {SPECIES_CONFIG[obs.specie]?.name || obs.specie}
+                          <Badge style={{ backgroundColor: SPECIES_CONFIG[obs.specie as keyof typeof SPECIES_CONFIG]?.color }}>
+                            {SPECIES_CONFIG[obs.specie as keyof typeof SPECIES_CONFIG]?.name || obs.specie}
                           </Badge>
                         </TableCell>
                         <TableCell>{obs.sesso}</TableCell>
@@ -347,10 +347,10 @@ export default function DashboardFauna() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Object.entries(statistics.percentualeAbbattimento || {}).map(([specie, perc]) => (
+                    {Object.entries((statistics as any)?.percentualeAbbattimento || {}).map(([specie, perc]: [string, any]) => (
                       <TableRow key={specie}>
                         <TableCell>{SPECIES_CONFIG[specie as keyof typeof SPECIES_CONFIG]?.name || specie}</TableCell>
-                        <TableCell>{Number(perc).toFixed(1)}%</TableCell>
+                        <TableCell>{Number(perc || 0).toFixed(1)}%</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
