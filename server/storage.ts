@@ -1009,18 +1009,6 @@ export class DatabaseStorage implements IStorage {
    */
   async getAllRegionalQuotas(): Promise<RegionalQuota[]> {
     console.log('Fetching all regional quotas for SuperAdmin dashboard');
-    const quotas = await db.select().from(regionalQuotas)
-      .orderBy(regionalQuotas.reserveId, regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);
-    
-    console.log(`Found ${quotas.length} total regional quotas across all reserves`);
-    return quotas;
-  }
-
-  /**
-   * Ottiene tutte le quote regionali con stato disponibilità e periodo di caccia
-   */
-  async getAllRegionalQuotas(): Promise<RegionalQuota[]> {
-    console.log('Fetching all regional quotas for SuperAdmin dashboard');
     
     const allQuotas = await db.select().from(regionalQuotas)
       .orderBy(regionalQuotas.reserveId, regionalQuotas.species, regionalQuotas.roeDeerCategory, regionalQuotas.redDeerCategory);

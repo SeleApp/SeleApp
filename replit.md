@@ -610,6 +610,14 @@ Changelog:
   - **Production Status**: System fully operational - CA TV28 Cison (44 quotas), CA TV01 Cordignano (52 quotas), all reserves functioning
   - **Official Compliance**: All data matches official Regione Veneto Piano Venatorio 2025-2026 PDF specifications
 
+- July 24, 2025. **CRITICAL CATEGORY CORRECTION**: Fixed Cison di Valmarino category mapping to proper CA TV standards
+  - **Correct Mapping**: M0→PM, F0→PF, MA→M2, M1→M1, FA→F1_FF (as specified by user)
+  - **Database Update**: Both regional and group quotas updated with standardized CA TV categories
+  - **Quote Totals**: PM=13, PF=3, M2=7, M1=4, F1_FF=12 (totale 39 caprioli regionali)
+  - **Group Distribution**: All 4 hunter groups (A,B,C,D) have proper quota allocation with CA TV categories
+  - **Resolved LSP Errors**: Fixed duplicate function definitions and TypeScript compilation issues
+  - **Data Integrity**: Consolidated duplicate entries and verified correct quota distribution
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
