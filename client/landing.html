@@ -1269,73 +1269,24 @@ Inserisci il numero (1 o 2):`);
         function startHunterDemo() {
             // Login automatico come demo hunter
             if (confirm('Demo Cacciatore: Accederai come cacciatore demo per 30 minuti. Potrai fare prenotazioni e vedere le quote. Continui?')) {
-                // Apri in una nuova finestra per non perdere la landing page
-                const demoWindow = window.open('/app?demo=hunter', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                
-                // Messaggio di conferma
-                setTimeout(() => {
-                    alert(`Demo Cacciatore avviata! 
-
-✅ Potrai:
-• Fare prenotazioni di caccia
-• Visualizzare quote disponibili  
-• Inviare report dopo la caccia
-• Vedere lo storico prenotazioni
-
-⏱️ Tempo disponibile: 30 minuti
-🎯 Riserva demo: "Valle Demo"
-
-La demo si aprirà in una nuova finestra.`);
-                }, 1000);
+                // Naviga direttamente alla demo
+                window.location.href = '/app?demo=hunter';
             }
         }
 
         function startAdminDemo() {
             // Login automatico come demo admin
             if (confirm('Demo Amministratore Comprensorio Alpino: Accederai come admin demo per 30 minuti. Potrai gestire cacciatori e prelievi. Continui?')) {
-                const demoWindow = window.open('/app?demo=admin', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                
-                setTimeout(() => {
-                    alert(`Demo Amministratore Comprensorio Alpino avviata!
-
-✅ Potrai:
-• Creare e gestire cacciatori
-• Modificare piani di prelievo e gestione specie
-• Visualizzare e correggere report di caccia
-• Gestire prenotazioni attive
-• Compilare moduli e schede abbattimento
-• Vedere statistiche comprensorio
-
-⏱️ Tempo disponibile: 30 minuti  
-🎯 Comprensorio demo: "CA TV01 Demo"
-
-La demo si aprirà in una nuova finestra.`);
-                }, 1000);
+                // Naviga direttamente alla demo
+                window.location.href = '/app?demo=admin';
             }
         }
 
         function startTecnicoFaunisticoDemo() {
             // Login automatico come demo tecnico faunistico
             if (confirm('Demo Tecnico Faunistico: Accederai come tecnico faunistico demo per 30 minuti. Potrai gestire osservazioni e dati scientifici. Continui?')) {
-                const demoWindow = window.open('/app?demo=tecnico-faunistico', 'SeleAppDemo', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                
-                setTimeout(() => {
-                    alert(`Demo Tecnico Faunistico avviata!
-
-✅ Potrai:
-• Registrare osservazioni faunistiche con GPS
-• Gestire dati biometrici dettagliati
-• Analizzare distribuzioni e statistiche
-• Visualizzare grafici scientifici (sesso, età, densità)
-• Esportare dati per ricerca
-• Filtrare osservazioni per specie e territorio
-• Monitorare popolazioni selvatiche
-
-⏱️ Tempo disponibile: 30 minuti  
-🎯 Sistema demo: "Gestione Faunistica"
-
-La demo si aprirà in una nuova finestra.`);
-                }, 1000);
+                // Naviga direttamente alla demo tecnico faunistico
+                window.location.href = '/app?demo=tecnico-faunistico';
             }
         }
 
