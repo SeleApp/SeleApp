@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [, navigate] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { toast } = useToast();
 
   const loginForm = useForm<LoginRequest>({
@@ -34,8 +35,12 @@ export default function LoginPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const demoType = urlParams.get('demo');
     
+    console.log('Demo check:', { demoType, search: window.location.search });
+    
     if (demoType && ['hunter', 'admin', 'superadmin', 'tecnico-faunistico'].includes(demoType)) {
-      // Auto-login demo
+      console.log('Starting demo login for:', demoType);
+      setIsDemoLoading(true);
+      // Auto-login demo senza mostrare il form
       handleDemoLogin(demoType);
       return;
     }
@@ -56,6 +61,7 @@ export default function LoginPage() {
   }, []); // Empty dependency array - only run once on mount
 
   const handleDemoLogin = async (demoType: string) => {
+    console.log('handleDemoLogin called for:', demoType);
     setIsLoading(true);
     try {
       // Prima crea la riserva demo se non esiste
@@ -93,6 +99,7 @@ export default function LoginPage() {
       });
     } finally {
       setIsLoading(false);
+      setIsDemoLoading(false);
     }
   };
 
@@ -127,6 +134,30 @@ export default function LoginPage() {
   };
 
 
+
+  // Se la demo è in caricamento, mostra solo il loading
+  if (isDemoLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center">
+              <img
+                src={logoPath}
+                alt="SeleApp Logo"
+                className="h-20 w-20 object-contain"
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">SeleApp</h2>
+            <p className="text-lg text-gray-600 text-center mb-6">
+              Avvio demo in corso...
+            </p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
