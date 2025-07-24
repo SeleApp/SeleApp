@@ -22,6 +22,17 @@ export default function LoginPage() {
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { toast } = useToast();
 
+  // Immediate demo check on component mount
+  const urlParams = new URLSearchParams(window.location.search);
+  const demoType = urlParams.get('demo');
+  
+  console.log('IMMEDIATE DEMO CHECK:', { 
+    demoType, 
+    search: window.location.search, 
+    href: window.location.href,
+    pathname: window.location.pathname 
+  });
+
   const loginForm = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,13 +43,14 @@ export default function LoginPage() {
 
   // Check for demo parameter and handle demo login
   useEffect(() => {
+    console.log('USEEFFECT TRIGGERED - Demo check in useEffect');
     const urlParams = new URLSearchParams(window.location.search);
     const demoType = urlParams.get('demo');
     
-    console.log('Demo check:', { demoType, search: window.location.search, url: window.location.href });
+    console.log('USEEFFECT Demo check:', { demoType, search: window.location.search, url: window.location.href });
     
     if (demoType && ['hunter', 'admin', 'superadmin', 'tecnico-faunistico'].includes(demoType)) {
-      console.log('Starting demo login for:', demoType);
+      console.log('USEEFFECT Starting demo login for:', demoType);
       setIsDemoLoading(true);
       // Auto-login demo senza mostrare il form
       handleDemoLogin(demoType);
@@ -48,7 +60,7 @@ export default function LoginPage() {
     // Regular authentication check
     if (authService.isAuthenticated()) {
       const user = authService.getUser();
-      console.log('User already authenticated:', user);
+      console.log('USEEFFECT User already authenticated:', user);
       if (user?.role === "SUPERADMIN") {
         navigate("/superadmin");
       } else if (user?.role === "ADMIN") {
@@ -59,7 +71,7 @@ export default function LoginPage() {
         navigate("/hunter");
       }
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, [navigate]); // Include navigate in dependencies
 
   const handleDemoLogin = async (demoType: string) => {
     console.log('handleDemoLogin called for:', demoType);
