@@ -657,6 +657,10 @@ export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
 export type MaterialAccessLog = typeof materialAccessLog.$inferSelect;
 export type InsertMaterialAccessLog = z.infer<typeof insertMaterialAccessLogSchema>;
 
+// Fauna Observation types
+export type FaunaObservation = typeof osservazioniFaunistiche.$inferSelect;
+export type InsertFaunaObservation = z.infer<typeof insertOsservazioneFaunisticaSchema>;
+
 // Login schema
 export const loginSchema = z.object({
   email: z.string().email("Email non valida"),

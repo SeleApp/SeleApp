@@ -172,8 +172,8 @@ export interface IStorage {
   }>;
 
   // Fauna Management (BIOLOGO/PROVINCIA only)
-  getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]>;
-  createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica>;
+  getFaunaObservations(filters: any, reserveId?: string): Promise<FaunaObservation[]>;
+  createFaunaObservation(data: InsertFaunaObservation): Promise<FaunaObservation>;
   deleteFaunaObservation(id: number, reserveId?: string): Promise<void>;
   getFaunaStatistics(reserveId?: string): Promise<{
     densitaPerZona: Record<string, number>;
