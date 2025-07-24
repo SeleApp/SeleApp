@@ -94,9 +94,19 @@ export default function LoginPage() {
       
       if (response && response.success) {
         console.log('DEMO: Success confirmed, saving token...');
-        // Salva il token di demo
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        // Salva il token di demo usando le chiavi corrette per authService
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('auth_user', JSON.stringify(response.user));
+        
+        // Forza l'aggiornamento dell'authService re-inizializzandolo
+        const currentToken = localStorage.getItem('auth_token');
+        const currentUser = localStorage.getItem('auth_user');
+        console.log('DEMO: Forcing authService refresh with:', { currentToken: currentToken ? 'EXISTS' : 'MISSING', currentUser: currentUser ? 'EXISTS' : 'MISSING' });
+        
+        // Re-inizializza authService per caricare i nuovi dati
+        (authService as any).token = response.token;
+        (authService as any).user = response.user;
+        
         console.log('DEMO: Token saved, showing toast...');
         
         toast({
@@ -111,6 +121,10 @@ export default function LoginPage() {
         // Force navigation with setTimeout to ensure state updates
         setTimeout(() => {
           console.log('DEMO: Executing navigation now...');
+          console.log('DEMO: Current localStorage token:', localStorage.getItem('token') ? 'EXISTS' : 'MISSING');
+          console.log('DEMO: Current authService.isAuthenticated():', authService.isAuthenticated());
+          console.log('DEMO: Current authService.getUser():', authService.getUser());
+          
           if (response.user.role === "SUPERADMIN") {
             navigate("/superadmin");
           } else if (response.user.role === "ADMIN") {
