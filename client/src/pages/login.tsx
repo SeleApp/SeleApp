@@ -76,34 +76,53 @@ export default function LoginPage() {
   const handleDemoLogin = async (demoType: string) => {
     console.log('handleDemoLogin called for:', demoType);
     setIsLoading(true);
+    setIsDemoLoading(true);
     try {
+      console.log('DEMO: Starting setup...');
       // Prima crea la riserva demo se non esiste
-      await apiRequest('/api/demo/setup', { method: 'POST' });
+      const setupResponse = await apiRequest('/api/demo/setup', { method: 'POST' });
+      await setupResponse.json(); // Consume the response
+      console.log('DEMO: Setup completed, starting demo session...');
       
       // Poi avvia la sessione demo
-      const response = await apiRequest(`/api/demo/start/${demoType}`, { method: 'POST' }) as any;
+      const apiResponse = await apiRequest(`/api/demo/start/${demoType}`, { method: 'POST' });
+      const response = await apiResponse.json();
+      console.log('DEMO: API response received:', response);
+      console.log('DEMO: Response type:', typeof response);
+      console.log('DEMO: Response keys:', Object.keys(response || {}));
+      console.log('DEMO: Response.success specifically:', response?.success);
       
-      if (response.success) {
+      if (response && response.success) {
+        console.log('DEMO: Success confirmed, saving token...');
         // Salva il token di demo
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('DEMO: Token saved, showing toast...');
         
         toast({
           title: `Demo ${demoType.charAt(0).toUpperCase() + demoType.slice(1)} Avviata`,
           description: `Benvenuto nella demo! Hai ${response.demoInfo.durationMinutes} minuti per esplorare.`,
         });
+        console.log('DEMO: Toast shown, preparing navigation...');
 
         // Redirect basato sul tipo demo
         console.log('Demo login successful, navigating to dashboard for role:', response.user.role);
-        if (response.user.role === "SUPERADMIN") {
-          navigate("/superadmin");
-        } else if (response.user.role === "ADMIN") {
-          navigate("/admin");
-        } else if (response.user.role === "BIOLOGO" || response.user.role === "PROVINCIA") {
-          navigate("/fauna");
-        } else {
-          navigate("/hunter");
-        }
+        
+        // Force navigation with setTimeout to ensure state updates
+        setTimeout(() => {
+          console.log('DEMO: Executing navigation now...');
+          if (response.user.role === "SUPERADMIN") {
+            navigate("/superadmin");
+          } else if (response.user.role === "ADMIN") {
+            navigate("/admin");
+          } else if (response.user.role === "BIOLOGO" || response.user.role === "PROVINCIA") {
+            navigate("/fauna");
+          } else {
+            navigate("/hunter");
+          }
+        }, 100);
+      } else {
+        console.log('DEMO: Response success was false:', response);
       }
     } catch (error: any) {
       toast({
