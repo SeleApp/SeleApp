@@ -34,7 +34,7 @@ interface GroupQuotasManagerProps {
 const SPECIES_CONFIG = {
   roe_deer: {
     name: 'Capriolo',
-    categories: ['M0', 'F0', 'FA', 'M1', 'MA'],
+    categories: ['M1', 'M2', 'F1_FF', 'PF', 'PM'],
     color: 'bg-amber-100 text-amber-800'
   },
   red_deer: {
