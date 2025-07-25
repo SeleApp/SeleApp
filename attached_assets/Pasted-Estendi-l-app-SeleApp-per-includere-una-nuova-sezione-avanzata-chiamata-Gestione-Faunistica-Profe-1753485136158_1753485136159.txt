@@ -1,0 +1,93 @@
+Estendi l’app SeleApp per includere una nuova sezione avanzata chiamata **“Gestione Faunistica Professionale”**, visibile solo agli utenti con ruolo `BIOLOGO`, `TECNICO`, `PROVINCIA` o `SUPERADMIN`. Deve includere:
+
+📁 Backend — Node.js + Express + PostgreSQL (Drizzle ORM)
+
+1. Crea i modelli:
+
+🦌 `OsservazioneFaunistica`:
+- id
+- specie: enum [capriolo, cervo, daino, muflone, camoscio]
+- sesso: enum [M, F]
+- classe_eta: enum [J, Y, A]
+- data: data
+- zona_id: FK zona
+- localita: string
+- tipo: enum [avvistamento, fototrappola, prelievo]
+- numero_individui: int
+- gps_lat / gps_lon: decimal (nullable)
+- stato_corpo: enum [buono, medio, scarso] (opzionale)
+- stato_riproduttivo: enum [gravida, no, nd] (opzionale)
+- lunghezza_mandibola / lunghezza_palchi: int (mm, opzionali)
+- peso: float (kg, opzionale)
+- foto_url: string[] (array immagini opzionale)
+- validato: boolean
+- autore_id: FK utente
+
+📊 `QuotaPiano`:
+- id
+- specie, sesso, classe_eta
+- anno
+- zona_id: FK zona
+- quota_assegnata: int
+- quota_abbattuta: int (aggiornata dinamicamente)
+
+📂 `DocumentoGestione`:
+- id
+- titolo: string
+- tipo: enum [piano_annuale, report_biologico, cartografia, decreto]
+- file_url: string
+- caricatore_id: FK utente
+- anno: int
+
+2. Crea le API protette (JWT + ruolo):
+- GET/POST `/fauna/observations`: CRUD per osservazioni (solo BIOLOGO, TECNICO, PROVINCIA)
+- GET `/fauna/statistiche`: restituisce:
+  - Densità stimata per zona (osservazioni/km²)
+  - Sex ratio per zona/specie
+  - Struttura per età
+  - Quota utilizzata (% prelievi su quota)
+  - Trend annuo 3–5 anni
+  - Distribuzione su mappa (geoaggregata)
+
+- GET/POST `/fauna/quote`: gestione e visualizzazione quote di abbattimento
+- POST `/fauna/validazione`: validazione osservazioni e foto da parte del tecnico
+- GET `/fauna/documenti`: gestione documentazione (upload + scarica)
+
+📱 Frontend — React + Tailwind
+
+1. Crea nuova pagina `/tecnico/gestione-faunistica` visibile solo a utenti con ruolo BIOLOGO/PROVINCIA/TECNICO
+2. Struttura pagina in 4 tab:
+- **📊 Statistiche**:
+  - Grafici sex ratio, età, densità zona, prelievi vs quota (Recharts)
+  - Mappa Leaflet interattiva con marker osservazioni/abbattimenti
+  - Filtri per specie, sesso, anno, zona, tipo osservazione
+
+- **🦌 Nuova Osservazione / Prelievo**:
+  - Form dinamico con GPS, caricamento foto, dati biometrici
+  - Validazione automatica campi obbligatori
+  - Upload foto e preview
+
+- **📂 Documenti**:
+  - Elenco documenti caricati con tipo, anno, PDF scaricabili
+  - Upload con selezione tipo e anno
+
+- **📥 Importazioni / Esportazioni**:
+  - Upload file Excel `.xlsx` con osservazioni (template guidato)
+  - Esporta: Excel, CSV, PDF report completo (zona, specie, quote)
+
+🗂️ Aggiungi anche:
+- Template Excel preconfigurato (specie, sesso, età, data, tipo, n° individui, ecc.)
+- Icone semplificate per le classi d’età e specie
+- Autenticazione persistente per campo (PWA / modalità offline con sync)
+
+🔐 Sicurezza e permessi:
+- BIOLOGO/TECNICO possono inserire dati
+- PROVINCIA e SUPERADMIN possono modificare quote e generare report
+- Validazione obbligatoria per prelievi (inserimento completo)
+- Log di ogni modifica (audit log)
+
+💡 Bonus:
+- Sistema di notifiche per: quote in esaurimento, osservazioni non validate, fine stagione
+- Modalità “Mobile da campo” con interfaccia semplificata
+
+🎯 Obiettivo: uno strumento da campo e da ufficio per il monitoraggio completo delle popolazioni e la validazione dei dati raccolti sul territorio.

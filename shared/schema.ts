@@ -43,6 +43,8 @@ export const faunaAgeClassEnum = pgEnum('fauna_age_class', ['J', 'Y', 'A']); // 
 export const faunaObservationTypeEnum = pgEnum('fauna_observation_type', ['prelievo', 'avvistamento', 'fototrappola']);
 export const faunaReproductiveStatusEnum = pgEnum('fauna_reproductive_status', ['gravida', 'no', 'n.d.']);
 export const faunaBodyConditionEnum = pgEnum('fauna_body_condition', ['buono', 'medio', 'scarso']);
+// Enums per gestione documenti
+export const documentTypeEnum = pgEnum('document_type', ['piano_annuale', 'report_biologico', 'cartografia', 'decreto']);
 
 // Reserves table (multi-tenant support)
 export const reserves = pgTable("reserves", {
@@ -337,6 +339,9 @@ export const reservesRelations = relations(reserves, ({ many, one }) => ({
   contracts: many(contracts),
   supportTickets: many(supportTickets),
   billing: one(billing),
+  faunaObservations: many(osservazioniFaunistiche),
+  quotePiano: many(quotePiano),
+  documentiGestione: many(documentiGestione),
 }));
 
 export const reserveSettingsRelations = relations(reserveSettings, ({ one }) => ({
@@ -657,9 +662,15 @@ export type InsertMaterial = z.infer<typeof insertMaterialSchema>;
 export type MaterialAccessLog = typeof materialAccessLog.$inferSelect;
 export type InsertMaterialAccessLog = z.infer<typeof insertMaterialAccessLogSchema>;
 
-// Fauna Observation types
+// Fauna Management types
 export type FaunaObservation = typeof osservazioniFaunistiche.$inferSelect;
 export type InsertFaunaObservation = z.infer<typeof insertOsservazioneFaunisticaSchema>;
+
+export type QuotaPiano = typeof quotePiano.$inferSelect;
+export type InsertQuotaPiano = z.infer<typeof insertQuotaPianoSchema>;
+
+export type DocumentoGestione = typeof documentiGestione.$inferSelect;
+export type InsertDocumentoGestione = z.infer<typeof insertDocumentoGestioneSchema>;
 
 // Login schema
 export const loginSchema = z.object({
@@ -807,7 +818,7 @@ export type InsertCa17Uscita = z.infer<typeof insertCa17UscitaSchema>;
 export type Ca17Blocco = typeof ca17Blocchi.$inferSelect;
 export type InsertCa17Blocco = z.infer<typeof insertCa17BloccoSchema>;
 
-// Tabella Osservazioni Faunistiche (BIOLOGO/PROVINCIA)
+// Tabella Osservazioni Faunistiche (BIOLOGO/PROVINCIA) - Estesa
 export const osservazioniFaunistiche = pgTable("osservazioni_faunistiche", {
   id: serial("id").primaryKey(),
   specie: faunaSpeciesEnum("specie").notNull(),
@@ -816,29 +827,81 @@ export const osservazioniFaunistiche = pgTable("osservazioni_faunistiche", {
   data: timestamp("data").notNull(),
   zonaId: integer("zona_id").notNull().references(() => zones.id),
   sezione: text("sezione").notNull(), // es: pederobba, cison, ecc.
+  localita: text("localita"), // Località specifica dell'osservazione
   tipo: faunaObservationTypeEnum("tipo").notNull(),
+  numeroIndividui: integer("numero_individui").notNull().default(1), // Numero di individui osservati
   peso: decimal("peso", { precision: 5, scale: 2 }), // facoltativo
   statoRiproduttivo: faunaReproductiveStatusEnum("stato_riproduttivo").default('n.d.'),
   statoCorpo: faunaBodyConditionEnum("stato_corpo").default('medio'),
-  lunghezzaMandibola: decimal("lunghezza_mandibola", { precision: 5, scale: 2 }), // opzionale
-  lunghezzaPalchi: decimal("lunghezza_palchi", { precision: 5, scale: 2 }), // opzionale
+  lunghezzaMandibola: decimal("lunghezza_mandibola", { precision: 5, scale: 2 }), // opzionale (mm)
+  lunghezzaPalchi: decimal("lunghezza_palchi", { precision: 5, scale: 2 }), // opzionale (mm)
   gpsLat: decimal("gps_lat", { precision: 10, scale: 8 }), // opzionale
   gpsLon: decimal("gps_lon", { precision: 11, scale: 8 }), // opzionale
+  fotoUrl: text("foto_url").array(), // Array di URL delle foto
+  validato: boolean("validato").notNull().default(false), // Se l'osservazione è stata validata
   note: text("note"),
   biologo: text("biologo").notNull(), // nome del biologo/operatore che ha inserito il dato
+  autoreId: integer("autore_id").notNull().references(() => users.id), // FK utente che ha inserito
   reserveId: text("reserve_id").notNull().references(() => reserves.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
-// Schema per inserimento osservazione faunistica
+// Tabella Quote Piano di Gestione 
+export const quotePiano = pgTable("quote_piano", {
+  id: serial("id").primaryKey(),
+  specie: faunaSpeciesEnum("specie").notNull(),
+  sesso: faunaSexEnum("sesso").notNull(),
+  classeEta: faunaAgeClassEnum("classe_eta").notNull(),
+  anno: integer("anno").notNull(), // Anno di riferimento
+  zonaId: integer("zona_id").notNull().references(() => zones.id),
+  quotaAssegnata: integer("quota_assegnata").notNull().default(0), // Quota assegnata per l'anno
+  quotaAbbattuta: integer("quota_abbattuta").notNull().default(0), // Quota utilizzata (aggiornato dinamicamente)
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Tabella Documenti di Gestione
+export const documentiGestione = pgTable("documenti_gestione", {
+  id: serial("id").primaryKey(),
+  titolo: text("titolo").notNull(),
+  tipo: documentTypeEnum("tipo").notNull(),
+  fileUrl: text("file_url").notNull(), // URL del file caricato
+  anno: integer("anno").notNull(), // Anno di riferimento
+  caricatoreId: integer("caricatore_id").notNull().references(() => users.id), // Chi ha caricato il documento
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Schema per inserimento osservazione faunistica - Aggiornato
 export const insertOsservazioneFaunisticaSchema = createInsertSchema(osservazioniFaunistiche).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+}).extend({
+  fotoUrl: z.string().array().optional(),
+  numeroIndividui: z.number().min(1).default(1),
+  localita: z.string().optional(),
+  validato: z.boolean().default(false),
+});
+
+// Schema per inserimento quota piano
+export const insertQuotaPianoSchema = createInsertSchema(quotePiano).omit({
   id: true,
   createdAt: true,
   updatedAt: true
 });
 
-// Relazioni per osservazioni faunistiche
+// Schema per inserimento documento gestione
+export const insertDocumentoGestioneSchema = createInsertSchema(documentiGestione).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Relazioni per osservazioni faunistiche - Aggiornate
 export const osservazioniFaunisticheRelations = relations(osservazioniFaunistiche, ({ one }) => ({
   zona: one(zones, {
     fields: [osservazioniFaunistiche.zonaId],
@@ -846,6 +909,34 @@ export const osservazioniFaunisticheRelations = relations(osservazioniFaunistich
   }),
   reserve: one(reserves, {
     fields: [osservazioniFaunistiche.reserveId],
+    references: [reserves.id],
+  }),
+  autore: one(users, {
+    fields: [osservazioniFaunistiche.autoreId],
+    references: [users.id],
+  }),
+}));
+
+// Relazioni per quote piano
+export const quotePianoRelations = relations(quotePiano, ({ one }) => ({
+  zona: one(zones, {
+    fields: [quotePiano.zonaId],
+    references: [zones.id],
+  }),
+  reserve: one(reserves, {
+    fields: [quotePiano.reserveId],
+    references: [reserves.id],
+  }),
+}));
+
+// Relazioni per documenti gestione
+export const documentiGestioneRelations = relations(documentiGestione, ({ one }) => ({
+  caricatore: one(users, {
+    fields: [documentiGestione.caricatoreId],
+    references: [users.id],
+  }),
+  reserve: one(reserves, {
+    fields: [documentiGestione.reserveId],
     references: [reserves.id],
   }),
 }));

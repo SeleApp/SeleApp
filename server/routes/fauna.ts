@@ -2,7 +2,17 @@ import { Router } from "express";
 import { z } from "zod";
 import { authenticateToken, requireRole, type AuthRequest } from "../middleware/auth";
 import { storage } from "../storage";
-import { insertOsservazioneFaunisticaSchema, type OsservazioneFaunistica, type InsertOsservazioneFaunistica } from "../../shared/schema";
+import { 
+  insertOsservazioneFaunisticaSchema, 
+  insertQuotaPianoSchema,
+  insertDocumentoGestioneSchema,
+  type OsservazioneFaunistica, 
+  type InsertOsservazioneFaunistica,
+  type QuotaPiano,
+  type InsertQuotaPiano,
+  type DocumentoGestione,
+  type InsertDocumentoGestione
+} from "../../shared/schema";
 
 const router = Router();
 
@@ -121,6 +131,176 @@ router.delete("/:id", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA']), 
     console.error("Error deleting fauna observation:", error);
     res.status(500).json({ 
       message: "Errore nell'eliminazione dell'osservazione",
+      error: error.message 
+    });
+  }
+});
+
+// GET /api/fauna/quote - Gestione quote piano di gestione
+router.get("/quote", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA', 'SUPERADMIN']), async (req: AuthRequest, res) => {
+  try {
+    const reserveId = req.user?.reserveId || '';
+    const quotes = await storage.getQuotePiano(reserveId);
+    res.json(quotes);
+  } catch (error: any) {
+    console.error("Error fetching quota piano:", error);
+    res.status(500).json({ 
+      message: "Errore nel recupero delle quote piano",
+      error: error.message 
+    });
+  }
+});
+
+// POST /api/fauna/quote - Crea/aggiorna quota piano
+router.post("/quote", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA', 'SUPERADMIN']), async (req: AuthRequest, res) => {
+  try {
+    const validatedData = insertQuotaPianoSchema.parse(req.body);
+    const quotaData = {
+      ...validatedData,
+      reserveId: req.user?.reserveId || validatedData.reserveId
+    };
+    
+    const newQuota = await storage.createQuotaPiano(quotaData);
+    console.log('Quota piano created successfully:', newQuota.id);
+    res.status(201).json(newQuota);
+  } catch (error: any) {
+    console.error("Error creating quota piano:", error);
+    res.status(500).json({ 
+      message: "Errore nella creazione della quota piano",
+      error: error.message 
+    });
+  }
+});
+
+// POST /api/fauna/validazione - Valida osservazioni faunistiche
+router.post("/validazione", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA']), async (req: AuthRequest, res) => {
+  try {
+    const { observationId, validato } = req.body;
+    
+    if (!observationId || typeof validato !== 'boolean') {
+      return res.status(400).json({ message: "ID osservazione e stato validazione richiesti" });
+    }
+    
+    const updatedObservation = await storage.validateFaunaObservation(observationId, validato);
+    
+    console.log('Fauna observation validation updated:', observationId, validato);
+    res.json(updatedObservation);
+  } catch (error: any) {
+    console.error("Error validating fauna observation:", error);
+    res.status(500).json({ 
+      message: "Errore nella validazione dell'osservazione",
+      error: error.message 
+    });
+  }
+});
+
+// GET /api/fauna/documenti - Lista documenti di gestione
+router.get("/documenti", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA', 'SUPERADMIN']), async (req: AuthRequest, res) => {
+  try {
+    const reserveId = req.user?.reserveId || '';
+    const documents = await storage.getDocumentiGestione(reserveId);
+    res.json(documents);
+  } catch (error: any) {
+    console.error("Error fetching documenti gestione:", error);
+    res.status(500).json({ 
+      message: "Errore nel recupero dei documenti",
+      error: error.message 
+    });
+  }
+});
+
+// POST /api/fauna/documenti - Upload documento gestione
+router.post("/documenti", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA', 'SUPERADMIN']), async (req: AuthRequest, res) => {
+  try {
+    const validatedData = insertDocumentoGestioneSchema.parse(req.body);
+    const documentData = {
+      ...validatedData,
+      caricatoreId: req.user?.id!,
+      reserveId: req.user?.reserveId || validatedData.reserveId
+    };
+    
+    const newDocument = await storage.createDocumentoGestione(documentData);
+    console.log('Document created successfully:', newDocument.id);
+    res.status(201).json(newDocument);
+  } catch (error: any) {
+    console.error("Error creating document:", error);
+    res.status(500).json({ 
+      message: "Errore nella creazione del documento",
+      error: error.message 
+    });
+  }
+});
+
+// POST /api/fauna/import-excel - Import osservazioni da file Excel
+router.post("/import-excel", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA']), async (req: AuthRequest, res) => {
+  try {
+    const { excelData } = req.body; // Array di osservazioni dal file Excel
+    
+    if (!Array.isArray(excelData)) {
+      return res.status(400).json({ message: "Dati Excel non validi" });
+    }
+    
+    const results = [];
+    const reserveId = req.user?.reserveId || '';
+    
+    for (const row of excelData) {
+      try {
+        const validatedData = insertOsservazioneFaunisticaSchema.parse({
+          ...row,
+          biologo: `${req.user?.firstName} ${req.user?.lastName}`,
+          reserveId: reserveId,
+          autoreId: req.user?.id
+        });
+        
+        const observation = await storage.createFaunaObservation(validatedData);
+        results.push({ success: true, id: observation.id });
+      } catch (error: any) {
+        results.push({ success: false, error: error.message, row });
+      }
+    }
+    
+    console.log(`Excel import completed: ${results.filter(r => r.success).length}/${results.length} successful`);
+    res.json({ 
+      message: "Import completato",
+      results,
+      successful: results.filter(r => r.success).length,
+      total: results.length
+    });
+  } catch (error: any) {
+    console.error("Error importing Excel data:", error);
+    res.status(500).json({ 
+      message: "Errore nell'importazione dei dati Excel",
+      error: error.message 
+    });
+  }
+});
+
+// GET /api/fauna/export - Export dati per ricerca (Excel, CSV, PDF)
+router.get("/export", authenticateToken, requireRole(['BIOLOGO', 'PROVINCIA']), async (req: AuthRequest, res) => {
+  try {
+    const { format = 'excel', dataInizio, dataFine, specie } = req.query;
+    
+    const filters = {
+      dataInizio: dataInizio as string,
+      dataFine: dataFine as string,
+      specie: specie as string
+    };
+    
+    const reserveId = req.user?.reserveId || '';
+    const observations = await storage.getFaunaObservations(filters, reserveId);
+    
+    // Qui si implementerebbe la logica di export in base al formato
+    // Per ora restituiamo i dati grezzi
+    res.json({
+      format,
+      data: observations,
+      count: observations.length,
+      filters: filters
+    });
+  } catch (error: any) {
+    console.error("Error exporting fauna data:", error);
+    res.status(500).json({ 
+      message: "Errore nell'export dei dati",
       error: error.message 
     });
   }

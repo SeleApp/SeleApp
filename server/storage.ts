@@ -5,7 +5,7 @@
 import { 
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves, groupQuotas,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
-  lotteries, lotteryParticipations, reserveRules, osservazioniFaunistiche,
+  lotteries, lotteryParticipations, reserveRules, osservazioniFaunistiche, quotePiano, documentiGestione,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
@@ -14,7 +14,8 @@ import {
   type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
   type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation,
   type ReserveRule, type InsertReserveRule, type GroupQuota, type InsertGroupQuota,
-  type OsservazioneFaunistica, type InsertOsservazioneFaunistica
+  type OsservazioneFaunistica, type InsertOsservazioneFaunistica, type QuotaPiano, type InsertQuotaPiano,
+  type DocumentoGestione, type InsertDocumentoGestione
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, isNotNull } from "drizzle-orm";
@@ -176,6 +177,7 @@ export interface IStorage {
   getFaunaObservations(filters: any, reserveId?: string): Promise<OsservazioneFaunistica[]>;
   createFaunaObservation(data: InsertOsservazioneFaunistica): Promise<OsservazioneFaunistica>;
   deleteFaunaObservation(id: number, reserveId?: string): Promise<void>;
+  validateFaunaObservation(id: number, validato: boolean): Promise<OsservazioneFaunistica>;
   getFaunaStatistics(reserveId?: string): Promise<{
     densitaPerZona: Record<string, number>;
     sexRatioPerSpecie: Record<string, { M: number; F: number }>;
@@ -185,6 +187,14 @@ export interface IStorage {
     mappaDistribuzione: Array<{ lat: number; lon: number; specie: string; count: number }>;
   }>;
   exportFaunaToExcel(filters: any, reserveId?: string): Promise<Buffer>;
+  
+  // Quota Piano Management
+  getQuotePiano(reserveId: string): Promise<any[]>;
+  createQuotaPiano(data: any): Promise<any>;
+  
+  // Document Management
+  getDocumentiGestione(reserveId: string): Promise<any[]>;
+  createDocumentoGestione(data: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2635,6 +2645,69 @@ export class DatabaseStorage implements IStorage {
     // In produzione si userebbe librerie come 'exceljs' o 'xlsx'
     const mockData = `ID,Specie,Sesso,Classe Età,Data,Zona,Tipo,Peso,Biologo\n1,capriolo,M,A,2025-01-01,1,avvistamento,25.5,Dr. Rossi\n`;
     return Buffer.from(mockData, 'utf-8');
+  }
+
+  // Validazione delle osservazioni faunistiche
+  async validateFaunaObservation(id: number, validato: boolean): Promise<OsservazioneFaunistica> {
+    console.log(`Updating validation status for observation ${id}: ${validato}`);
+    
+    const [updatedObservation] = await db
+      .update(osservazioniFaunistiche)
+      .set({ validato })
+      .where(eq(osservazioniFaunistiche.id, id))
+      .returning();
+    
+    if (!updatedObservation) {
+      throw new Error(`Observation with ID ${id} not found`);
+    }
+    
+    return updatedObservation;
+  }
+
+  // Gestione Quote Piano
+  async getQuotePiano(reserveId: string): Promise<any[]> {
+    console.log('Fetching quota piano for reserve:', reserveId);
+    
+    try {
+      const quotas = await db.select().from(quotePiano)
+        .where(eq(quotePiano.reserveId, reserveId));
+      
+      console.log(`Found ${quotas.length} quota piano entries`);
+      return quotas;
+    } catch (error) {
+      console.error('Error fetching quota piano:', error);
+      return [];
+    }
+  }
+
+  async createQuotaPiano(data: any): Promise<any> {
+    console.log('Creating new quota piano:', data);
+    
+    const [newQuota] = await db.insert(quotePiano).values(data).returning();
+    return newQuota;
+  }
+
+  // Gestione Documenti
+  async getDocumentiGestione(reserveId: string): Promise<any[]> {
+    console.log('Fetching documents for reserve:', reserveId);
+    
+    try {
+      const documents = await db.select().from(documentiGestione)
+        .where(eq(documentiGestione.reserveId, reserveId));
+      
+      console.log(`Found ${documents.length} documents`);
+      return documents;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      return [];
+    }
+  }
+
+  async createDocumentoGestione(data: any): Promise<any> {
+    console.log('Creating new document:', data);
+    
+    const [newDocument] = await db.insert(documentiGestione).values(data).returning();
+    return newDocument;
   }
 }
 

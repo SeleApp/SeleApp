@@ -98,6 +98,24 @@ export default function DashboardFauna() {
     }
   });
 
+  // Query per quote piano di gestione
+  const { data: quotePiano = [] } = useQuery({
+    queryKey: ['/api/fauna/quote'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/fauna/quote', { method: 'GET' });
+      return await response.json();
+    }
+  });
+
+  // Query per documenti di gestione
+  const { data: documents = [] } = useQuery({
+    queryKey: ['/api/fauna/documenti'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/fauna/documenti', { method: 'GET' });
+      return await response.json();
+    }
+  });
+
   // Mutation per creare nuova osservazione
   const createObservationMutation = useMutation({
     mutationFn: async (data: NewObservationData) => {
@@ -249,13 +267,25 @@ export default function DashboardFauna() {
         </CardContent>
       </Card>
 
-      {/* Dashboard Tabs */}
-      <Tabs defaultValue="observations" className="space-y-4">
+      {/* Gestione Faunistica Professionale - 4 Sezioni */}
+      <Tabs defaultValue="statistics" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="observations">Osservazioni</TabsTrigger>
-          <TabsTrigger value="statistics">Statistiche</TabsTrigger>
-          <TabsTrigger value="charts">Grafici</TabsTrigger>
-          <TabsTrigger value="map">Mappa</TabsTrigger>
+          <TabsTrigger value="statistics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Statistiche
+          </TabsTrigger>
+          <TabsTrigger value="observations" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Osservazioni
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex items-center gap-2">
+            <Camera className="h-4 w-4" />
+            Documenti
+          </TabsTrigger>
+          <TabsTrigger value="import-export" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Import/Export
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab Osservazioni */}
@@ -312,9 +342,9 @@ export default function DashboardFauna() {
           </Card>
         </TabsContent>
 
-        {/* Tab Statistiche */}
+        {/* Tab Statistiche Professionali */}
         <TabsContent value="statistics" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Densità per Zona</CardTitle>
@@ -365,71 +395,134 @@ export default function DashboardFauna() {
           </div>
         </TabsContent>
 
-        {/* Tab Grafici */}
-        <TabsContent value="charts" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Sex Ratio */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Sex Ratio per Specie</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={sexRatioData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="specie" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="maschi" fill="#8884d8" name="Maschi" />
-                    <Bar dataKey="femmine" fill="#82ca9d" name="Femmine" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Distribuzione Età */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuzione Classi di Età</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={ageDistributionData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="specie" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="giovani" fill="#ffc658" name="Giovani (J)" />
-                    <Bar dataKey="yearling" fill="#ff7300" name="Yearling (Y)" />
-                    <Bar dataKey="adulti" fill="#8dd1e1" name="Adulti (A)" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Tab Mappa */}
-        <TabsContent value="map" className="space-y-4">
+        {/* Tab Documenti */}
+        <TabsContent value="documents" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Distribuzione Geografica
+                <Camera className="h-5 w-5" />
+                Documenti di Gestione ({documents.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <MapPin className="h-12 w-12 mx-auto mb-2" />
-                  <p>Mappa interattiva con Leaflet</p>
-                  <p className="text-sm">Visualizzazione delle osservazioni geolocalizzate</p>
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Carica Documento
+                  </Button>
                 </div>
+                
+                {documents.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nessun documento caricato</p>
+                    <p className="text-sm">Inizia caricando il primo documento di gestione</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {documents.map((doc: any) => (
+                      <Card key={doc.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Camera className="h-8 w-8 text-green-600 mt-1" />
+                            <div className="flex-1">
+                              <h4 className="font-medium truncate">{doc.titolo}</h4>
+                              <p className="text-sm text-gray-600">{doc.tipo}</p>
+                              <p className="text-sm text-gray-500">Anno: {doc.anno}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Tab Import/Export */}
+        <TabsContent value="import-export" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Import Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5 rotate-180" />
+                  Import Dati
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="excel-import">Import da Excel</Label>
+                  <Input 
+                    id="excel-import"
+                    type="file" 
+                    accept=".xlsx,.xls"
+                    className="mt-2"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">
+                    Formato supportato: Excel (.xlsx, .xls)
+                  </p>
+                </div>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Download className="h-4 w-4 mr-2 rotate-180" />
+                  Importa Osservazioni
+                </Button>
+                <Button variant="outline" className="w-full">
+                  Scarica Template Excel
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Export Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5" />
+                  Export Dati
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <Label>Formato Export</Label>
+                    <Select defaultValue="excel">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                        <SelectItem value="csv">CSV</SelectItem>
+                        <SelectItem value="pdf">PDF Report</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Periodo</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Input type="date" placeholder="Da..." />
+                      <Input type="date" placeholder="A..." />
+                    </div>
+                  </div>
+                </div>
+                
+                <Button className="w-full bg-green-600 hover:bg-green-700">
+                  <Download className="h-4 w-4 mr-2" />
+                  Esporta Dati
+                </Button>
+                
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>• Export completo di tutte le osservazioni</p>
+                  <p>• Dati biometrici inclusi</p>
+                  <p>• Coordinate GPS quando disponibili</p>
+                  <p>• Formato per analisi scientifiche</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
