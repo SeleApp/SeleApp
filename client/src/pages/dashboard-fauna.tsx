@@ -57,9 +57,9 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
 export default function DashboardFauna() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filters, setFilters] = useState({
-    specie: '',
-    sesso: '',
-    tipo: '',
+    specie: 'all',
+    sesso: 'all',
+    tipo: 'all',
     sezione: '',
     dataInizio: '',
     dataFine: ''
@@ -82,25 +82,30 @@ export default function DashboardFauna() {
     queryFn: async () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+        if (value && value !== 'all') params.append(key, value);
       });
-      return await apiRequest(`/api/fauna?${params.toString()}`, { method: 'GET' });
+      const response = await apiRequest(`/api/fauna?${params.toString()}`, { method: 'GET' });
+      return await response.json();
     }
   });
 
   // Query per statistiche faunistiche
   const { data: statistics = {}, isLoading: loadingStats } = useQuery({
     queryKey: ['/api/fauna/statistiche'],
-    queryFn: async () => await apiRequest('/api/fauna/statistiche', { method: 'GET' })
+    queryFn: async () => {
+      const response = await apiRequest('/api/fauna/statistiche', { method: 'GET' });
+      return await response.json();
+    }
   });
 
   // Mutation per creare nuova osservazione
   const createObservationMutation = useMutation({
     mutationFn: async (data: NewObservationData) => {
-      return await apiRequest('/api/fauna', {
+      const response = await apiRequest('/api/fauna', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/fauna'] });
@@ -182,7 +187,7 @@ export default function DashboardFauna() {
                   <SelectValue placeholder="Tutte" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tutte le specie</SelectItem>
+                  <SelectItem value="all">Tutte le specie</SelectItem>
                   {Object.entries(SPECIES_CONFIG).map(([key, config]) => (
                     <SelectItem key={key} value={key}>{config.name}</SelectItem>
                   ))}
@@ -196,7 +201,7 @@ export default function DashboardFauna() {
                   <SelectValue placeholder="Tutti" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tutti</SelectItem>
+                  <SelectItem value="all">Tutti</SelectItem>
                   <SelectItem value="M">Maschio</SelectItem>
                   <SelectItem value="F">Femmina</SelectItem>
                 </SelectContent>
@@ -209,7 +214,7 @@ export default function DashboardFauna() {
                   <SelectValue placeholder="Tutti" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tutti i tipi</SelectItem>
+                  <SelectItem value="all">Tutti i tipi</SelectItem>
                   <SelectItem value="prelievo">Prelievo</SelectItem>
                   <SelectItem value="avvistamento">Avvistamento</SelectItem>
                   <SelectItem value="fototrappola">Fototrappola</SelectItem>
