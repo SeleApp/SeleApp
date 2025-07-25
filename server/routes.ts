@@ -97,6 +97,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const faunaRoutes = await import("./routes/fauna");
   app.use("/api/fauna", faunaRoutes.default);
   
+  // Reservation locks routes (prevenzione overbooking)
+  const reservationLocksRoutes = await import("./routes/reservation-locks");
+  app.use("/api/reservation-locks", reservationLocksRoutes.default);
+  
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);

@@ -6,6 +6,7 @@ import {
   users, zones, wildlifeQuotas, regionalQuotas, reservations, huntReports, reserves, groupQuotas,
   reserveSettings, contracts, supportTickets, billing, materials, materialAccessLog,
   lotteries, lotteryParticipations, reserveRules, osservazioniFaunistiche, quotePiano, documentiGestione,
+  reservationLocks,
   type User, type InsertUser, type Zone, type InsertZone, type Reserve, type InsertReserve,
   type WildlifeQuota, type InsertWildlifeQuota, type RegionalQuota, type InsertRegionalQuota,
   type Reservation, type InsertReservation, type HuntReport, type InsertHuntReport,
@@ -14,6 +15,7 @@ import {
   type Material, type InsertMaterial, type MaterialAccessLog, type InsertMaterialAccessLog,
   type Lottery, type InsertLottery, type LotteryParticipation, type InsertLotteryParticipation,
   type ReserveRule, type InsertReserveRule, type GroupQuota, type InsertGroupQuota,
+  type ReservationLock, type InsertReservationLock,
   type OsservazioneFaunistica, type InsertOsservazioneFaunistica, type QuotaPiano, type InsertQuotaPiano,
   type DocumentoGestione, type InsertDocumentoGestione
 } from "@shared/schema";
@@ -195,6 +197,13 @@ export interface IStorage {
   // Document Management
   getDocumentiGestione(reserveId: string): Promise<any[]>;
   createDocumentoGestione(data: any): Promise<any>;
+  
+  // Reservation Locks Management (prevenzione overbooking)
+  createReservationLock(lock: InsertReservationLock): Promise<ReservationLock>;
+  checkSpeciesAvailability(userId: number, reserveId: string, species: string, category: string, huntDate: string, timeSlot: string, sessionId: string): Promise<{ available: boolean; message?: string }>;
+  releaseReservationLock(sessionId: string): Promise<void>;
+  cleanupExpiredLocks(): Promise<void>;
+  consumeReservationLock(sessionId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2708,6 +2717,148 @@ export class DatabaseStorage implements IStorage {
     
     const [newDocument] = await db.insert(documentiGestione).values(data).returning();
     return newDocument;
+  }
+
+  // Reservation Locks Management (prevenzione overbooking)
+  async createReservationLock(lock: InsertReservationLock): Promise<ReservationLock> {
+    // Pulisci i lock scaduti prima di crearne uno nuovo
+    await this.cleanupExpiredLocks();
+    
+    const [newLock] = await db.insert(reservationLocks).values({
+      ...lock,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minuti da ora
+    }).returning();
+    
+    return newLock;
+  }
+
+  async checkSpeciesAvailability(
+    userId: number, 
+    reserveId: string, 
+    species: string,
+    category: string, 
+    huntDate: string, 
+    timeSlot: string,
+    sessionId: string
+  ): Promise<{ available: boolean; message?: string }> {
+    try {
+      // Pulisci i lock scaduti
+      await this.cleanupExpiredLocks();
+      
+      // Ottieni informazioni sulla riserva
+      const reserve = await this.getReserve(reserveId);
+      if (!reserve) {
+        return { available: false, message: "Riserva non trovata" };
+      }
+
+      // Per riserve "zones_groups", controlla disponibilità nel gruppo del cacciatore
+      if (reserve.managementType === 'zones_groups') {
+        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        if (!user || !user.hunterGroup) {
+          return { available: false, message: "Gruppo cacciatore non definito" };
+        }
+
+        // Controlla quota del gruppo
+        const categoryFilter = species === 'roe_deer' 
+          ? eq(groupQuotas.roeDeerCategory, category as any)
+          : eq(groupQuotas.redDeerCategory, category as any);
+
+        const [groupQuota] = await db
+          .select()
+          .from(groupQuotas)
+          .where(
+            and(
+              eq(groupQuotas.reserveId, reserveId),
+              eq(groupQuotas.hunterGroup, user.hunterGroup),
+              eq(groupQuotas.species, species as any),
+              categoryFilter
+            )
+          );
+
+        if (!groupQuota) {
+          return { available: false, message: "Quota non configurata per questa categoria" };
+        }
+
+        const available = groupQuota.totalQuota - groupQuota.harvested;
+        if (available <= 0) {
+          return { available: false, message: "Quota esaurita per questa categoria nel tuo gruppo" };
+        }
+
+        // Controlla lock attivi per la stessa categoria/data/orario (escludendo la propria sessione)
+        const activeLocks = await db
+          .select()
+          .from(reservationLocks)
+          .where(
+            and(
+              eq(reservationLocks.reserveId, reserveId),
+              eq(reservationLocks.species, species as any),
+              species === 'roe_deer' 
+                ? eq(reservationLocks.roeDeerCategory, category as any)
+                : eq(reservationLocks.redDeerCategory, category as any),
+              eq(reservationLocks.huntDate, huntDate),
+              eq(reservationLocks.timeSlot, timeSlot as any),
+              eq(reservationLocks.status, 'active'),
+              sql`${reservationLocks.sessionId} != ${sessionId}`
+            )
+          );
+
+        const locksCount = activeLocks.length;
+        if (available - locksCount <= 0) {
+          return { 
+            available: false, 
+            message: `Capo temporaneamente riservato da altro cacciatore. Rimanenti: ${Math.max(0, available - locksCount)}` 
+          };
+        }
+
+        return { 
+          available: true, 
+          message: `Capo disponibile. Rimanenti dopo prenotazione: ${available - locksCount - 1}` 
+        };
+      }
+
+      // Per altre tipologie di riserva, logica standard
+      return { available: true, message: "Capo disponibile" };
+      
+    } catch (error) {
+      console.error('Error checking species availability:', error);
+      return { available: false, message: "Errore durante la verifica disponibilità" };
+    }
+  }
+
+  async releaseReservationLock(sessionId: string): Promise<void> {
+    await db
+      .update(reservationLocks)
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(reservationLocks.sessionId, sessionId),
+          eq(reservationLocks.status, 'active')
+        )
+      );
+  }
+
+  async cleanupExpiredLocks(): Promise<void> {
+    await db
+      .update(reservationLocks)
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(reservationLocks.status, 'active'),
+          sql`${reservationLocks.expiresAt} < NOW()`
+        )
+      );
+  }
+
+  async consumeReservationLock(sessionId: string): Promise<void> {
+    await db
+      .update(reservationLocks)
+      .set({ status: 'consumed' })
+      .where(
+        and(
+          eq(reservationLocks.sessionId, sessionId),
+          eq(reservationLocks.status, 'active')
+        )
+      );
   }
 }
 

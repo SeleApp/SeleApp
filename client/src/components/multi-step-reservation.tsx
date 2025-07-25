@@ -24,6 +24,9 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   const [step, setStep] = useState(1);
   const [isCisonReserve, setIsCisonReserve] = useState(false);
   const totalSteps = isCisonReserve ? 3 : 5; // Cison: 3 step (Capo->Zona->Orario), Altri: 5 step normali
+  const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const [activeLock, setActiveLock] = useState<any>(null);
+  const [lockTimer, setLockTimer] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -70,8 +73,132 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = form;
   const selectedSpecies = watch("targetSpecies");
 
+  // Funzione per creare un lock temporaneo per specie/categoria selezionata
+  const createSpeciesLock = async (species: string, category: string, huntDate: string, timeSlot: string) => {
+    try {
+      const lockData: any = {
+        species,
+        huntDate,
+        timeSlot,
+        sessionId
+      };
+
+      // Aggiungi la categoria corretta in base alla specie
+      if (species === 'roe_deer') {
+        lockData.roeDeerCategory = category;
+      } else if (species === 'red_deer') {
+        lockData.redDeerCategory = category;
+      } else if (species === 'fallow_deer') {
+        lockData.fallowDeerCategory = category;
+      } else if (species === 'mouflon') {
+        lockData.mouflonCategory = category;
+      } else if (species === 'chamois') {
+        lockData.chamoisCategory = category;
+      }
+
+      const response: any = await apiRequest("/api/reservation-locks/create-lock", {
+        method: "POST",
+        body: lockData
+      });
+
+      if (response.success) {
+        setActiveLock({
+          lockId: response.lockId,
+          species,
+          category,
+          expiresAt: response.expiresAt
+        });
+
+        // Imposta timer per avvisare dell'imminente scadenza
+        const timer = setTimeout(() => {
+          toast({
+            title: "Prenotazione in scadenza",
+            description: "Il capo selezionato verrà rilasciato tra 2 minuti. Completa la prenotazione.",
+            variant: "destructive"
+          });
+        }, 8 * 60 * 1000); // Avviso a 8 minuti = 2 minuti prima della scadenza
+
+        setLockTimer(timer);
+
+        toast({
+          title: "Capo riservato",
+          description: response.message || "Capo temporaneamente riservato per 10 minuti",
+          variant: "default"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Errore prenotazione",
+        description: error.message || "Impossibile riservare il capo selezionato",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Funzione per rilasciare il lock temporaneo
+  const releaseActiveLock = async () => {
+    if (!activeLock) return;
+
+    try {
+      await apiRequest("/api/reservation-locks/release-lock", {
+        method: "POST",
+        body: { sessionId }
+      });
+
+      setActiveLock(null);
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        setLockTimer(null);
+      }
+    } catch (error) {
+      console.error("Errore rilascio lock:", error);
+    }
+  };
+
+  // Funzione per consumare il lock (conferma prenotazione)
+  const consumeActiveLock = async () => {
+    if (!activeLock) return;
+
+    try {
+      await apiRequest("/api/reservation-locks/consume-lock", {
+        method: "POST",
+        body: { sessionId }
+      });
+
+      setActiveLock(null);
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        setLockTimer(null);
+      }
+    } catch (error) {
+      console.error("Errore consumo lock:", error);
+    }
+  };
+
+  // Cleanup quando il componente si chiude
+  React.useEffect(() => {
+    return () => {
+      if (activeLock) {
+        releaseActiveLock();
+      }
+    };
+  }, [activeLock]);
+
+  // Rilascia lock quando modal si chiude
+  React.useEffect(() => {
+    if (!open && activeLock) {
+      releaseActiveLock();
+    }
+  }, [open]);
+
   const createReservationMutation = useMutation({
     mutationFn: async (data: CreateReservationInput) => {
+      // Consuma il lock prima di creare la prenotazione
+      if (activeLock) {
+        await consumeActiveLock();
+      }
+      
       console.log("🚀 Sending reservation data:", data);
       const response = await apiRequest("/api/reservations", { method: "POST", body: data });
       return response.json();
@@ -163,7 +290,28 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
     onOpenChange(false);
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    // Per Cison: quando si procede dallo step 1 (selezione capo), attiva il lock
+    if (isCisonReserve && step === 1) {
+      const species = watch("targetSpecies");
+      const roeDeerCategory = watch("targetRoeDeerCategory");
+      const redDeerCategory = watch("targetRedDeerCategory");
+      const huntDate = watch("huntDate");
+      const timeSlot = watch("timeSlot") || "morning"; // Default per il lock
+      
+      if (species && (roeDeerCategory || redDeerCategory)) {
+        try {
+          const category = species === "roe_deer" ? roeDeerCategory : redDeerCategory;
+          if (category) {
+            await createSpeciesLock(species, category, huntDate, timeSlot);
+          }
+        } catch (error) {
+          // Se il lock fallisce, non procedere al passo successivo
+          return;
+        }
+      }
+    }
+    
     if (step < totalSteps) setStep(step + 1);
   };
 
@@ -238,6 +386,21 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
           <DialogDescription className="text-lg text-gray-600">
             Passo {step} di {totalSteps}: {getStepTitle()}
           </DialogDescription>
+          
+          {/* Indicatore Lock Attivo */}
+          {activeLock && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+              <div className="flex items-center text-green-800">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                <span className="font-medium">
+                  Capo riservato: {activeLock.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} {activeLock.category}
+                </span>
+                <span className="ml-2 text-sm">
+                  (Scade in 10 minuti)
+                </span>
+              </div>
+            </div>
+          )}
         </DialogHeader>
 
         {/* Progress Bar */}
@@ -317,12 +480,12 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     </div>
                   </div>
 
-                  {/* Categorie Capriolo */}
+                  {/* Categorie Capriolo - CA TV corrette per Cison */}
                   {selectedSpecies === "roe_deer" && (
                     <div className="space-y-4">
                       <h4 className="text-xl font-semibold text-gray-900 text-center">Categoria Capriolo</h4>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {["M0", "F0", "FA", "M1", "MA"].map((category) => (
+                        {["PM", "PF", "M1", "M2", "F1_FF"].map((category) => (
                           <button
                             key={category}
                             type="button"

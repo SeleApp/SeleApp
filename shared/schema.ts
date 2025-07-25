@@ -46,6 +46,9 @@ export const faunaBodyConditionEnum = pgEnum('fauna_body_condition', ['buono', '
 // Enums per gestione documenti
 export const documentTypeEnum = pgEnum('document_type', ['piano_annuale', 'report_biologico', 'cartografia', 'decreto']);
 
+// Enum per stato dei lock di prenotazione
+export const lockStatusEnum = pgEnum('lock_status', ['active', 'expired', 'consumed']);
+
 // Reserves table (multi-tenant support)
 export const reserves = pgTable("reserves", {
   id: text("id").primaryKey(), // UUID
@@ -268,8 +271,36 @@ export const insertGroupQuotaSchema = createInsertSchema(groupQuotas).omit({
   updatedAt: true,
 });
 
+// Tabella per lock temporanei delle prenotazioni (prevenzione overbooking)
+export const reservationLocks = pgTable("reservation_locks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  reserveId: text("reserve_id").notNull().references(() => reserves.id),
+  species: speciesEnum("species").notNull(),
+  roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
+  redDeerCategory: redDeerCategoryEnum("red_deer_category"),
+  fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"), 
+  mouflonCategory: mouflonCategoryEnum("mouflon_category"),
+  chamoisCategory: chamoisCategoryEnum("chamois_category"),
+  zoneId: integer("zone_id"), // Zona selezionata per la prenotazione
+  huntDate: text("hunt_date").notNull(), // Data della caccia in formato YYYY-MM-DD
+  timeSlot: timeSlotEnum("time_slot").notNull(),
+  status: lockStatusEnum("status").notNull().default('active'),
+  sessionId: text("session_id").notNull(), // Identificativo sessione browser
+  lockedAt: timestamp("locked_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(), // Auto-scadenza dopo 10 minuti
+});
+
+export const insertReservationLockSchema = createInsertSchema(reservationLocks).omit({
+  id: true,
+  lockedAt: true,
+});
+
 export type GroupQuota = typeof groupQuotas.$inferSelect;
 export type InsertGroupQuota = z.infer<typeof insertGroupQuotaSchema>;
+
+export type ReservationLock = typeof reservationLocks.$inferSelect;
+export type InsertReservationLock = z.infer<typeof insertReservationLockSchema>;
 
 // Reservations table
 export const reservations = pgTable("reservations", {
