@@ -201,6 +201,7 @@ export interface IStorage {
   // Reservation Locks Management (prevenzione overbooking)
   createReservationLock(lock: InsertReservationLock): Promise<ReservationLock>;
   checkSpeciesAvailability(userId: number, reserveId: string, species: string, category: string, huntDate: string, timeSlot: string, sessionId: string): Promise<{ available: boolean; message?: string }>;
+  checkZoneAvailability(userId: number, reserveId: string, zoneId: number, huntDate: string, timeSlot: string, sessionId: string): Promise<{ available: boolean; message?: string }>;
   releaseReservationLock(sessionId: string): Promise<void>;
   cleanupExpiredLocks(): Promise<void>;
   consumeReservationLock(sessionId: string): Promise<void>;
@@ -2822,6 +2823,74 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error checking species availability:', error);
       return { available: false, message: "Errore durante la verifica disponibilità" };
+    }
+  }
+
+  async checkZoneAvailability(
+    userId: number,
+    reserveId: string, 
+    zoneId: number,
+    huntDate: string,
+    timeSlot: string,
+    sessionId: string
+  ): Promise<{available: boolean, message: string}> {
+    try {
+      // Per le zone, il lock è a livello di RISERVA (tutti i gruppi A,B,C,D)
+      // Non per gruppo singolo, diversamente dalle specie
+      
+      // Controlla se la zona esiste
+      const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId));
+      if (!zone) {
+        return { available: false, message: "Zona non trovata" };
+      }
+
+      // Controlla lock attivi per la stessa zona/data/orario a livello di RISERVA
+      // (escludendo la propria sessione)
+      const activeLocks = await db
+        .select()
+        .from(reservationLocks)
+        .where(
+          and(
+            eq(reservationLocks.reserveId, reserveId),
+            eq(reservationLocks.zoneId, zoneId),
+            eq(reservationLocks.huntDate, huntDate),
+            eq(reservationLocks.timeSlot, timeSlot as any),
+            eq(reservationLocks.status, 'active'),
+            sql`${reservationLocks.sessionId} != ${sessionId}`
+          )
+        );
+
+      // Controlla anche prenotazioni attive esistenti per la stessa zona/data/orario
+      const activeReservations = await db
+        .select()
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.reserveId, reserveId),
+            eq(reservations.zoneId, zoneId),
+            sql`DATE(${reservations.huntDate}) = ${huntDate}`,
+            eq(reservations.timeSlot, timeSlot as any),
+            eq(reservations.status, 'active')
+          )
+        );
+
+      const totalOccupied = activeLocks.length + activeReservations.length;
+      
+      if (totalOccupied > 0) {
+        return { 
+          available: false, 
+          message: `Zona ${zoneId} già prenotata per questo orario da altro cacciatore` 
+        };
+      }
+
+      return { 
+        available: true, 
+        message: `Zona ${zoneId} disponibile per prenotazione` 
+      };
+      
+    } catch (error) {
+      console.error('Error checking zone availability:', error);
+      return { available: false, message: "Errore durante la verifica disponibilità zona" };
     }
   }
 

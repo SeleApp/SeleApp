@@ -276,7 +276,7 @@ export const reservationLocks = pgTable("reservation_locks", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   reserveId: text("reserve_id").notNull().references(() => reserves.id),
-  species: speciesEnum("species").notNull(),
+  species: speciesEnum("species"), // Nullable per permettere lock solo su zone
   roeDeerCategory: roeDeerCategoryEnum("roe_deer_category"),
   redDeerCategory: redDeerCategoryEnum("red_deer_category"),
   fallowDeerCategory: fallowDeerCategoryEnum("fallow_deer_category"), 

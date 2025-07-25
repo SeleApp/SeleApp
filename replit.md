@@ -625,6 +625,14 @@ Changelog:
   - **Database Queries Fixed**: Rimosse incompatibilità Drizzle ORM e query malformate
   - **Sistema Operativo**: Raggiunta stabilità 99%+ - tutte le funzioni core operative
   - **Production Ready**: Sistema pronto per deploy con architettura enterprise-grade completa
+- July 25, 2025. **SISTEMA PREVENZIONE OVERBOOKING ESTESO**: Implementazione completa sistema lock cross-group per zone e animali
+  - **Dual Lock System**: Lock animali per gruppo (A,B,C,D separati) + lock zone per riserva (tutti i gruppi A,B,C,D)
+  - **API Endpoints**: Estesi /api/reservation-locks/* per gestire lockType 'species' e 'zone'
+  - **Database Schema**: Campo species nullable in reservation_locks per supportare lock solo-zona
+  - **Storage Methods**: Aggiunto checkZoneAvailability() per verifica disponibilità zone cross-group
+  - **Validation Logic**: Schema Zod condizionale per validazione species vs zone lock
+  - **Complete Testing**: Testato con successo cross-group blocking (Gruppo A vs Gruppo B su stessa zona)
+  - **Real-time Prevention**: Sistema impedisce overbooking sia per animali che per zone con timeout 10 minuti
 - July 24, 2025. **DEMO TECNICO FAUNISTICO FUNZIONANTE**: Risoluzione completa autenticazione demo fauna management
   - **JWT_SECRET Synchronized**: Sincronizzati JWT_SECRET tra demo.ts e auth.ts (seleapp_dev_secret_2025)
   - **Authentication Fixed**: Demo tecnico-faunistico token ora validato correttamente dai middleware
