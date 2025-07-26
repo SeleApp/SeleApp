@@ -31,18 +31,26 @@ export default function AdminDashboard() {
 
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
+    staleTime: 1 * 60 * 1000, // 1 minuto cache per statistiche
+    gcTime: 3 * 60 * 1000,
   });
 
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/reservations"],
+    staleTime: 30 * 1000, // 30 secondi cache per prenotazioni admin
+    gcTime: 2 * 60 * 1000,
   });
 
   const { data: quotasData = [], isLoading: quotasLoading } = useQuery<any[]>({
     queryKey: ["/api/regional-quotas"],
+    staleTime: 2 * 60 * 1000, // 2 minuti cache per quote
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: reports = [], isLoading: reportsLoading } = useQuery<any[]>({
     queryKey: ["/api/reports"],
+    staleTime: 3 * 60 * 1000, // 3 minuti cache per report
+    gcTime: 8 * 60 * 1000,
   });
 
   const updateQuotaMutation = useMutation({

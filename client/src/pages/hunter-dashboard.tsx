@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import Header from "@/components/layout/header";
 import MultiStepReservation from "@/components/multi-step-reservation";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { authService } from "@/lib/auth";
+import { prefetchCommonQueries, measurePerformance } from "@/lib/performance";
 import type { ZoneWithQuotas, ReservationWithDetails } from "@/lib/types";
 import { CalendarCheck, Target, Plus, ClipboardList, Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -19,26 +20,43 @@ export default function HunterDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<number | null>(null);
 
+  // Prefetch delle query comuni all'avvio per migliorare performance
+  useEffect(() => {
+    measurePerformance('Prefetch queries', () => {
+      prefetchCommonQueries();
+    });
+  }, []);
+
   const { data: zones = [], isLoading: zonesLoading } = useQuery<ZoneWithQuotas[]>({
     queryKey: ["/api/zones"],
+    staleTime: 5 * 60 * 1000, // 5 minuti cache per zone (dato statico)
+    gcTime: 15 * 60 * 1000,
   });
 
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/reservations"],
+    staleTime: 30 * 1000, // 30 secondi cache per prenotazioni
+    gcTime: 2 * 60 * 1000,
   });
 
   const { data: regionalQuotas = [] } = useQuery({
     queryKey: ["/api/regional-quotas"],
+    staleTime: 2 * 60 * 1000, // 2 minuti cache per quote regionali
+    gcTime: 5 * 60 * 1000,
   });
 
-  // Query per le quote di gruppo (solo se il sistema è "Zone & gruppi")
+  // Query per le quote di gruppo (solo se il sistema è "Zone & gruppi") - cache lunga
   const { data: groupQuotas = [] } = useQuery({
     queryKey: ["/api/group-quotas"],
+    staleTime: 3 * 60 * 1000, // 3 minuti cache per quote gruppo
+    gcTime: 8 * 60 * 1000,
   });
 
-  // Query per informazioni sulla riserva corrente
+  // Query per informazioni sulla riserva corrente - cache molto lunga
   const { data: currentReserve } = useQuery({
     queryKey: ["/api/current-reserve"],
+    staleTime: 10 * 60 * 1000, // 10 minuti cache per info riserva
+    gcTime: 30 * 60 * 1000,
   });
 
   const user = authService.getUser();
