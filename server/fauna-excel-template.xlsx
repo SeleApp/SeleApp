@@ -1,6 +1,0 @@
-specie,sesso,classe_eta,data,zona_id,sezione,tipo,peso,stato_riproduttivo,stato_corpo,lunghezza_mandibola,lunghezza_palchi,gps_lat,gps_lon,note
-capriolo,M,A,2025-01-15,1,pederobba,avvistamento,25.5,n.d.,buono,,,45.7788,11.9123,Esemplare adulto in buone condizioni
-cervo,F,Y,2025-01-16,3,cison,prelievo,55.0,gravida,buono,15.2,,,45.7801,11.9145,Femmina giovane prelevata
-daino,M,A,2025-01-17,5,valdobbiadene,fototrappola,45.2,n.d.,medio,,25.8,45.7820,11.9180,Maschio adulto ripreso da fototrappola
-muflone,F,J,2025-01-18,2,follina,avvistamento,18.0,no,scarso,,,45.7750,11.9100,Giovane in condizioni precarie
-camoscio,M,Y,2025-01-19,4,miane,prelievo,42.5,n.d.,buono,12.8,,,45.7900,11.9200,Yearling maschio prelevato
