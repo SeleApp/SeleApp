@@ -188,54 +188,54 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Admin Stats */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Statistiche Generali</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Admin Stats - Mobile Responsive */}
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Statistiche Generali</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <Card className="border-l-4 border-l-primary">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <Users className="text-primary text-2xl mr-4" size={32} />
-                  <div>
-                    <p className="text-base text-gray-600">Cacciatori Attivi</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats?.activeHunters || 0}</p>
+                  <Users className="text-primary mr-2 sm:mr-4 flex-shrink-0" size={24} />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-base text-gray-600 truncate">Cacciatori Attivi</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats?.activeHunters || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-l-4 border-l-available">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <CalendarCheck className="text-available text-2xl mr-4" size={32} />
-                  <div>
-                    <p className="text-base text-gray-600">Prenotazioni Oggi</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats?.todayReservations || 0}</p>
+                  <CalendarCheck className="text-available mr-2 sm:mr-4 flex-shrink-0" size={24} />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-base text-gray-600 truncate">Prenotazioni Oggi</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats?.todayReservations || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-l-4 border-l-accent">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <Target className="text-accent text-2xl mr-4" size={32} />
-                  <div>
-                    <p className="text-base text-gray-600">Capi Prelevati</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats?.totalHarvested || 0}</p>
+                  <Target className="text-accent mr-2 sm:mr-4 flex-shrink-0" size={24} />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-base text-gray-600 truncate">Capi Prelevati</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats?.totalHarvested || 0}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-l-4 border-l-low">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center">
-                  <AlertTriangle className="text-low text-2xl mr-4" size={32} />
-                  <div>
-                    <p className="text-base text-gray-600">Quote in Esaurimento</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats?.lowQuotas || 0}</p>
+                  <AlertTriangle className="text-low mr-2 sm:mr-4 flex-shrink-0" size={24} />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-base text-gray-600 truncate">Quote in Esaurimento</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats?.lowQuotas || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -243,26 +243,32 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Mobile Responsive */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="zones" className="flex items-center gap-2 text-lg py-4">
-              <MapPin size={20} />
-              Zone e Quote
-            </TabsTrigger>
-            <TabsTrigger value="reservations" className="flex items-center gap-2 text-lg py-4">
-              <Calendar size={20} />
-              Prenotazioni
-            </TabsTrigger>
-            <TabsTrigger value="hunters" className="flex items-center gap-2 text-lg py-4">
-              <Users size={20} />
-              Cacciatori
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 text-lg py-4">
-              <BarChart size={20} />
-              Report
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="flex w-full min-w-max gap-1 sm:grid sm:grid-cols-4 sm:gap-0 bg-gray-100 p-1">
+              <TabsTrigger value="zones" className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:py-4 text-xs sm:text-lg whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <MapPin size={16} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline">Zone e Quote</span>
+                <span className="md:hidden">Quote</span>
+              </TabsTrigger>
+              <TabsTrigger value="reservations" className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:py-4 text-xs sm:text-lg whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <Calendar size={16} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline">Prenotazioni</span>
+                <span className="md:hidden">Prenotazioni</span>
+              </TabsTrigger>
+              <TabsTrigger value="hunters" className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:py-4 text-xs sm:text-lg whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <Users size={16} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline">Cacciatori</span>
+                <span className="md:hidden">Cacciatori</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-1 sm:gap-2 px-3 py-2 sm:py-4 text-xs sm:text-lg whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <BarChart size={16} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline">Report</span>
+                <span className="md:hidden">Report</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Zones Tab */}
           <TabsContent value="zones">

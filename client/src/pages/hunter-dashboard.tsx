@@ -84,22 +84,22 @@ export default function HunterDashboard() {
         </div>
 
         <Tabs defaultValue="quotas" className="space-y-4 sm:space-y-6">
-          <div className="w-full overflow-x-auto">
-            <TabsList className="flex w-full min-w-max gap-1 sm:grid sm:grid-cols-3 sm:gap-0">
-              <TabsTrigger value="quotas" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-                <Target className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Piani di Abbattimento</span>
-                <span className="sm:hidden">Quote</span>
+          <div className="w-full overflow-x-auto -mx-2 px-2">
+            <TabsList className="flex w-full min-w-max gap-1 sm:grid sm:grid-cols-3 sm:gap-0 bg-gray-100 p-1">
+              <TabsTrigger value="quotas" className="flex items-center gap-1 px-3 py-2 text-xs sm:text-sm whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <Target className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden md:inline">Piani di Abbattimento</span>
+                <span className="md:hidden">Quote</span>
               </TabsTrigger>
-              <TabsTrigger value="reservations" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-                <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Le Mie Prenotazioni</span>
-                <span className="sm:hidden">Prenotazioni</span>
+              <TabsTrigger value="reservations" className="flex items-center gap-1 px-3 py-2 text-xs sm:text-sm whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <CalendarCheck className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden md:inline">Le Mie Prenotazioni</span>
+                <span className="md:hidden">Prenotazioni</span>
               </TabsTrigger>
-              <TabsTrigger value="reports" className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm whitespace-nowrap">
-                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">I Miei Report</span>
-                <span className="sm:hidden">Report</span>
+              <TabsTrigger value="reports" className="flex items-center gap-1 px-3 py-2 text-xs sm:text-sm whitespace-nowrap min-w-0 flex-1 sm:flex-auto">
+                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden md:inline">I Miei Report</span>
+                <span className="md:hidden">Report</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -223,16 +223,16 @@ export default function HunterDashboard() {
                 reservations.map((reservation) => (
                   <Card key={reservation.id} className="border-l-4 border-l-available">
                     <CardContent className="p-3 sm:p-6">
-                      <div className="flex flex-col gap-3 sm:gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0">
                           <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{reservation.zone.name}</h3>
                           <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                            {format(new Date(reservation.huntDate), "dd MMMM yyyy", { locale: it })},{" "}
+                            {format(new Date(reservation.huntDate), "dd MMM yyyy", { locale: it })},{" "}
                             {reservation.timeSlot === "morning" ? "Mattina" : 
                              reservation.timeSlot === "afternoon" ? "Pomeriggio" : "Tutto il Giorno"}
                           </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                           <Badge
                             variant={
                               reservation.status === "active"
@@ -256,10 +256,12 @@ export default function HunterDashboard() {
                           {reservation.status === "active" && (
                             <Button
                               onClick={() => handleReportHunt(reservation.id)}
-                              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                              className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto"
+                              size="sm"
                             >
-                              <ClipboardList className="mr-1" size={16} />
-                              Report
+                              <ClipboardList className="mr-1 h-4 w-4" />
+                              <span className="sm:hidden">Report</span>
+                              <span className="hidden sm:inline">Completa Report</span>
                             </Button>
                           )}
                         </div>
@@ -269,9 +271,9 @@ export default function HunterDashboard() {
                 ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <Calendar className="mx-auto mb-4" size={48} />
-                  <p className="text-lg">Nessuna prenotazione trovata</p>
-                  <p className="text-base">Inizia prenotando una zona di caccia</p>
+                  <Calendar className="mx-auto mb-4 h-12 w-12 sm:h-12 sm:w-12" />
+                  <p className="text-base sm:text-lg">Nessuna prenotazione trovata</p>
+                  <p className="text-sm sm:text-base">Inizia prenotando una zona di caccia</p>
                 </div>
               )}
             </div>
@@ -306,10 +308,10 @@ export default function HunterDashboard() {
                           
                           {/* Dettagli del prelievo se presente */}
                           {report?.outcome === 'harvest' && report.species && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                              <h5 className="font-medium text-green-900 mb-3">📋 Dettagli Prelievo:</h5>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+                              <h5 className="font-medium text-green-900 mb-3 text-sm sm:text-base">📋 Dettagli Prelievo:</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                                <div className="text-sm">
                                   <span className="font-medium text-green-800">Specie:</span>
                                   <span className="ml-2 text-green-700">
                                     {report.species === 'roe_deer' ? 'Capriolo' : 
@@ -319,14 +321,14 @@ export default function HunterDashboard() {
                                      report.species === 'chamois' ? 'Camoscio' : 'N/A'}
                                   </span>
                                 </div>
-                                <div>
+                                <div className="text-sm">
                                   <span className="font-medium text-green-800">Categoria:</span>
                                   <span className="ml-2 text-green-700">
                                     {report.roeDeerCategory || report.redDeerCategory || report.fallowDeerCategory || report.mouflonCategory || report.chamoisCategory || 'N/A'}
                                   </span>
                                 </div>
                                 {report.sex && (
-                                  <div>
+                                  <div className="text-sm">
                                     <span className="font-medium text-green-800">Sesso:</span>
                                     <span className="ml-2 text-green-700">
                                       {report.sex === 'male' ? 'Maschio' : 'Femmina'}
@@ -334,7 +336,7 @@ export default function HunterDashboard() {
                                   </div>
                                 )}
                                 {report.ageClass && (
-                                  <div>
+                                  <div className="text-sm">
                                     <span className="font-medium text-green-800">Età:</span>
                                     <span className="ml-2 text-green-700">
                                       {report.ageClass === 'adult' ? 'Adulto' : 'Giovane'}
@@ -344,8 +346,8 @@ export default function HunterDashboard() {
                               </div>
                               {report.notes && (
                                 <div className="mt-3 pt-3 border-t border-green-200">
-                                  <span className="font-medium text-green-800">Note:</span>
-                                  <p className="mt-1 text-green-700 text-sm">{report.notes}</p>
+                                  <span className="font-medium text-green-800 text-sm">Note:</span>
+                                  <p className="mt-1 text-green-700 text-xs sm:text-sm">{report.notes}</p>
                                 </div>
                               )}
                             </div>

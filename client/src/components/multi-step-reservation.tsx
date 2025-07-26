@@ -378,48 +378,50 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="text-2xl font-bold text-gray-900">
-            Sistema Multi-Step - Nuova Prenotazione
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-3xl lg:max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+        <DialogHeader className="pb-3 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-2xl font-bold text-gray-900">
+            <span className="hidden sm:inline">Sistema Multi-Step - </span>Nuova Prenotazione
           </DialogTitle>
-          <DialogDescription className="text-lg text-gray-600">
+          <DialogDescription className="text-sm sm:text-lg text-gray-600">
             Passo {step} di {totalSteps}: {getStepTitle()}
           </DialogDescription>
           
-          {/* Indicatore Lock Attivo */}
+          {/* Indicatore Lock Attivo - Mobile Responsive */}
           {activeLock && (
-            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-100 border border-green-300 rounded-lg">
               <div className="flex items-center text-green-800">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                <span className="font-medium">
-                  Capo riservato: {activeLock.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} {activeLock.category}
+                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full mr-2 animate-pulse flex-shrink-0"></div>
+                <span className="font-medium text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Capo riservato: </span>
+                  {activeLock.species === 'roe_deer' ? 'Capriolo' : 'Cervo'} {activeLock.category}
                 </span>
-                <span className="ml-2 text-sm">
-                  (Scade in 10 minuti)
+                <span className="ml-1 sm:ml-2 text-xs">
+                  <span className="hidden sm:inline">(Scade in 10 minuti)</span>
+                  <span className="sm:hidden">(10 min)</span>
                 </span>
               </div>
             </div>
           )}
         </DialogHeader>
 
-        {/* Progress Bar */}
-        <div className="flex justify-between items-center mb-8">
+        {/* Progress Bar - Mobile Responsive */}
+        <div className="flex justify-between items-center mb-4 sm:mb-8 px-2">
           {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNum) => (
             <div key={stepNum} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+              <div className={`w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-base ${
                 stepNum === step ? 'bg-blue-600' : 
                 stepNum < step ? 'bg-green-500' : 'bg-gray-300'
               }`}>
                 {stepNum}
               </div>
-              <div className={`text-sm ml-2 hidden sm:block ${stepNum === step ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
+              <div className={`text-xs sm:text-sm ml-1 sm:ml-2 hidden md:block ${stepNum === step ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
                 {isCisonReserve ? 
                   (stepNum === 1 ? 'Capo' : stepNum === 2 ? 'Zona' : 'Orario') :
                   (stepNum === 1 ? 'Zona' : stepNum === 2 ? 'Data' : stepNum === 3 ? 'Orario' : stepNum === 4 ? 'Specie' : 'Conferma')
                 }
               </div>
-              {stepNum < totalSteps && <div className="w-4 sm:w-8 h-1 bg-gray-300 mx-2 sm:mx-4"></div>}
+              {stepNum < totalSteps && <div className="w-2 sm:w-4 md:w-8 h-0.5 sm:h-1 bg-gray-300 mx-1 sm:mx-2 md:mx-4"></div>}
             </div>
           ))}
         </div>
@@ -432,33 +434,33 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
             handleSubmit(onSubmit)(e);
           }}
         >
-          <div className="min-h-[400px] py-6">
-            {/* STEP 1 CISON: SELEZIONE CAPO */}
+          <div className="min-h-[300px] sm:min-h-[400px] py-3 sm:py-6">
+            {/* STEP 1 CISON: SELEZIONE CAPO - Mobile Responsive */}
             {step === 1 && isCisonReserve && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-2">Seleziona il Capo da Prelevare</h3>
-                  <p className="text-lg text-gray-600">Scegli la specie e categoria che intendi cacciare</p>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="text-center mb-4 sm:mb-8">
+                  <h3 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2">Seleziona il Capo da Prelevare</h3>
+                  <p className="text-sm sm:text-lg text-gray-600">Scegli la specie e categoria che intendi cacciare</p>
                 </div>
                 
-                <div className="max-w-2xl mx-auto space-y-8">
-                  <div className="space-y-4">
-                    <h4 className="text-xl font-semibold text-gray-900 text-center">Seleziona Specie</h4>
-                    <div className="grid grid-cols-2 gap-6">
+                <div className="max-w-2xl mx-auto space-y-4 sm:space-y-8">
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">Seleziona Specie</h4>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-6">
                       <button
                         type="button"
                         onClick={() => {
                           setValue("targetSpecies", "roe_deer");
                           setValue("targetRedDeerCategory", undefined);
                         }}
-                        className={`p-6 rounded-xl border-3 text-lg font-medium transition-all ${
+                        className={`p-3 sm:p-6 rounded-xl border-2 sm:border-3 text-base sm:text-lg font-medium transition-all ${
                           selectedSpecies === "roe_deer"
                             ? "border-blue-500 bg-blue-100 text-blue-700"
                             : "border-gray-300 hover:border-gray-400"
                         }`}
                       >
                         <div className="text-center">
-                          <div className="text-xl font-bold">Capriolo</div>
+                          <div className="text-lg sm:text-xl font-bold">Capriolo</div>
                         </div>
                       </button>
                       <button
@@ -467,30 +469,30 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                           setValue("targetSpecies", "red_deer");
                           setValue("targetRoeDeerCategory", undefined);
                         }}
-                        className={`p-6 rounded-xl border-3 text-lg font-medium transition-all ${
+                        className={`p-3 sm:p-6 rounded-xl border-2 sm:border-3 text-base sm:text-lg font-medium transition-all ${
                           selectedSpecies === "red_deer"
                             ? "border-blue-500 bg-blue-100 text-blue-700"
                             : "border-gray-300 hover:border-gray-400"
                         }`}
                       >
                         <div className="text-center">
-                          <div className="text-xl font-bold">Cervo</div>
+                          <div className="text-lg sm:text-xl font-bold">Cervo</div>
                         </div>
                       </button>
                     </div>
                   </div>
 
-                  {/* Categorie Capriolo - CA TV corrette per Cison */}
+                  {/* Categorie Capriolo - CA TV corrette per Cison - Mobile Responsive */}
                   {selectedSpecies === "roe_deer" && (
-                    <div className="space-y-4">
-                      <h4 className="text-xl font-semibold text-gray-900 text-center">Categoria Capriolo</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">Categoria Capriolo</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
                         {["PM", "PF", "M1", "M2", "F1_FF"].map((category) => (
                           <button
                             key={category}
                             type="button"
                             onClick={() => setValue("targetRoeDeerCategory", category as any)}
-                            className={`p-4 rounded-lg border-2 font-medium transition-all ${
+                            className={`p-2 sm:p-4 rounded-lg border-2 font-medium transition-all text-sm sm:text-base ${
                               watch("targetRoeDeerCategory") === category
                                 ? "border-blue-500 bg-blue-100 text-blue-700"
                                 : "border-gray-300 hover:border-gray-400"
@@ -503,17 +505,17 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                     </div>
                   )}
 
-                  {/* Categorie Cervo */}
+                  {/* Categorie Cervo - Mobile Responsive */}
                   {selectedSpecies === "red_deer" && (
-                    <div className="space-y-4">
-                      <h4 className="text-xl font-semibold text-gray-900 text-center">Categoria Cervo</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">Categoria Cervo</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                         {["CL0", "FF", "MM", "MCL1"].map((category) => (
                           <button
                             key={category}
                             type="button"
                             onClick={() => setValue("targetRedDeerCategory", category as any)}
-                            className={`p-4 rounded-lg border-2 font-medium transition-all ${
+                            className={`p-2 sm:p-4 rounded-lg border-2 font-medium transition-all text-sm sm:text-base ${
                               watch("targetRedDeerCategory") === category
                                 ? "border-blue-500 bg-blue-100 text-blue-700"
                                 : "border-gray-300 hover:border-gray-400"
@@ -931,15 +933,17 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
             )}
           </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between pt-6 border-t">
+          {/* Navigation - Mobile Responsive */}
+          <div className="flex justify-between pt-4 sm:pt-6 border-t gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={prevStep}
               disabled={step === 1}
+              className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base"
             >
-              Indietro
+              <span className="hidden sm:inline">Indietro</span>
+              <span className="sm:hidden">←</span>
             </Button>
             
             {step < totalSteps ? (
@@ -947,8 +951,10 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                 type="button"
                 onClick={nextStep}
                 disabled={!canProceed()}
+                className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base flex-1 max-w-32 sm:max-w-none"
               >
-                Avanti
+                <span className="hidden sm:inline">Avanti</span>
+                <span className="sm:hidden">→</span>
               </Button>
             ) : (
               <Button
@@ -964,8 +970,15 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
                   console.log("🚀 Chiamata diretta mutation");
                   onSubmit(formData);
                 }}
+                className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base flex-1 max-w-32 sm:max-w-none"
               >
-                {createReservationMutation.isPending ? "Creazione..." : "Conferma"}
+                {createReservationMutation.isPending ? 
+                  (<span className="hidden sm:inline">Creazione...</span>) : 
+                  (<span className="hidden sm:inline">Conferma</span>)
+                }
+                <span className="sm:hidden">
+                  {createReservationMutation.isPending ? "..." : "✓"}
+                </span>
               </Button>
             )}
           </div>
