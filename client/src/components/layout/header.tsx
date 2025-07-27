@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 // Using official SeleApp logo
-const logoPath = "/seleapp-logo.png";
+const logoPath = "/seleapp-logo.jpg";
 
 export default function Header() {
   const user = authService.getUser();
