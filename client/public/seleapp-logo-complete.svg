@@ -1,0 +1,23 @@
+<svg width="280" height="120" viewBox="0 0 280 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Deer head silhouette -->
+  <g transform="translate(20, 20)">
+    <!-- Deer body -->
+    <path d="M40 15C35 15 30 18 30 23C30 24 30.5 25 31 26L28 29C27 29.5 26.5 30.5 26.5 31.5C26.5 33 27.5 34 29 34C29.5 34 30 33.8 30.5 33.5L33 31C35.5 32.5 38.5 33.5 40 33.5C41.5 33.5 44.5 32.5 47 31L49.5 33.5C50 33.8 50.5 34 51 34C52.5 34 53.5 33 53.5 31.5C53.5 30.5 53 29.5 52 29L49 26C49.5 25 50 24 50 23C50 18 45 15 40 15Z" fill="#4a5d23"/>
+    
+    <!-- Antlers -->
+    <path d="M32 22L26 15M32 22L29 18M48 22L54 15M48 22L51 18" stroke="#4a5d23" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Additional antler details -->
+    <path d="M28 17L24 13M30 19L26 16M50 17L56 13M50 19L54 16" stroke="#4a5d23" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- SeleApp Text -->
+  <g transform="translate(90, 35)">
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#4a5d23">SeleApp</text>
+  </g>
+  
+  <!-- Subtitle -->
+  <g transform="translate(90, 70)">
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Gestione Professionale</text>
+  </g>
+</svg>
