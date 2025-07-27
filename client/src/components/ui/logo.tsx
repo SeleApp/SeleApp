@@ -6,9 +6,10 @@ interface LogoProps {
 }
 
 export function Logo({ className = "h-20 w-20 object-contain", alt = "SeleApp Logo" }: LogoProps) {
+  // Force SVG for now to ensure visibility
   const [currentSrc, setCurrentSrc] = useState("/logo.png");
   const [hasError, setHasError] = useState(false);
-  const [useSvg, setUseSvg] = useState(false);
+  const [useSvg, setUseSvg] = useState(true);
 
   const fallbacks = [
     "/seleapp-logo-optimized.png",
