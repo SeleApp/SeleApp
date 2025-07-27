@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth";
 import { LogOut } from "lucide-react";
-import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
+// Using existing app icon instead of missing asset
+const logoPath = "/icon-192.png";
 
 export default function Header() {
   const user = authService.getUser();

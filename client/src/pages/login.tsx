@@ -13,7 +13,8 @@ import AccessCodeRegistration from "@/components/access-code-registration";
 
 import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
+// Using existing app icon instead of missing asset
+const logoPath = "/icon-192.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
