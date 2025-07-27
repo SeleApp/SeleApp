@@ -13,8 +13,8 @@ import AccessCodeRegistration from "@/components/access-code-registration";
 
 import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-// Using custom SeleApp logo
-const logoPath = "/seleapp-logo.svg";
+// Using official SeleApp logo
+const logoPath = "/seleapp-logo.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
