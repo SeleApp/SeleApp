@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="#16a34a"/>
+  
+  <!-- Deer head silhouette -->
+  <path d="M32 12C28.5 12 25.5 14.5 25.5 17.5C25.5 18.2 25.7 18.8 26 19.3L24 21C23.5 21.3 23.2 21.8 23.2 22.4C23.2 23.2 23.8 23.8 24.6 23.8C25 23.8 25.3 23.6 25.6 23.4L27.5 21.8C29 22.8 30.9 23.5 32 23.5C33.1 23.5 35 22.8 36.5 21.8L38.4 23.4C38.7 23.6 39 23.8 39.4 23.8C40.2 23.8 40.8 23.2 40.8 22.4C40.8 21.8 40.5 21.3 40 21L38 19.3C38.3 18.8 38.5 18.2 38.5 17.5C38.5 14.5 35.5 12 32 12Z" fill="white"/>
+  
+  <!-- Antlers -->
+  <path d="M26 18L22 14M26 18L24 16M38 18L42 14M38 18L40 16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Trees -->
+  <path d="M20 45L20 52M44 45L44 52" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="20,38 16,45 24,45" fill="white"/>
+  <polygon points="44,38 40,45 48,45" fill="white"/>
+  
+  <!-- Target/crosshair -->
+  <circle cx="32" cy="40" r="8" stroke="white" stroke-width="2" fill="none"/>
+  <circle cx="32" cy="40" r="4" stroke="white" stroke-width="1" fill="none"/>
+  <path d="M24 40L28 40M36 40L40 40M32 32L32 36M32 44L32 48" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>
