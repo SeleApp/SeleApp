@@ -13,8 +13,8 @@ import AccessCodeRegistration from "@/components/access-code-registration";
 
 import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-// Using official SeleApp logo
-const logoPath = "/seleapp-logo.jpg";
+// Using official SeleApp logo (optimized PNG)
+const logoPath = "/seleapp-logo-optimized.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -194,6 +194,11 @@ export default function LoginPage() {
                 src={logoPath}
                 alt="SeleApp Logo"
                 className="h-20 w-20 object-contain"
+                onError={(e) => {
+                  console.error('Logo loading error:', e);
+                  e.currentTarget.src = '/icon-192.png';
+                }}
+                onLoad={() => console.log('Logo loaded successfully')}
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">SeleApp</h2>
@@ -216,6 +221,11 @@ export default function LoginPage() {
               src={logoPath}
               alt="SeleApp Logo"
               className="h-20 w-20 object-contain"
+              onError={(e) => {
+                console.error('Logo loading error:', e);
+                e.currentTarget.src = '/icon-192.png';
+              }}
+              onLoad={() => console.log('Logo loaded successfully')}
             />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">SeleApp</CardTitle>
