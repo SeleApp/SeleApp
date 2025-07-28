@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth";
 import { LogOut } from "lucide-react";
-import { Logo } from "@/components/ui/logo";
+import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function Header() {
   const user = authService.getUser();
@@ -16,7 +16,11 @@ export default function Header() {
         <div className="flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center min-w-0 flex-1">
             <div className="w-8 h-8 sm:w-12 sm:h-12 mr-2 sm:mr-4 flex items-center justify-center flex-shrink-0">
-              <Logo className="w-6 h-6 sm:w-10 sm:h-10 object-contain" />
+              <img 
+                src={logoPath} 
+                alt="SeleApp Logo" 
+                className="w-6 h-6 sm:w-10 sm:h-10 object-contain"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">SeleApp</h1>

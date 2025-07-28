@@ -13,7 +13,7 @@ import AccessCodeRegistration from "@/components/access-code-registration";
 
 import { LogIn, UserPlus, Shield, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { Logo } from "@/components/ui/logo";
+import logoPath from "@assets/ChatGPT Image 24 giu 2025, 00_38_53_1750799612475.png";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -189,7 +189,11 @@ export default function LoginPage() {
         <Card className="w-full max-w-md shadow-xl">
           <CardContent className="flex flex-col items-center justify-center p-8">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center">
-              <Logo />
+              <img
+                src={logoPath}
+                alt="SeleApp Logo"
+                className="h-20 w-20 object-contain"
+              />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">SeleApp</h2>
             <p className="text-lg text-gray-600 text-center mb-6">
@@ -207,7 +211,11 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center">
-            <Logo />
+            <img
+              src={logoPath}
+              alt="SeleApp Logo"
+              className="h-20 w-20 object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">SeleApp</CardTitle>
           <p className="text-sm text-gray-600">
