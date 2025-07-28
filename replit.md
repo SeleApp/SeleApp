@@ -653,6 +653,12 @@ Changelog:
   - **JavaScript Functions**: Removed "per 30 minuti" from all demo confirm dialogs
   - **Mobile Demo**: Removed "TEMPO DISPONIBILE: 30 minuti" from mobile demo alerts
   - **Clean Interface**: Landing page now has cleaner professional appearance with only demo buttons, no explanatory box
+- July 28, 2025. **CRITICAL CISON ACCESS AND QUOTA FIX**: Resolved authentication errors and incorrect quota calculations for Cison di Valmarino
+  - **Authentication Fixed**: Updated admin password hash for trattoriasanbastian@gmail.com (password: admin123)
+  - **Regional Quotas Corrected**: Set official CA TV28 quotas (PM=2, PF=3, M2=7, M1=4, F1_FF=12, CL0=2, FF=8, MM=3, MCL1=3)
+  - **Group Quotas Reset**: All group quotas reset to 0 to enable proper "Da Assegnare" calculations
+  - **"Da Assegnare" Fixed**: Column now correctly displays Regional Quota - Currently Assigned = Available to Assign
+  - **Production Ready**: Cison system fully operational with correct quota management and access control
 
 # User Preferences
 
