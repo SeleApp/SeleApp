@@ -104,6 +104,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Group quotas routes (per sistema "Zone & gruppi")
   const groupQuotasRoutes = await import("./routes/group-quotas");
   app.use("/api/group-quotas", groupQuotasRoutes.default);
+
+  // Hunter group quotas routes (solo quote del gruppo del cacciatore)
+  const hunterGroupQuotasRoutes = await import("./routes/hunter-group-quotas");
+  app.use("/api/hunter-group-quotas", hunterGroupQuotasRoutes.default);
   
   // SuperAdmin reserves management routes
   app.use("/api/superadmin/reserves", reservesRoutes);

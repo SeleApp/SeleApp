@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/header";
-import MultiStepReservation from "@/components/multi-step-reservation";
+import CisonReservationModal from "@/components/cison-reservation-modal";
 import HuntReportModal from "@/components/hunt-report-modal";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -32,8 +32,9 @@ export default function HunterDashboard() {
     queryKey: ["/api/reservations"],
   });
 
-  const { data: regionalQuotas = [] } = useQuery({
-    queryKey: ["/api/regional-quotas"],
+  // Fetch solo le quote del gruppo del cacciatore (non tutte le regionali)
+  const { data: hunterGroupQuotas = [] } = useQuery({
+    queryKey: ["/api/hunter-group-quotas"],
   });
 
   const { data: reports = [] } = useQuery({
@@ -119,8 +120,8 @@ export default function HunterDashboard() {
   };
 
   const getFilteredQuotas = () => {
-    if (selectedSpecies === 'all') return regionalQuotas;
-    return regionalQuotas.filter((q: any) => q.species === selectedSpecies);
+    if (selectedSpecies === 'all') return hunterGroupQuotas;
+    return hunterGroupQuotas.filter((q: any) => q.species === selectedSpecies);
   };
 
   if (zonesLoading || reservationsLoading) {
@@ -457,7 +458,7 @@ export default function HunterDashboard() {
         </Tabs>
       </main>
 
-      <MultiStepReservation
+      <CisonReservationModal
         open={showReservationModal}
         onOpenChange={setShowReservationModal}
         zones={zones}

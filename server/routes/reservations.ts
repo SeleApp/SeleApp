@@ -100,8 +100,8 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     }
 
     // Check for hunting day restrictions
-    const dayOfWeek = huntDate.getDay();
-    if (dayOfWeek === 2 || dayOfWeek === 5) { // Tuesday or Friday
+    const huntDayOfWeek = huntDate.getDay();
+    if (huntDayOfWeek === 2 || huntDayOfWeek === 5) { // Tuesday or Friday
       return res.status(400).json({ 
         message: "Caccia non permessa nei giorni di silenzio venatorio (martedì e venerdì)" 
       });
@@ -113,8 +113,8 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     // Calcola inizio e fine della settimana corrente (lunedì-domenica)
     const huntDateObj = new Date(huntDateStr + 'T12:00:00Z');
     const startOfWeek = new Date(huntDateObj);
-    const dayOfWeek = huntDateObj.getDay();
-    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Domenica = 0, quindi 6 giorni indietro
+    const weekDayOfWeek = huntDateObj.getDay();
+    const daysToMonday = weekDayOfWeek === 0 ? 6 : weekDayOfWeek - 1; // Domenica = 0, quindi 6 giorni indietro
     startOfWeek.setDate(huntDateObj.getDate() - daysToMonday);
     startOfWeek.setHours(0, 0, 0, 0);
     
