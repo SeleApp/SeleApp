@@ -285,14 +285,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
               <CardTitle className="text-xl">Distribuzione Quote per Gruppo (SEMPRE MODIFICABILI DURANTE LA STAGIONE)</CardTitle>
             </div>
           </div>
-          <div className="text-base text-blue-800 mt-3 p-4 bg-blue-100 rounded-lg">
-            <div className="space-y-2">
-              <p><strong>🔄 MODIFICHE SEMPRE POSSIBILI:</strong> Puoi cambiare la distribuzione delle quote tra gruppi in qualsiasi momento durante la stagione.</p>
-              <p><strong>🎯 LIMITE MASSIMO:</strong> La somma di tutti i gruppi NON può superare le quote regionali assegnate.</p>
-              <p><strong>🗺️ ZONE LIBERE:</strong> Tutti i cacciatori possono prenotare in tutte le 16 zone di Cison.</p>
-              <p><strong>🦌 CAPI LIMITATI:</strong> Ogni cacciatore può prelevare solo i capi assegnati al suo gruppo.</p>
-            </div>
-          </div>
+          
         </CardHeader>
         <CardContent>
 
