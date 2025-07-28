@@ -1,0 +1,56 @@
+Devo aggiungere alla mia app SeleApp una sezione per la **gestione dei codici di accesso per ogni riserva**, visibile solo al Superadmin.
+
+👥 Sistema Multi-Tenant: ogni riserva ha un suo codice univoco che serve ai cacciatori per registrarsi. Solo chi ha il codice corretto può accedere alla propria riserva.
+
+🛠️ Stack usato:
+- Frontend: React + TypeScript + Tailwind + shadcn/ui
+- Backend: Node.js + Express + TypeScript
+- Database: PostgreSQL + Drizzle ORM
+- JWT authentication con ruoli (SUPERADMIN, ADMIN, HUNTER)
+
+---
+
+🎯 Obiettivo:
+1. Ogni riserva ha un **codice di accesso univoco**
+2. Il **Superadmin** può:
+   - Visualizzare il codice attuale
+   - Rigenerare un nuovo codice casuale
+   - Impostarlo manualmente (opzionale)
+   - Attivarlo/disattivarlo (boolean)
+3. Durante la **registrazione cacciatore**, il codice inserito deve:
+   - Corrispondere a una riserva attiva
+   - Bloccare registrazione se codice non valido
+
+---
+
+📁 Da fare:
+
+✅ DATABASE
+- Aggiungi campo `access_code` e `code_active` alla tabella `reserves` (se non ci sono già)
+
+✅ BACKEND (Express)
+- Route protetta `PATCH /superadmin/reserves/:id/code` per aggiornare il codice
+- Route `GET /superadmin/reserves/:id/code` per visualizzarlo
+- Middleware di controllo accesso per ruolo `SUPERADMIN`
+- Logica in `POST /auth/register` (registrazione cacciatore): verificare codice inserito
+
+✅ FRONTEND (React)
+- Aggiungi una **colonna "Codice"** alla tabella riserve nella dashboard
+  - Mostra codice e stato (🟢 attivo / 🔴 disattivo)
+  - Icona 👁️ per vedere/modificare
+  - Icona 🔁 per rigenerare random con conferma
+- Oppure: aggiungi sezione “Gestione Codice Accesso” nella modale di modifica riserva
+- UI semplice, leggibile, compatibile con over 50
+
+✅ EXTRA
+- Funzione `generateRandomCode(length = 6)` per generare codici alfanumerici
+- Protezione contro duplicati (check nel DB)
+- Tooltip e conferma rigenerazione
+
+---
+
+📌 Alla fine mostrami:
+- I file modificati/aggiunti
+- Le route backend nuove
+- Il comportamento di registrazione cacciatore aggiornato
+

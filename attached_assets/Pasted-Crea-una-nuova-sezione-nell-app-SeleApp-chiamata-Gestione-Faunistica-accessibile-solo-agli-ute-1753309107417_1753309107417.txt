@@ -1,0 +1,52 @@
+Crea una nuova sezione nell'app SeleApp chiamata **"Gestione Faunistica"** accessibile solo agli utenti con ruolo `BIOLOGO` o `PROVINCIA`. Questa sezione deve includere:
+
+📁 Backend: Node.js + Express + Drizzle ORM (PostgreSQL)
+
+1. Crea un modello chiamato `OsservazioneFaunistica` con questi campi:
+   - specie (stringa) — enum: capriolo, cervo, daino, muflone, camoscio
+   - sesso (stringa) — enum: M, F
+   - classe_eta (stringa) — enum: J (giovane), Y (yearling), A (adulto)
+   - data (data)
+   - zona_id (relazione con modello Zona)
+   - sezione (stringa) — es: pederobba
+   - tipo (stringa) — enum: prelievo, avvistamento, fototrappola
+   - peso (numero) — facoltativo
+   - stato_riproduttivo (stringa) — enum: gravida, no, n.d.
+   - stato_corpo (stringa) — enum: buono, medio, scarso
+   - lunghezza_mandibola (numero) — opzionale
+   - lunghezza_palchi (numero) — opzionale
+   - gps_lat (numero) — opzionale
+   - gps_lon (numero) — opzionale
+
+2. Crea API REST protette con JWT:
+   - `GET /fauna` → lista osservazioni filtrabile per data, specie, sesso, zona, tipo
+   - `POST /fauna` → inserisce nuova osservazione
+   - `GET /fauna/statistiche` → restituisce:
+     - densità stimata per zona (osservazioni / superficie zona)
+     - sex ratio per specie e zona
+     - distribuzione per classi età
+     - percentuale di abbattimento rispetto al piano
+     - trend temporali (ultimi 3 anni se presenti)
+     - mappa distribuzione (lat/lon aggregati)
+
+📱 Frontend (React + Tailwind):
+1. Nuova pagina `/dashboard-fauna` visibile solo a ruoli `BIOLOGO` e `PROVINCIA`
+2. Include:
+   - Tabelle e grafici (usa Recharts)
+   - Filtri (specie, sesso, zona, periodo)
+   - Grafico Sex Ratio (barre)
+   - Grafico Classi Età (torta)
+   - Densità per zona (tabella + heatmap Leaflet)
+   - Cronologia abbattimenti (line chart)
+   - Bottone "Esporta Excel" e "Esporta PDF"
+3. Mappa interattiva (Leaflet):
+   - Marker per osservazioni geolocalizzate
+   - Cluster per aggregazioni
+   - Layer per specie/sesso
+
+🔐 Accesso:
+- Se l'utente non ha ruolo `BIOLOGO` o `PROVINCIA`, la pagina è nascosta
+- Autenticazione tramite JWT già integrata in SeleApp
+
+💡 Extra:
+- Crea anche un file Excel `.xlsx` di esempio con colonne per l'importazione bulk dei dati faunistici
