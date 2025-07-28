@@ -350,7 +350,7 @@
             <!-- Demo Info -->
             <div class="bg-white rounded-3xl p-12 shadow-xl text-center">
                 <h3 class="text-4xl font-bold mb-8" style="color: var(--text-primary);">
-                    Demo Gratuita - 30 Minuti
+                    Demo Gratuita
                 </h3>
                 <p class="text-2xl mb-8" style="color: var(--text-secondary);">
                     Nessuna registrazione richiesta. Clicca sui pulsanti qui sopra per iniziare subito.
@@ -1268,7 +1268,7 @@ Inserisci il numero (1 o 2):`);
 
         function startHunterDemo() {
             // Login automatico come demo hunter
-            if (confirm('Demo Cacciatore: Accederai come cacciatore demo per 30 minuti. Potrai fare prenotazioni e vedere le quote. Continui?')) {
+            if (confirm('Demo Cacciatore: Accederai come cacciatore demo. Potrai fare prenotazioni e vedere le quote. Continui?')) {
                 // Naviga direttamente alla demo
                 window.location.href = '/app?demo=hunter';
             }
@@ -1276,7 +1276,7 @@ Inserisci il numero (1 o 2):`);
 
         function startAdminDemo() {
             // Login automatico come demo admin
-            if (confirm('Demo Amministratore Comprensorio Alpino: Accederai come admin demo per 30 minuti. Potrai gestire cacciatori e prelievi. Continui?')) {
+            if (confirm('Demo Amministratore Comprensorio Alpino: Accederai come admin demo. Potrai gestire cacciatori e prelievi. Continui?')) {
                 // Naviga direttamente alla demo
                 window.location.href = '/app?demo=admin';
             }
@@ -1284,7 +1284,7 @@ Inserisci il numero (1 o 2):`);
 
         function startTecnicoFaunisticoDemo() {
             // Login automatico come demo tecnico faunistico
-            if (confirm('Demo Tecnico Faunistico: Accederai come tecnico faunistico demo per 30 minuti. Potrai gestire osservazioni e dati scientifici. Continui?')) {
+            if (confirm('Demo Tecnico Faunistico: Accederai come tecnico faunistico demo. Potrai gestire osservazioni e dati scientifici. Continui?')) {
                 // Naviga direttamente alla demo tecnico faunistico
                 window.location.href = '/app?demo=tecnico-faunistico';
             }
@@ -1316,7 +1316,6 @@ CARATTERISTICHE TELEFONO:
 • Funziona anche senza internet
 • Notifiche automatiche
 
-TEMPO DISPONIBILE: 30 minuti
 PROVA A INSTALLARE L'APP SULLA SCHERMATA PRINCIPALE!
 
 ${isMobile ? '' : 'La demo si è aperta in finestra mobile simulata.'}`);

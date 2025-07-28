@@ -648,6 +648,11 @@ Changelog:
   - **Database Migration**: Tabella osservazioni_faunistiche creata e configurata nel database
   - **Fauna API Operational**: Endpoint /api/fauna risponde correttamente per ruolo BIOLOGO
   - **Complete System Integration**: Sistema demo fauna management completamente funzionante e testato
+- July 28, 2025. **LANDING PAGE CONTENT CLEANUP**: Removed all "demo gratuita 30 minuti" references from frontend
+  - **Demo Section**: Changed from "Demo Gratuita - 30 Minuti" to "Demo Gratuita" 
+  - **JavaScript Functions**: Removed "per 30 minuti" from all demo confirm dialogs
+  - **Mobile Demo**: Removed "TEMPO DISPONIBILE: 30 minuti" from mobile demo alerts
+  - **Clean Interface**: Landing page now has cleaner professional appearance without time limitations
 
 # User Preferences
 
