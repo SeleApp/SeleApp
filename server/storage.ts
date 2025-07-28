@@ -2274,7 +2274,7 @@ export class DatabaseStorage implements IStorage {
     return newQuota;
   }
 
-  // Metodo per ottenere lock attivi per una specifica categoria di specie
+  // Metodo per ottenere lock attivi per una specifica categoria di specie (PER GRUPPO)
   async getActiveLockForSpecies(reserveId: string, species: string, category: string): Promise<any> {
     try {
       // Pulisci i lock scaduti prima del controllo
@@ -2297,6 +2297,30 @@ export class DatabaseStorage implements IStorage {
       return activeLocks[0] || null;
     } catch (error) {
       console.error('Error getting active lock for species:', error);
+      return null;
+    }
+  }
+
+  // Metodo per ottenere lock attivi per una specifica zona (CROSS-GRUPPO)
+  async getActiveLockForZone(reserveId: string, zoneId: number): Promise<any> {
+    try {
+      // Pulisci i lock scaduti prima del controllo
+      await this.cleanupExpiredLocks();
+      
+      // Cerca lock attivi per questa zona (TUTTI i gruppi A,B,C,D)
+      const activeLocks = await db.select()
+        .from(reservationLocks)
+        .where(and(
+          eq(reservationLocks.reserveId, reserveId),
+          eq(reservationLocks.zoneId, zoneId),
+          eq(reservationLocks.status, 'active'),
+          sql`${reservationLocks.expiresAt} > NOW()`
+        ))
+        .limit(1);
+      
+      return activeLocks[0] || null;
+    } catch (error) {
+      console.error('Error getting active lock for zone:', error);
       return null;
     }
   }

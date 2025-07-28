@@ -357,7 +357,28 @@ export default function CisonReservationModal({ open, onOpenChange, zones }: Cis
                   key={zone.id}
                   variant={selectedZone === zone.id ? "default" : "outline"}
                   className="h-20 flex flex-col items-center justify-center"
-                  onClick={() => setSelectedZone(zone.id)}
+                  onClick={async () => {
+                    // Controlla disponibilità zona per TUTTI i cacciatori della riserva
+                    try {
+                      const response = await apiRequest("/api/reservation-locks/check-zone", {
+                        method: "POST", 
+                        body: {
+                          zoneId: zone.id,
+                          lockType: 'zone'
+                        }
+                      });
+                      
+                      if (response.ok) {
+                        setSelectedZone(zone.id);
+                      }
+                    } catch (error: any) {
+                      toast({
+                        title: "Zona non disponibile",
+                        description: error.message || "Un altro cacciatore sta prenotando questa zona",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
                 >
                   <div className="font-bold">{zone.name}</div>
                   <div className="text-xs text-gray-600">{zone.description}</div>

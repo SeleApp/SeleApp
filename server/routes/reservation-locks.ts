@@ -19,6 +19,47 @@ const checkSpeciesSchema = z.object({
   lockType: z.literal('species')
 });
 
+// Schema per controllo zona (cross-gruppo)
+const checkZoneSchema = z.object({
+  zoneId: z.number(),
+  lockType: z.literal('zone')
+});
+
+// POST /api/reservation-locks/check-zone - Controlla disponibilità zona per TUTTA la riserva
+router.post('/check-zone', authenticateToken, async (req: any, res: any) => {
+  try {
+    const validatedData = checkZoneSchema.parse(req.body);
+    const { zoneId } = validatedData;
+    
+    const userId = req.user.id;
+    const reserveId = req.user.reserveId;
+    
+    if (!reserveId) {
+      return res.status(400).json({ error: "Utente non associato a una riserva" });
+    }
+
+    // Verifica se c'è già un lock attivo per questa zona (CROSS-GRUPPO)
+    const existingLock = await storage.getActiveLockForZone(reserveId, zoneId);
+    if (existingLock && existingLock.userId !== userId) {
+      return res.status(400).json({ 
+        error: `Un altro cacciatore sta prenotando questa zona. Riprova tra qualche minuto.` 
+      });
+    }
+
+    console.log(`✅ Zone check passed: Zona ${zoneId} disponibile per prenotazione`);
+    res.json({ 
+      available: true, 
+      zoneId: zoneId 
+    });
+  } catch (error: any) {
+    console.error("Error checking zone availability:", error);
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ error: "Dati non validi" });
+    }
+    res.status(500).json({ error: error.message || "Errore nel controllo disponibilità zona" });
+  }
+});
+
 // POST /api/reservation-locks/check-species - Controlla disponibilità categoria per gruppo
 router.post('/check-species', authenticateToken, async (req: any, res: any) => {
   try {
