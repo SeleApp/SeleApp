@@ -382,6 +382,7 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                               <th className="text-center p-3 font-bold text-base">Controlli</th>
                               <th className="text-center p-3 font-bold text-base">Prelevati</th>
                               <th className="text-center p-3 font-bold text-base">Disponibili</th>
+                              <th className="text-center p-3 font-bold text-base">Da Assegnare</th>
                               <th className="text-center p-3 font-bold text-base">Limite Regionale</th>
                             </tr>
                           </thead>
@@ -414,11 +415,6 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                                     <div className="text-xl font-bold text-blue-600">
                                       {displayQuota}
                                     </div>
-                                    {pendingChange !== undefined && (
-                                      <div className="text-xs text-orange-600 mt-1">
-                                        (era {currentQuota})
-                                      </div>
-                                    )}
                                   </td>
                                   
                                   {/* Controlli +/- */}
@@ -458,6 +454,30 @@ export default function GroupQuotasManager({ reserveId, readonly = false }: Grou
                                     <div className="text-lg font-bold text-green-600">
                                       {Math.max(0, displayQuota - harvested)}
                                     </div>
+                                  </td>
+                                  
+                                  {/* Da Assegnare */}
+                                  <td className="p-4 text-center">
+                                    {(() => {
+                                      // Calcola il totale assegnato a tutti i gruppi per questa categoria
+                                      const totalAssignedToAllGroups = (groupQuotas as GroupQuota[])
+                                        .filter(q => q.species === species && 
+                                          (q.roeDeerCategory === category || q.redDeerCategory === category))
+                                        .reduce((sum, q) => {
+                                          // Include anche le modifiche pending per tutti i gruppi
+                                          const pendingKey = `${q.hunterGroup}-${species}-${category}`;
+                                          const quotaToUse = quotaChanges[pendingKey] !== undefined ? quotaChanges[pendingKey] : q.totalQuota;
+                                          return sum + quotaToUse;
+                                        }, 0);
+                                      
+                                      const remaining = Math.max(0, regionalLimit - totalAssignedToAllGroups);
+                                      
+                                      return (
+                                        <div className={`text-lg font-bold ${remaining > 0 ? 'text-orange-600' : 'text-gray-500'}`}>
+                                          {remaining}
+                                        </div>
+                                      );
+                                    })()}
                                   </td>
                                   
                                   {/* Limite Regionale */}
