@@ -236,9 +236,29 @@ export default function CisonReservationModal({ open, onOpenChange, zones }: Cis
                         key={quota.id}
                         variant={selectedSpecies === 'roe_deer' && selectedCategory === quota.roeDeerCategory ? "default" : "outline"}
                         className="h-auto p-4 flex flex-col items-center space-y-2"
-                        onClick={() => {
-                          setSelectedSpecies('roe_deer');
-                          setSelectedCategory(quota.roeDeerCategory!);
+                        onClick={async () => {
+                          // Controlla disponibilità in tempo reale prima di selezionare
+                          try {
+                            const response = await apiRequest("/api/reservation-locks/check-species", {
+                              method: "POST",
+                              body: {
+                                species: 'roe_deer',
+                                category: quota.roeDeerCategory,
+                                lockType: 'species'
+                              }
+                            });
+                            
+                            if (response.ok) {
+                              setSelectedSpecies('roe_deer');
+                              setSelectedCategory(quota.roeDeerCategory!);
+                            }
+                          } catch (error: any) {
+                            toast({
+                              title: "Categoria non disponibile",
+                              description: error.message || "Un altro cacciatore sta prenotando questa categoria",
+                              variant: "destructive",
+                            });
+                          }
                         }}
                       >
                         <div className="text-lg font-bold">{quota.roeDeerCategory}</div>
@@ -263,9 +283,29 @@ export default function CisonReservationModal({ open, onOpenChange, zones }: Cis
                         key={quota.id}
                         variant={selectedSpecies === 'red_deer' && selectedCategory === quota.redDeerCategory ? "default" : "outline"}
                         className="h-auto p-4 flex flex-col items-center space-y-2"
-                        onClick={() => {
-                          setSelectedSpecies('red_deer');
-                          setSelectedCategory(quota.redDeerCategory!);
+                        onClick={async () => {
+                          // Controlla disponibilità in tempo reale prima di selezionare
+                          try {
+                            const response = await apiRequest("/api/reservation-locks/check-species", {
+                              method: "POST",
+                              body: {
+                                species: 'red_deer',
+                                category: quota.redDeerCategory,
+                                lockType: 'species'
+                              }
+                            });
+                            
+                            if (response.ok) {
+                              setSelectedSpecies('red_deer');
+                              setSelectedCategory(quota.redDeerCategory!);
+                            }
+                          } catch (error: any) {
+                            toast({
+                              title: "Categoria non disponibile",
+                              description: error.message || "Un altro cacciatore sta prenotando questa categoria",
+                              variant: "destructive",
+                            });
+                          }
                         }}
                       >
                         <div className="text-lg font-bold">{quota.redDeerCategory}</div>

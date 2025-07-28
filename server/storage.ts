@@ -2274,6 +2274,33 @@ export class DatabaseStorage implements IStorage {
     return newQuota;
   }
 
+  // Metodo per ottenere lock attivi per una specifica categoria di specie
+  async getActiveLockForSpecies(reserveId: string, species: string, category: string): Promise<any> {
+    try {
+      // Pulisci i lock scaduti prima del controllo
+      await this.cleanupExpiredLocks();
+      
+      // Cerca lock attivi per questa specifica categoria
+      const categoryField = species === 'roe_deer' ? 'roeDeerCategory' : 'redDeerCategory';
+      
+      const activeLocks = await db.select()
+        .from(reservationLocks)
+        .where(and(
+          eq(reservationLocks.reserveId, reserveId),
+          eq(reservationLocks.species, species as any),
+          eq(reservationLocks[categoryField as 'roeDeerCategory' | 'redDeerCategory'], category),
+          eq(reservationLocks.status, 'active'),
+          sql`${reservationLocks.expiresAt} > NOW()`
+        ))
+        .limit(1);
+      
+      return activeLocks[0] || null;
+    } catch (error) {
+      console.error('Error getting active lock for species:', error);
+      return null;
+    }
+  }
+
   async updateGroupQuota(id: number, data: Partial<GroupQuota>): Promise<GroupQuota | undefined> {
     const [updatedQuota] = await db.update(groupQuotas)
       .set({ ...data, updatedAt: new Date() })

@@ -5,9 +5,90 @@
 import { Router } from "express";
 import { authenticateToken } from "../middleware/auth";
 import { storage } from "../storage";
+import { db } from "../db";
+import { groupQuotas } from "../../shared/schema";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const router = Router();
+
+// Schema per controllo specie (più semplice)
+const checkSpeciesSchema = z.object({
+  species: z.enum(['roe_deer', 'red_deer', 'fallow_deer', 'mouflon', 'chamois']),
+  category: z.string(),
+  lockType: z.literal('species')
+});
+
+// POST /api/reservation-locks/check-species - Controlla disponibilità categoria per gruppo
+router.post('/check-species', authenticateToken, async (req: any, res: any) => {
+  try {
+    const validatedData = checkSpeciesSchema.parse(req.body);
+    const { species, category } = validatedData;
+    
+    const userId = req.user.id;
+    const reserveId = req.user.reserveId;
+    
+    if (!reserveId) {
+      return res.status(400).json({ error: "Utente non associato a una riserva" });
+    }
+
+    // Trova il gruppo del cacciatore
+    const hunter = await storage.getUser(userId);
+    if (!hunter?.hunterGroup) {
+      return res.status(400).json({ error: "Gruppo cacciatore non definito" });
+    }
+
+    // Verifica se la categoria è disponibile per il gruppo
+    const categoryField = species === 'roe_deer' ? 'roeDeerCategory' : 'redDeerCategory';
+    const groupQuota = await db.select()
+      .from(groupQuotas)
+      .where(
+        and(
+          eq(groupQuotas.reserveId, reserveId),
+          eq(groupQuotas.hunterGroup, hunter.hunterGroup),
+          eq(groupQuotas.species, species),
+          eq(groupQuotas[categoryField as 'roeDeerCategory' | 'redDeerCategory'], category)
+        )
+      )
+      .limit(1);
+
+    if (groupQuota.length === 0) {
+      return res.status(400).json({ 
+        error: `Categoria ${category} non disponibile per il gruppo ${hunter.hunterGroup}` 
+      });
+    }
+
+    const quota = groupQuota[0];
+    const available = quota.totalQuota - quota.harvested;
+    
+    if (available <= 0) {
+      return res.status(400).json({ 
+        error: `Quota esaurita per ${category} nel gruppo ${hunter.hunterGroup} (${quota.harvested}/${quota.totalQuota})` 
+      });
+    }
+
+    // Verifica se c'è già un lock attivo per questa categoria
+    const existingLock = await storage.getActiveLockForSpecies(reserveId, species, category);
+    if (existingLock && existingLock.userId !== userId) {
+      return res.status(400).json({ 
+        error: `Un altro cacciatore sta prenotando ${category}. Riprova tra qualche minuto.` 
+      });
+    }
+
+    console.log(`✅ Species check passed: ${category} - ${available} available for group ${hunter.hunterGroup}`);
+    res.json({ 
+      available: true, 
+      quota: available,
+      group: hunter.hunterGroup 
+    });
+  } catch (error: any) {
+    console.error("Error checking species availability:", error);
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ error: "Dati non validi" });
+    }
+    res.status(500).json({ error: error.message || "Errore nel controllo disponibilità" });
+  }
+});
 
 // Schema per validazione check availability (specie o zona)
 const checkAvailabilitySchema = z.object({
