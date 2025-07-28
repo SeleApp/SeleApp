@@ -2,7 +2,7 @@
 // Licenza: Uso riservato esclusivamente alle riserve attivate tramite contratto
 // Vietata la riproduzione, distribuzione o modifica non autorizzata
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ interface GroupQuotasManagerProps {
 const SPECIES_CONFIG = {
   roe_deer: {
     name: 'Capriolo',
-    categories: ['M1', 'M2', 'F1_FF', 'PF', 'PM'],
+    categories: ['PM', 'PF', 'M2', 'M1', 'F1_FF'],
     color: 'bg-amber-100 text-amber-800'
   },
   red_deer: {
