@@ -36,6 +36,31 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       return res.status(403).json({ message: "Solo i cacciatori possono prenotare" });
     }
 
+    // ⏰ CONTROLLO LIMITAZIONI ORARIE: 19:00-21:00 per prenotare il giorno dopo
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute; // minuti dal inizio del giorno
+    const startTime = 19 * 60; // 19:00 in minuti
+    const endTime = 21 * 60;   // 21:00 in minuti
+    
+    if (currentTime < startTime || currentTime > endTime) {
+      return res.status(400).json({ 
+        message: `Le prenotazioni sono consentite solo dalle 19:00 alle 21:00. Ora attuale: ${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}` 
+      });
+    }
+
+    // ⏰ CONTROLLO DATA: Solo prenotazioni per il giorno successivo
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    if (req.body.huntDate !== tomorrowStr) {
+      return res.status(400).json({ 
+        message: `Puoi prenotare solo per domani (${tomorrowStr}). Data richiesta: ${req.body.huntDate}` 
+      });
+    }
+
     const reservationData = createReservationSchema.parse({
       ...req.body,
       hunterId: req.user.id,
@@ -129,7 +154,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
               eq(groupQuotas.reserveId, req.user.reserveId!),
               eq(groupQuotas.hunterGroup, hunter.hunterGroup),
               eq(groupQuotas.species, reservationData.targetSpecies),
-              eq(groupQuotas[categoryField as keyof typeof groupQuotas], targetCategory)
+              eq(groupQuotas[categoryField as 'roeDeerCategory' | 'redDeerCategory'], targetCategory)
             )
           )
           .limit(1);
@@ -209,7 +234,12 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
         zoneName: zone.name,
         huntDate: reservation.huntDate.toISOString(),
         timeSlot: timeSlotText,
-        reservationId: reservation.id
+        reservationId: reservation.id,
+        targetSpecies: reservation.targetSpecies || undefined,
+        targetCategory: reservation.targetRoeDeerCategory || reservation.targetRedDeerCategory || undefined,
+        targetSex: reservation.targetSex || undefined,
+        targetAgeClass: reservation.targetAgeClass || undefined,
+        targetNotes: reservation.targetNotes || undefined
       });
     } catch (emailError) {
       console.error("Errore invio email conferma:", emailError);

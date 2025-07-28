@@ -20,6 +20,11 @@ interface ReservationEmailData {
   huntDate: string;
   timeSlot: string;
   reservationId: number;
+  targetSpecies?: string;
+  targetCategory?: string;
+  targetSex?: string;
+  targetAgeClass?: string;
+  targetNotes?: string;
 }
 
 interface ContactRequestData {
@@ -57,6 +62,40 @@ export class EmailService {
         ? '12:00-Tramonto' 
         : 'Alba-Tramonto';
 
+      // Formattazione dettagli capo prenotato
+      let targetAnimalDetails = '';
+      if (data.targetSpecies) {
+        const speciesName = data.targetSpecies === 'roe_deer' ? 'Capriolo' : 
+                           data.targetSpecies === 'red_deer' ? 'Cervo' :
+                           data.targetSpecies === 'fallow_deer' ? 'Daino' :
+                           data.targetSpecies === 'mouflon' ? 'Muflone' :
+                           data.targetSpecies === 'chamois' ? 'Camoscio' : 'Specie non specificata';
+        
+        targetAnimalDetails = `
+              <p><strong>🎯 Capo Prenotato:</strong> ${speciesName}`;
+        
+        if (data.targetCategory) {
+          targetAnimalDetails += ` - Categoria ${data.targetCategory}`;
+        }
+        
+        if (data.targetSex) {
+          const sexText = data.targetSex === 'male' ? 'Maschio' : 'Femmina';
+          targetAnimalDetails += ` (${sexText})`;
+        }
+        
+        if (data.targetAgeClass) {
+          const ageText = data.targetAgeClass === 'adult' ? 'Adulto' : 'Giovane';
+          targetAnimalDetails += ` - ${ageText}`;
+        }
+        
+        targetAnimalDetails += `</p>`;
+        
+        if (data.targetNotes) {
+          targetAnimalDetails += `
+              <p><strong>📝 Note:</strong> ${data.targetNotes}</p>`;
+        }
+      }
+
       const mailOptions = {
         from: `"SeleApp" <${process.env.GMAIL_USER}>`,
         to: data.hunterEmail,
@@ -76,6 +115,7 @@ export class EmailService {
                 day: 'numeric' 
               })}</p>
               <p><strong>Orario:</strong> ${timeSlotText}</p>
+              ${targetAnimalDetails}
               <p><strong>ID Prenotazione:</strong> #${data.reservationId}</p>
             </div>
 
@@ -123,7 +163,7 @@ export class EmailService {
       console.log(`Email di conferma prenotazione inviata a ${data.hunterEmail}`);
       return true;
     } catch (error) {
-      console.error('Errore invio email conferma prenotazione:', error);
+      console.error('Errore invio email conferma prenotazione:', error as Error);
       console.error('Error details:', error.message);
       console.error('SMTP config check:', { 
         user: process.env.GMAIL_USER ? 'SET' : 'MISSING',
