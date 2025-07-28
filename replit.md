@@ -659,6 +659,15 @@ Changelog:
   - **Group Quotas Reset**: All group quotas reset to 0 to enable proper "Da Assegnare" calculations
   - **"Da Assegnare" Fixed**: Column now correctly displays Regional Quota - Currently Assigned = Available to Assign
   - **Production Ready**: Cison system fully operational with correct quota management and access control
+- July 28, 2025. **REALISTIC BOOKING SYSTEM IMPLEMENTATION**: Complete implementation of real-world hunting reservation rules for Cison
+  - **Booking Hours**: Reservations allowed only 19:00-21:00 daily with automatic time validation
+  - **Next Day Only**: Can only book for tomorrow with automatic date calculation and validation
+  - **Hunting Silence Days**: Automatic closure on Monday evenings (Tuesday silence) and Thursday evenings (Friday silence)
+  - **Weekly Limit**: Maximum 3 outings per hunter per week with automatic weekly calculation (Monday-Sunday)
+  - **Zone Exclusivity**: Strict 1 hunter per zone per time slot enforcement preventing conflicts
+  - **Seasonal Limits**: Maintained existing species limits (capriolo/cervo) with group quota integration
+  - **Smart Messages**: Frontend displays clear booking status, time restrictions, and availability information
+  - **Production Ready**: Complete realistic booking system matching real hunting reserve operations
 
 # User Preferences
 

@@ -40,9 +40,9 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
-    const currentTime = currentHour * 60 + currentMinute; // minuti dal inizio del giorno
-    const startTime = 19 * 60; // 19:00 in minuti
-    const endTime = 21 * 60;   // 21:00 in minuti
+    const currentTime = currentHour * 60 + currentMinute;
+    const startTime = 19 * 60; // 19:00
+    const endTime = 21 * 60;   // 21:00
     
     if (currentTime < startTime || currentTime > endTime) {
       return res.status(400).json({ 
@@ -50,11 +50,24 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     }
 
-    // ⏰ CONTROLLO DATA: Solo prenotazioni per il giorno successivo
+    // ⏰ CONTROLLO DATA E GIORNI DI SILENZIO: Solo per il giorno successivo, no martedì/venerdì
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    let tomorrowDay = tomorrow.getDay();
     
+    // Se domani è martedì (2) o venerdì (5), le prenotazioni sono CHIUSE
+    if (tomorrowDay === 2) {
+      return res.status(400).json({ 
+        message: "Prenotazioni chiuse: domani è martedì (silenzio venatorio). Riprova domani sera per prenotare mercoledì." 
+      });
+    }
+    if (tomorrowDay === 5) {
+      return res.status(400).json({ 
+        message: "Prenotazioni chiuse: domani è venerdì (silenzio venatorio). Riprova domani sera per prenotare sabato." 
+      });
+    }
+    
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
     if (req.body.huntDate !== tomorrowStr) {
       return res.status(400).json({ 
         message: `Puoi prenotare solo per domani (${tomorrowStr}). Data richiesta: ${req.body.huntDate}` 
@@ -94,19 +107,45 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
       });
     }
 
-    // Check if hunter already has a reservation for this date and time slot
+    // 📊 CONTROLLO 3 USCITE SETTIMANALI: Verifica che non superi il limite settimanale
     const existingReservations = await storage.getReservations(req.user.reserveId!, req.user.id);
-    const dateStr = huntDateStr; // Use original string format
-    const hasConflict = existingReservations.some(r => {
+    
+    // Calcola inizio e fine della settimana corrente (lunedì-domenica)
+    const huntDateObj = new Date(huntDateStr + 'T12:00:00Z');
+    const startOfWeek = new Date(huntDateObj);
+    const dayOfWeek = huntDateObj.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Domenica = 0, quindi 6 giorni indietro
+    startOfWeek.setDate(huntDateObj.getDate() - daysToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    // Conta prenotazioni attive nella settimana
+    const weeklyReservations = existingReservations.filter(r => {
+      const resDate = new Date(r.huntDate);
+      return resDate >= startOfWeek && resDate <= endOfWeek && r.status === 'active';
+    });
+    
+    if (weeklyReservations.length >= 3) {
+      return res.status(400).json({ 
+        message: `Limite settimanale raggiunto: hai già ${weeklyReservations.length}/3 uscite prenotate questa settimana (${startOfWeek.toLocaleDateString('it-IT')} - ${endOfWeek.toLocaleDateString('it-IT')})` 
+      });
+    }
+
+    // 🚫 CONTROLLO ZONA OCCUPATA: 1 cacciatore per zona per slot
+    const zoneConflict = existingReservations.some(r => {
       const reservationDate = new Date(r.huntDate).toISOString().split('T')[0];
-      return reservationDate === dateStr && 
+      return reservationDate === huntDateStr && 
+             r.zoneId === reservationData.zoneId &&
              r.timeSlot === reservationData.timeSlot && 
              r.status === 'active';
     });
 
-    if (hasConflict) {
+    if (zoneConflict) {
       return res.status(400).json({ 
-        message: "Hai già una prenotazione per questa fascia oraria" 
+        message: "Questa zona è già prenotata per questo orario da un altro cacciatore" 
       });
     }
 

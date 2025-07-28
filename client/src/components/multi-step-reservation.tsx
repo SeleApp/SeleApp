@@ -30,20 +30,38 @@ export default function MultiStepReservation({ open, onOpenChange, zones }: Mult
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Verifica se siamo nell'orario consentito per le prenotazioni (19:00-21:00)
+  const isBookingTimeAllowed = (): boolean => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    return currentHour >= 19 && currentHour < 21;
+  };
+
   // Calcola automaticamente la data per il giorno successivo (no martedì/venerdì)
   const getNextValidHuntingDate = (): string => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     
-    // Se domani è martedì (2) o venerdì (5), salta al giorno dopo
+    // Se domani è martedì (2) o venerdì (5), le prenotazioni sono CHIUSE
     let dayOfWeek = tomorrow.getDay();
-    if (dayOfWeek === 2) { // Martedì -> Mercoledì
-      tomorrow.setDate(tomorrow.getDate() + 1);
-    } else if (dayOfWeek === 5) { // Venerdì -> Sabato  
-      tomorrow.setDate(tomorrow.getDate() + 1);
+    if (dayOfWeek === 2 || dayOfWeek === 5) {
+      return ""; // Nessuna data disponibile se domani è silenzio venatorio
     }
     
     return tomorrow.toISOString().split('T')[0];
+  };
+
+  // Messaggio per orario non consentito
+  const getBookingTimeMessage = (): string => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    if (currentHour < 19) {
+      return `Prenotazioni aperte dalle 19:00. Ora attuale: ${String(currentHour).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    } else if (currentHour >= 21) {
+      return `Prenotazioni chiuse alle 21:00. Ritorna domani dalle 19:00.`;
+    }
+    return "";
   };
 
   const form = useForm<CreateReservationInput>({
